@@ -1495,7 +1495,7 @@ export const searchApi = {
         // Determine the endpoint based on environment - Updated to use new providers/search endpoint
         const endpoint =
           process.env.NODE_ENV === "production"
-            ? "/v1/download/tasks" // Direct API call in production - NEW ENDPOINT
+            ? "/v1/providers/search" // Direct API call in production - NEW ENDPOINT
             : "/api/search"; // Use proxy in development
 
         const response = await searchApiClient.get(endpoint, {
@@ -1739,7 +1739,7 @@ export const searchApi = {
       // Determine the endpoint based on environment
       const endpoint =
         process.env.NODE_ENV === "production"
-          ? "/v1/download/tasks" // Direct API call in production
+          ? "/v1/providers/search" // Direct API call in production
           : "/api/providers/search"; // Use proxy in development
 
       const response = await searchApiClient.post(endpoint, {
