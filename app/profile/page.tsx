@@ -6,7 +6,6 @@ import {
   Download,
   Filter,
   TrendingUp,
-  Settings,
   Activity,
   Search,
   Lock,
@@ -62,7 +61,7 @@ const getMediaUrl = (item: DownloadHistoryEntry): string => {
     return item.data.downloadUrl;
   }
 
-  // For external URLs (Freepik, etc.), use the media proxy to get actual images
+  // For external URLs (Freepik, etc.), use the media proxy
   if (item.data.downloadUrl.startsWith("http")) {
     const proxyUrl = `/api/media-proxy?url=${encodeURIComponent(item.data.downloadUrl)}`;
     console.log("[Profile] Using media proxy for real image:", proxyUrl);
@@ -575,10 +574,6 @@ export default function ProfilePage() {
                 </div>
               </div>
               <Separator />
-              <Button className="w-full" variant="outline">
-                <Settings className="w-4 h-4" />
-                {t("profile.subscription.manageSubscription")}
-              </Button>
             </CardContent>
           </Card>
 
@@ -953,19 +948,14 @@ export default function ProfilePage() {
                       }
                     >
                       {imageErrors.has(index) ? (
-                        // Fallback display when media fails to load
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/30 to-muted/60">
-                          <div className="text-center space-y-3 p-4">
-                            <div>
-                              <p className="text-sm text-foreground font-medium capitalize">
-                                {item.data.downloadUrl.includes("video")
-                                  ? "Video"
-                                  : "Image"}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Click to view on {item.data.from}
-                              </p>
-                            </div>
+                        // Show error message when image not found
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-muted/30 text-center p-4">
+                          <div className="text-muted-foreground text-sm space-y-2">
+                            <p className="font-medium">Image not available</p>
+                            <p className="text-xs">
+                              The image could not be loaded from{" "}
+                              {item.data.from}
+                            </p>
                           </div>
                         </div>
                       ) : (
