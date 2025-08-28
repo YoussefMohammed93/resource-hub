@@ -1,0 +1,1696 @@
+{
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out"
+  },
+  "header": {
+    "logo": "ResourceHub",
+    "navigation": {
+      "home": "Home",
+      "platforms": "Platforms",
+      "pricing": "Pricing",
+      "categories": "Categories",
+      "features": "Features",
+      "faq": "FAQ"
+    }
+  },
+  "hero": {
+    "title": "Discover Millions of",
+    "titleHighlight": "Creative Resources",
+    "description": "Purchase and download high-quality stock photos, vectors, illustrations, and videos using credits. Access premium content from popular platforms like Freepik, Shutterstock, Adobe Stock, and many more creative marketplaces worldwide.",
+    "searchPlaceholder": "Search for photos, vectors, illustrations, videos, and more...",
+    "searchPlaceholderMobile": "Search creative content...",
+    "searchButton": "Search",
+    "searching": "Searching...",
+    "popularSearches": "Popular searches :",
+    "categories": {
+      "title": "Browse by Category",
+      "video": "Video",
+      "photos": "Photos",
+      "vector": "Vector",
+      "psd": "PSD",
+      "icons": "Icons",
+      "templates": "Templates",
+      "illustrations": "Illustrations",
+      "audio": "Audio"
+    },
+    "viewPricing": "View Pricing",
+    "contactUs": "Contact Us",
+    "searchType": {
+      "placeholder": "All Content",
+      "all": "All Content",
+      "images": "Images",
+      "vectors": "Vectors",
+      "videos": "Videos",
+      "templates": "Templates",
+      "icons": "Icons"
+    },
+    "imageSearch": {
+      "buttonText": "Search by Image",
+      "dialogTitle": "Search by Image",
+      "dialogDescription": "Upload an image to find similar content across our platforms",
+      "dragAndDrop": "Drag and drop your image here",
+      "orClickToBrowse": "or click to browse files",
+      "tipText": "Your image must be a JPG or PNG and be smaller than 5MB",
+      "uploading": "Uploading image...",
+      "uploadSuccess": "Image uploaded successfully!",
+      "uploadError": "Failed to upload image. Please try again.",
+      "supportedFormats": "Supported formats: JPG, PNG (max 5MB)"
+    }
+  },
+  "statistics": {
+    "title": "Trusted by",
+    "titleHighlight": "Millions Worldwide",
+    "description": "Our platform serves creators globally with impressive numbers that speak to our commitment to quality and reliability."
+  },
+  "features": {
+    "title": "Why Choose",
+    "titleHighlight": "Resource Hub",
+    "description": "Everything you need to access premium creative resources from top platforms worldwide.",
+    "premiumQuality": {
+      "title": "Premium Quality",
+      "description": "Access millions of high-resolution images, vectors, and videos from top creative platforms with guaranteed quality."
+    },
+    "instantDownloads": {
+      "title": "Instant Downloads",
+      "description": "Download your favorite resources instantly with our optimized servers and lightning-fast delivery system."
+    },
+    "allPlatforms": {
+      "title": "All Platforms",
+      "description": "One subscription gives you access to Freepik, Shutterstock, Adobe Stock, and many more premium platforms."
+    },
+    "secureAndSafe": {
+      "title": "Secure & Safe",
+      "description": "Your data is protected with enterprise-grade security. Safe downloads with no malware or unwanted software."
+    },
+    "support24": {
+      "title": "24/7 Support",
+      "description": "Get help whenever you need it with our dedicated support team available around the clock."
+    },
+    "easyToUse": {
+      "title": "Easy to Use",
+      "description": "Simple and intuitive interface designed for creators. Search, preview, and download in just a few clicks."
+    }
+  },
+  "supportedPlatforms": {
+    "title": "Download from all your favorite sites",
+    "titleHighlight": "with original quality!",
+    "description": "Our platform automatically downloads content from all major creative platforms in original quality without any loss in resolution or details. Simply copy the link and leave the rest to us!",
+    "tabs": {
+      "imagesVectors": "Images & Vectors",
+      "videos": "Videos",
+      "soundEffects": "Sound Effects"
+    },
+    "platforms": {
+      "freepik": "Freepik",
+      "shutterstock": "Shutterstock",
+      "nexus": "Nexus",
+      "raw": "Raw Pixel"
+    }
+  },
+  "categories": {
+    "title": "Popular",
+    "titleHighlight": "Categories",
+    "description": "Discover trending content across our most popular categories and find exactly what you're looking for.",
+    "items": {
+      "nature": "Nature",
+      "business": "Business",
+      "technology": "Technology",
+      "travel": "Travel",
+      "sports": "Sports",
+      "art": "Art"
+    }
+  },
+  "pricing": {
+    "title": "Choose Your",
+    "titleHighlight": "Perfect Plan",
+    "description": "Get access to millions of premium resources with our flexible pricing plans designed for every need.",
+    "basic": {
+      "title": "Basic Plan",
+      "subtitle": "Perfect for getting started",
+      "price": "Contact Us",
+      "priceSubtitle": "Custom pricing available",
+      "credits": "50",
+      "validity": "15 days",
+      "supportedSites": "2 sites",
+      "features": ["Access to all sites", "24/7 Support", "Admin Management"],
+      "button": "Contact Us"
+    },
+    "advanced": {
+      "title": "Advanced Plan",
+      "subtitle": "Perfect for management",
+      "price": "$99",
+      "priceSubtitle": "Best value for professionals",
+      "credits": "1,000",
+      "validity": "30 days",
+      "supportedSites": "3 sites",
+      "features": [
+        "Everything in Basic",
+        "Priority Support",
+        "Advanced Analytics",
+        "Team Management"
+      ],
+      "button": "Get Started"
+    },
+    "premium": {
+      "title": "Premium Plan",
+      "subtitle": "Perfect for teams",
+      "price": "$199",
+      "priceSubtitle": "Ultimate creative freedom",
+      "credits": "5,000",
+      "validity": "30 days",
+      "supportedSites": "5 sites",
+      "features": [
+        "Everything in Advanced",
+        "Unlimited Downloads",
+        "Custom Integrations",
+        "Dedicated Account Manager"
+      ],
+      "button": "Get Started"
+    },
+    "labels": {
+      "credits": "Credits:",
+      "validity": "Validity:",
+      "supportedSites": "Supported Sites:",
+      "days": "Days",
+      "featuresIncluded": "Features included:",
+      "supportedSitesDialog": {
+        "title": "Supported Sites",
+        "description": "These are the websites you can access with this plan"
+      }
+    },
+    "features": {
+      "main": "All plans include access to our premium resource library and customer support.",
+      "moneyBack": "30-day money-back guarantee",
+      "support24": "24/7 Support",
+      "cancelAnytime": "Cancel anytime"
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked",
+    "titleHighlight": "Questions",
+    "description": "Find answers to the most common questions about our platform and services.",
+    "questions": {
+      "whatIsResourceHub": {
+        "question": "What is Resource Hub and how does it work?",
+        "answer": "Resource Hub is a premium platform that provides access to millions of high-quality creative resources from top platforms like Freepik, Shutterstock, Adobe Stock, and more. We offer a credit-based system where you can download premium content using credits from your subscription plan."
+      },
+      "howCreditsWork": {
+        "question": "How do credits work and what can I download with them?",
+        "answer": "Credits are used to download premium resources from supported platforms. Each download typically costs 1 credit, regardless of the file type (images, vectors, videos, or templates). Your credits are valid for the duration of your subscription period and can be used across all supported platforms."
+      },
+      "supportedPlatforms": {
+        "question": "Which creative platforms are supported?",
+        "answer": "We support major creative platforms including Freepik, Shutterstock, Adobe Stock, Getty Images, Unsplash, and many more. The number of supported platforms varies by subscription plan, with premium plans offering access to more platforms and exclusive content."
+      },
+      "howToDownload": {
+        "question": "How do I download resources from the platform?",
+        "answer": "Simply search for the content you need, select the resource you want, and click download. The system will automatically use one credit from your account and provide you with the high-quality file. All downloads are instant and available in multiple formats when applicable."
+      },
+      "safetyLegal": {
+        "question": "Is it safe and legal to use these resources?",
+        "answer": "Yes, absolutely! All resources available through our platform are legally licensed and safe to use for commercial and personal projects. We maintain partnerships with content creators and platforms to ensure all downloads are legitimate and properly licensed."
+      },
+      "musicRestrictions": {
+        "question": "Can I download music or audio files from this platform?",
+        "answer": "No, our platform does not support music downloads or any audio content. We strictly focus on visual creative resources such as images, vectors, graphics, and videos. Music downloads are prohibited due to copyright and licensing restrictions. For audio content, please use specialized music licensing platforms."
+      },
+      "pricingPlans": {
+        "question": "What pricing plans are available and what's included?",
+        "answer": "We offer flexible subscription plans ranging from basic to premium tiers. Each plan includes a specific number of monthly credits, access to different platforms, and various features. Premium plans offer more credits, access to exclusive content, priority support, and advanced features like bulk downloads and API access."
+      },
+      "accountManagement": {
+        "question": "How do I manage my account and subscription?",
+        "answer": "You can manage your account through your dashboard where you can view your credit balance, download history, update payment methods, change subscription plans, and modify account settings. You can also cancel or pause your subscription at any time without penalties."
+      },
+      "technicalSupport": {
+        "question": "What technical support options are available?",
+        "answer": "We provide 24/7 technical support through multiple channels including live chat, email support, and phone support for premium users. Our support team can help with account issues, download problems, billing questions, and technical troubleshooting. Response times vary by plan level."
+      },
+      "fileFormats": {
+        "question": "What file formats are available for download?",
+        "answer": "We support a wide range of file formats including JPG, PNG, SVG, EPS, AI, PSD, MP4, MOV, and more. The available formats depend on the original content and platform. Most resources are available in multiple formats and resolutions to suit different project needs."
+      },
+      "troubleshooting": {
+        "question": "What should I do if downloads fail or I encounter errors?",
+        "answer": "If you experience download issues, first check your internet connection and try refreshing the page. Clear your browser cache and cookies if problems persist. For failed downloads, your credits will be automatically refunded. Contact our support team if issues continue, and we'll resolve them quickly."
+      },
+      "commercialUsage": {
+        "question": "Can I use downloaded resources for commercial projects?",
+        "answer": "Yes, all resources downloaded through our platform come with commercial usage rights. You can use them in client projects, marketing materials, websites, apps, and other commercial applications. However, you cannot resell or redistribute the original files as standalone products."
+      },
+      "refundPolicy": {
+        "question": "What is your refund and cancellation policy?",
+        "answer": "We offer a 30-day money-back guarantee for new subscriptions. You can cancel your subscription at any time, and it will remain active until the end of your billing period. Unused credits expire at the end of your subscription period, but we offer pro-rated refunds in certain circumstances."
+      },
+      "platformFeatures": {
+        "question": "What advanced features does the platform offer?",
+        "answer": "Our platform includes advanced search filters, collections and favorites, download history tracking, bulk download capabilities, API access for developers, team collaboration tools, and integration with popular design software. Premium users get access to exclusive features and priority processing."
+      }
+    }
+  },
+  "testimonials": {
+    "title": "What Our",
+    "titleHighlight": "Customers Say",
+    "description": "Join thousands of satisfied creators who trust ResourceHub for their creative projects.",
+    "stats": {
+      "totalDownloads": {
+        "value": "2500000",
+        "label": "Total Downloads",
+        "suffix": "+"
+      },
+      "customerSatisfaction": {
+        "value": "99",
+        "label": "Customer Satisfaction",
+        "suffix": "%"
+      },
+      "supportedPlatforms": {
+        "value": "25",
+        "label": "Supported Platforms",
+        "suffix": "+"
+      },
+      "totalResources": {
+        "value": "5000000",
+        "label": "Total Resources",
+        "suffix": "+"
+      }
+    },
+    "reviews": [
+      {
+        "name": "Sarah Ahmed",
+        "role": "Graphic Designer",
+        "content": "ResourceHub has completely transformed my workflow. The quality of resources and ease of accessing multiple platforms in one place is incredible. I've saved countless hours and my clients love the results.",
+        "rating": 5,
+        "avatar": "/avatars/sarah.jpg"
+      },
+      {
+        "name": "Michael Johnson",
+        "role": "Marketing Director",
+        "content": "The credit system is brilliant and the variety of platforms available is unmatched. We've been able to maintain consistent visual branding across all our campaigns with high-quality assets from ResourceHub.",
+        "rating": 5,
+        "avatar": "/avatars/michael.jpg"
+      },
+      {
+        "name": "Emma Wilson",
+        "role": "Content Creator",
+        "content": "I love how ResourceHub gives me access to premium content from all my favorite platforms. The download speeds are incredibly fast and the quality is always excellent. Highly recommend!",
+        "rating": 5,
+        "avatar": "/avatars/emma.jpg"
+      },
+      {
+        "name": "David Chen",
+        "role": "Web Designer",
+        "content": "As a freelancer, ResourceHub has been a game-changer. The affordable pricing and access to multiple premium platforms has helped me deliver better results to my clients while staying within budget.",
+        "rating": 5,
+        "avatar": "/avatars/david.jpg"
+      },
+      {
+        "name": "David Chen",
+        "role": "Web Designer",
+        "content": "As a freelancer, ResourceHub has been a game-changer. The affordable pricing and access to multiple premium platforms has helped me deliver better results to my clients while staying within budget.",
+        "rating": 5,
+        "avatar": "/avatars/david.jpg"
+      },
+      {
+        "name": "Emma Wilson",
+        "role": "Content Creator",
+        "content": "I love how ResourceHub gives me access to premium content from all my favorite platforms. The download speeds are incredibly fast and the quality is always excellent. Highly recommend!",
+        "rating": 5,
+        "avatar": "/avatars/emma.jpg"
+      }
+    ]
+  },
+  "footer": {
+    "description": "Your ultimate destination for premium creative resources. Access millions of high-quality images, vectors, and videos from top platforms worldwide.",
+    "quickLinks": "Quick Links",
+    "resources": "Resources",
+    "support": "Support",
+    "legal": "Legal",
+    "followUs": "Follow Us",
+    "allRightsReserved": "All rights reserved.",
+    "links": {
+      "home": "Home",
+      "categories": "Categories",
+      "pricing": "Pricing",
+      "about": "About",
+      "helpCenter": "Help Center",
+      "contactSupport": "Contact Support",
+      "faq": "FAQ",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "cookiePolicy": "Cookie Policy",
+      "stockPhotos": "Stock Photos",
+      "vectors": "Vectors",
+      "illustrations": "Illustrations",
+      "videos": "Videos",
+      "templates": "Templates"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "search": {
+      "placeholder": "Search by name, email, plan..."
+    },
+    "stats": {
+      "totalUsers": {
+        "title": "Total Users",
+        "description": "Registered accounts"
+      },
+      "activeSites": {
+        "title": "Active Sites",
+        "description": "Live websites"
+      },
+      "onlineUsers": {
+        "title": "Online Users",
+        "description": "Currently active"
+      },
+      "totalCreditsIssued": "Total Credits Issued",
+      "totalCreditsUsed": "Total Credits Used",
+      "remainingCredits": "Remaining Credits",
+      "registeredUsers": "Registered users in the system",
+      "onlineNow": "online now",
+      "systemWideCreditsDistributed": "System-wide credits distributed",
+      "creditsConsumedByUsers": "Credits consumed by users",
+      "availableCreditsInSystem": "Available credits in system",
+      "totalDownloads": {
+        "title": "Total Downloads",
+        "description": "All time downloads"
+      },
+      "creditsUsed": {
+        "title": "Credits Used",
+        "description": "Total consumed"
+      },
+      "creditsRemaining": {
+        "title": "Credits Remaining",
+        "description": "Available balance"
+      },
+      "planStatus": {
+        "title": "Plan Status",
+        "description": "Current subscription"
+      }
+    },
+    "usersManagement": {
+      "title": "Users Management",
+      "description": "Manage user subscriptions and monitor activity",
+      "searchPlaceholder": "Search users by name, email, phone...",
+      "filters": {
+        "allStatus": "All Status",
+        "active": "Active",
+        "expired": "Expired",
+        "suspended": "Suspended"
+      },
+      "table": {
+        "headers": {
+          "user": "USER",
+          "phone": "PHONE",
+          "planCredits": "PLAN & CREDITS",
+          "status": "STATUS",
+          "expiry": "EXPIRY",
+          "actions": "ACTIONS"
+        },
+        "loadingUsers": "Loading users...",
+        "loadingDescription": "Please wait while we fetch the user data",
+        "credits": "credits",
+        "deleteUser": "Delete User",
+        "noUsersFound": "No users found",
+        "noUsersDescription": "Try adjusting your search or filter criteria",
+        "showingUsers": "Showing {{filtered}} of {{total}} users",
+        "lastActive": "Last active: {{time}}",
+        "joined": "Joined",
+        "expires": "Expires",
+        "errorLoading": "Error fetching users"
+      }
+    },
+    "addSubscription": {
+      "title": "Add New Subscription",
+      "description": "Create a subscription for a user",
+      "userEmail": "User Email",
+      "plan": "Subscription Plan",
+      "subscriptionPlan": "Subscription Plan",
+      "planPreview": "Plan Preview",
+      "planName": "Plan Name :",
+      "credits": "credits",
+      "adding": "Adding...",
+      "add": "Add Subscription",
+      "addingSubscription": "Adding Subscription...",
+      "addSubscription": "Add Subscription",
+      "choosePlan": "Choose a subscription plan",
+      "emailPlaceholder": "user@example.com",
+      "placeholders": {
+        "email": "user@example.com",
+        "plan": "Choose a subscription plan"
+      },
+      "validation": {
+        "emailRequired": "Email is required",
+        "invalidEmail": "Please enter a valid email address",
+        "planRequired": "Please select a subscription plan"
+      }
+    },
+    "upgradeSubscription": {
+      "title": "Upgrade Subscription",
+      "description": "Upgrade user to a higher plan",
+      "userEmail": "User Email",
+      "newPlan": "New Plan",
+      "credits": "credits",
+      "upgrading": "Upgrading...",
+      "upgrade": "Upgrade",
+      "placeholders": {
+        "email": "user@example.com",
+        "plan": "Choose a new plan"
+      },
+      "validation": {
+        "emailRequired": "Email is required",
+        "invalidEmail": "Please enter a valid email address",
+        "planRequired": "Please select a new plan"
+      }
+    },
+    "extendSubscription": {
+      "title": "Extend Subscription",
+      "description": "Extend user subscription validity",
+      "userEmail": "User Email",
+      "days": "Additional Days",
+      "additionalDays": "Additional Days",
+      "extending": "Extending...",
+      "extend": "Extend",
+      "estimatedNewExpiry": "Estimated New Expiry",
+      "placeholders": {
+        "email": "user@example.com",
+        "days": "30"
+      },
+      "validation": {
+        "emailRequired": "Email is required",
+        "invalidEmail": "Please enter a valid email address",
+        "daysRequired": "Please enter a valid number of days"
+      }
+    },
+    "deleteSubscription": {
+      "title": "Delete Subscription",
+      "description": "Remove user subscription",
+      "warning": "Warning: This action is irreversible",
+      "warningDescription": "All subscription data and credits associated with this user will be permanently deleted.",
+      "userEmail": "User Email",
+      "deleting": "Deleting...",
+      "delete": "Delete Subscription",
+      "placeholders": {
+        "email": "user@example.com"
+      },
+      "validation": {
+        "emailRequired": "Email is required",
+        "invalidEmail": "Please enter a valid email address"
+      }
+    },
+    "siteManagement": {
+      "title": "Site Management",
+      "description": "Manage supported websites",
+      "addSite": "Add New Site",
+      "siteName": "Site Name",
+      "siteUrl": "Site URL",
+      "price": "Price",
+      "siteIcon": "Site Icon URL *",
+      "external": "External Website",
+      "externalHelp": "External websites don't support cookie authentication",
+      "adding": "Adding Site...",
+      "add": "Add Site",
+      "editSite": "Edit Site",
+      "editing": "Updating Site...",
+      "edit": "Update Site",
+      "status": "Status",
+      "addedDate": "Added Date",
+      "table": {
+        "headers": {
+          "site": "Site",
+          "url": "URL",
+          "price": "Price",
+          "cookieSupport": "Cookie Support",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "noSites": "No sites found",
+        "noSitesDescription": "Add your first site to get started",
+        "accessPrice": "Access Price",
+        "credits": "credits",
+        "active": "Active",
+        "cookieSupported": "Supported",
+        "cookieNotSupported": "Not Supported",
+        "edit": "Edit",
+        "delete": "Delete",
+        "retry": "Retry"
+      },
+      "placeholders": {
+        "siteName": "Enter site name",
+        "siteUrl": "https://example.com",
+        "sitePrice": "Enter price in credits",
+        "siteIcon": "https://example.com/icon.png",
+        "siteIconHelp": "Required - provide a URL to the site's icon image",
+        "externalYes": "Yes",
+        "externalNo": "No"
+      },
+      "validation": {
+        "nameRequired": "Site name is required",
+        "urlRequired": "Site URL is required",
+        "invalidUrl": "Please enter a valid URL",
+        "priceRequired": "Price is required",
+        "invalidPrice": "Please enter a valid price",
+        "iconRequired": "Site icon URL is required",
+        "invalidIconUrl": "Please enter a valid icon URL"
+      },
+      "toast": {
+        "addSuccess": "Website added successfully",
+        "addError": "Failed to add website",
+        "editSuccess": "Website updated successfully",
+        "editError": "Failed to update website",
+        "deleteSuccess": "Website deleted successfully",
+        "deleteError": "Failed to delete website"
+      }
+    },
+    "packageManagement": {
+      "title": "Pricing Management",
+      "description": "Manage subscription plans and pricing",
+      "addPackage": "Add New Plan",
+      "editPackage": "Edit Plan",
+      "packageName": "Plan Name",
+      "packagePrice": "Plan Price (Optional - leave empty to show 'Contact Us')",
+      "packageDescription": "Plan Description",
+      "daysValidity": "Validity Period (in days)",
+      "credits": "Number of Credits",
+      "contactUrl": "Contact Us URL",
+      "supportedSites": "Supported Sites (comma-separated)",
+      "adding": "Adding Plan...",
+      "updating": "Updating Plan...",
+      "deleting": "Deleting Plan...",
+      "add": "Add Plan",
+      "update": "Update Plan",
+      "delete": "Delete Plan",
+      "edit": "Edit",
+      "confirmDelete": "Are you sure you want to delete this plan?",
+      "deleteDescription": "This action cannot be undone. This will permanently delete the plan and may affect users subscribed to it.",
+      "noPackages": "No plans available",
+      "noPackagesDescription": "Start by adding a new plan to manage subscriptions",
+      "noPricingPlans": "No pricing plans available",
+      "editDescription": "Edit plan details",
+      "planDetails": {
+        "name": "Plan Name:",
+        "price": "Price:",
+        "description": "Description:",
+        "validity": "Validity Period:",
+        "credits": "Credits:",
+        "contactUs": "Contact Us:",
+        "supportedSites": "Supported Sites:",
+        "days": "days",
+        "contactUsLabel": "Contact Us"
+      },
+      "placeholders": {
+        "packageName": "Enter plan name",
+        "packageDescription": "Enter plan description",
+        "packagePrice": "Leave empty to show 'Contact Us'",
+        "packagePriceHelp": "Leave empty to display Contact Us instead of a price",
+        "daysValidity": "30",
+        "credits": "100",
+        "contactUrl": "https://example.com/contact",
+        "supportedSites": "freepik, shutterstock, adobe",
+        "supportedSitesHelp": "Enter comma-separated list of site names or domains (must match existing sites)"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "adding": "Adding...",
+        "updating": "Updating...",
+        "addPackage": "Add Package",
+        "updatePackage": "Update Package"
+      },
+      "validation": {
+        "nameRequired": "Plan name is required",
+        "descriptionRequired": "Description is required",
+        "daysRequired": "Validity period is required",
+        "invalidDays": "Please enter a valid number of days",
+        "creditsRequired": "Number of credits is required",
+        "invalidCredits": "Please enter a valid number of credits",
+        "sitesRequired": "At least one supported site is required",
+        "contactUrlRequired": "Contact URL is required",
+        "invalidUrl": "Please enter a valid URL"
+      },
+      "toast": {
+        "addSuccess": "Pricing plan added successfully",
+        "addError": "Failed to add pricing plan",
+        "updateSuccess": "Pricing plan updated successfully",
+        "updateError": "Failed to update pricing plan",
+        "deleteSuccess": "Pricing plan deleted successfully",
+        "deleteError": "Failed to delete pricing plan"
+      },
+      "features": {
+        "accessToSites": "Access to supported sites",
+        "support": "24/7 Support",
+        "adminManagement": "Admin Management"
+      }
+    },
+    "creditAnalytics": {
+      "title": "Credit Analytics",
+      "description": "System-wide credit usage statistics",
+      "totalIssued": "Total Issued",
+      "totalUsed": "Total Used",
+      "remaining": "Remaining",
+      "used": "Used",
+      "dailyAverage": "Daily Average",
+      "dailyAvg": "Daily Avg",
+      "creditsByPlan": "Credits by Plan",
+      "lastUpdated": "Last updated",
+      "noAnalyticsData": "No analytics data available",
+      "retry": "Retry",
+      "refresh": "Refresh"
+    },
+    "creditHistory": {
+      "title": "Credit History",
+      "description": "Recent credit transactions",
+      "noHistoryData": "No credit history available",
+      "retry": "Retry",
+      "refresh": "Refresh",
+      "showAll": "Show All",
+      "total": "total",
+      "transactions": {
+        "siteAccess": "Site access",
+        "creditPurchase": "Credit Purchase",
+        "planUpgrade": "Plan Upgrade",
+        "types": {
+          "add": "Subscription Added",
+          "use": "User Used Credit",
+          "delete": "Subscription Deleted"
+        },
+        "reasons": {
+          "top-up": "Top-up",
+          "download": "Download",
+          "subscription": "Subscription",
+          "refund": "Refund",
+          "bonus": "Bonus"
+        },
+        "timeAgo": {
+          "now": "now",
+          "minutesAgo": "{{count}}m ago",
+          "minutesAgo_one": "{{count}} minute ago",
+          "minutesAgo_other": "{{count}} minutes ago",
+          "hoursAgo": "{{count}}h ago",
+          "hoursAgo_one": "{{count}} hour ago",
+          "hoursAgo_other": "{{count}} hours ago",
+          "daysAgo": "{{count}}d ago",
+          "daysAgo_one": "{{count}} day ago",
+          "daysAgo_other": "{{count}} days ago"
+        }
+      }
+    },
+    "errors": {
+      "failedToLoadAnalytics": "Failed to load analytics",
+      "failedToLoadHistory": "Failed to load history",
+      "failedToLoadUsers": "Failed to load users",
+      "failedToLoadDownloads": "Failed to load downloads",
+      "failedToLoadSites": "Failed to load sites",
+      "failedToLoadPricingPlans": "Failed to load pricing plans",
+      "failedToAddSubscription": "Failed to add subscription",
+      "failedToUpgradeSubscription": "Failed to upgrade subscription",
+      "failedToExtendSubscription": "Failed to extend subscription",
+      "failedToDeleteSubscription": "Failed to delete subscription"
+    },
+    "buttons": {
+      "retry": "Retry"
+    }
+  },
+  "sidebar": {
+    "sections": {
+      "overview": "Overview",
+      "management": "Management",
+      "account": "Account"
+    },
+    "navigation": {
+      "dashboard": "Dashboard",
+      "broadcast": "Broadcast",
+      "usersManagement": "Users Management",
+      "sitesManagement": "Sites Management",
+      "pricingManagement": "Pricing Management",
+      "cookiesManagement": "Cookies Management",
+      "profile": "Profile",
+      "settings": "Settings",
+      "signOut": "Sign Out"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "userInfo": {
+      "member": "Member",
+      "active": "Active",
+      "editProfile": "Edit Profile",
+      "creditsLeft": "Credits Left",
+      "downloads": "Downloads",
+      "memberSince": "Member Since",
+      "onlineStatus": "Online"
+    },
+    "stats": {
+      "totalDownloads": {
+        "title": "Total Downloads",
+        "description": "All time downloads"
+      },
+      "creditsUsed": {
+        "title": "Credits Used",
+        "description": "Total consumed"
+      },
+      "creditsRemaining": {
+        "title": "Credits Remaining",
+        "description": "Available balance"
+      },
+      "planStatus": {
+        "title": "Plan Status",
+        "description": "Current subscription"
+      }
+    },
+    "subscription": {
+      "title": "Subscription Details",
+      "description": "Your current plan information",
+      "currentPlan": "Current Plan",
+      "status": "Status",
+      "validUntil": "Valid Until",
+      "manageSubscription": "Manage Subscription"
+    },
+    "credits": {
+      "title": "Credits Overview",
+      "description": "Your credit usage and balance",
+      "remaining": "Credits Remaining",
+      "usageProgress": "Usage Progress",
+      "used": "Used",
+      "total": "Total",
+      "buyMore": "Buy More Credits"
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "description": "Update your account password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "currentPasswordPlaceholder": "Enter your current password",
+      "newPasswordPlaceholder": "Enter your new password",
+      "confirmPasswordPlaceholder": "Confirm your new password",
+      "updatePassword": "Update Password",
+      "passwordRequirements": "Password must be at least 8 characters long",
+      "success": "Password updated successfully",
+      "error": "Failed to update password"
+    },
+    "downloadHistory": {
+      "title": "Download History",
+      "description": "Your recent downloads and credit usage",
+      "filters": {
+        "newest": "Newest First",
+        "oldest": "Oldest First",
+        "creditsHigh": "Credits: High to Low",
+        "creditsLow": "Credits: Low to High"
+      },
+      "empty": {
+        "title": "No downloads found",
+        "description": "Your download history will appear here"
+      },
+      "loadMore": "Load More Downloads",
+      "credits": "credits",
+      "types": {
+        "image": "image",
+        "video": "video"
+      }
+    }
+  },
+  "cookies": {
+    "title": "Cookies Control",
+    "description": "Manage your website cookies and user sessions.",
+    "filter": {
+      "placeholder": "Filter by website",
+      "all": "All Websites"
+    },
+    "empty": {
+      "title": "No cookies found",
+      "description": "Add your first cookie to get started",
+      "filtered": "No cookies for this website",
+      "filteredDescription": "Try selecting a different website or add a new cookie"
+    },
+    "stats": {
+      "total": "Total Cookies",
+      "filtered": "Filtered Results",
+      "premium": "Premium Accounts",
+      "websites": "Unique Websites"
+    },
+    "addCookie": {
+      "title": "Add Cookie",
+      "description": "Upload a new cookie file to manage website sessions",
+      "button": "Add Cookie",
+      "dialog": {
+        "title": "Add New Cookie",
+        "description": "Add cookies for a specific website platform",
+        "website": {
+          "label": "Website Platform",
+          "placeholder": "Select a website platform",
+          "noWebsites": "No websites available"
+        },
+        "json": {
+          "label": "Cookies (JSON Format)",
+          "placeholder": "{\"session_id\": \"abc123\", \"auth_token\": \"xyz789\"}",
+          "help": "Enter cookies in valid JSON format. Example: {\"key\": \"value\"}"
+        },
+        "submitting": "Adding Cookie...",
+        "submit": "Add Cookie"
+      }
+    },
+    "fields": {
+      "userId": "User ID",
+      "username": "Username",
+      "email": "Email",
+      "noEmail": "No email",
+      "credit": "Credit",
+      "credits": "credits",
+      "noCredit": "No credit",
+      "lastUpdate": "Last Update",
+      "premium": "Premium",
+      "status": "Status"
+    },
+    "status": {
+      "premium": "Premium User",
+      "active": "Yes",
+      "inactive": "No"
+    },
+    "deleteDialog": {
+      "title": "Delete Cookie",
+      "description": "Are you sure you want to delete the cookie for {{domain}}? This action cannot be undone."
+    },
+    "deleting": "Deleting..."
+  },
+  "login": {
+    "title": "Welcome Back",
+    "subtitle": "Sign in to access your account",
+    "form": {
+      "email": {
+        "label": "Email Address",
+        "placeholder": "Enter your email address"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Enter your password"
+      },
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submitButton": "Login",
+      "submitting": "Signing in..."
+    },
+    "validation": {
+      "emailRequired": "Email address is required",
+      "invalidEmail": "Please enter a valid email address",
+      "passwordRequired": "Password is required"
+    },
+    "footer": {
+      "noAccount": "Don't have an account?",
+      "registerLink": "Register now"
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: July 2025",
+    "sections": {
+      "cookies": {
+        "title": "Web Cookies",
+        "content": "If you leave a comment on our site, you may opt-in to saving your name, email address and website in cookies. These are for your convenience so that you do not have to fill in your details again when you leave another comment. These cookies will last for one year. If you visit our login page, we will set a temporary cookie to determine if your browser accepts cookies. This cookie contains no personal data and is discarded when you close your browser. When you log in, we will also set up several cookies to save your login information and your screen display choices. Login cookies last for two days, and screen options cookies last for a year. If you select \"Remember Me\", your login will persist for two weeks. If you log out of your account, the login cookies will be removed. If you edit or publish an article, an additional cookie will be saved in your browser. This cookie includes no personal data and simply indicates the post ID of the article you just edited. It expires after one day."
+      },
+      "embeddedContent": {
+        "title": "Embedded content from other websites",
+        "content": "This site may contain embedded content (e.g. videos, images, articles, etc.). Embedded content from other websites behaves in the exact same way as if the visitor has visited the other website. These websites may collect data about you, use cookies, embed additional third-party tracking, and monitor your interaction with that embedded content, including tracking your interaction with the embedded content if you have an account and are logged in to that website."
+      },
+      "dataSharing": {
+        "title": "Who we share your data with",
+        "content": "If you request a password reset, your IP address will be included in the reset email."
+      },
+      "dataRetention": {
+        "title": "How long we retain your data",
+        "content": "If you leave a comment, the comment and its metadata are retained indefinitely. This is so we can recognize and approve any follow-up comments automatically instead of holding them in a moderation queue. For users that register on our website (if any), we also store the personal information they provide in their user profile. All users can see, edit, or delete their personal information at any time (except they cannot change their username). Website administrators can also view and edit that information."
+      },
+      "musicRestriction": {
+        "title": "Music Download Restrictions",
+        "content": "This platform does not support or facilitate music downloads in any form. We strictly prohibit the downloading, distribution, or sharing of copyrighted music content due to copyright and licensing restrictions. Our services are designed to respect intellectual property rights and comply with applicable copyright laws. Any attempt to use our platform for music-related downloads may result in account suspension or termination."
+      }
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "January 15, 2025",
+    "effectiveDate": "January 15, 2025",
+    "tableOfContents": {
+      "title": "Table of Contents",
+      "sections": [
+        "Information We Collect",
+        "How We Use Your Information",
+        "Data Sharing and Disclosure",
+        "Cookies and Tracking Technologies",
+        "Data Security",
+        "Your Rights and Choices",
+        "International Data Transfers",
+        "Data Retention",
+        "Children's Privacy",
+        "Third-Party Services",
+        "Updates to This Policy",
+        "Contact Information"
+      ]
+    },
+    "introduction": {
+      "title": "Introduction",
+      "content": "At ResourceHub, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services. By accessing or using our platform, you agree to the collection and use of information in accordance with this policy."
+    },
+    "sections": {
+      "informationCollection": {
+        "title": "Information We Collect",
+        "content": "We collect several types of information from and about users of our platform, including: (1) Personal Information: When you create an account, we collect your name, email address, phone number, and payment information. (2) Usage Data: We automatically collect information about how you interact with our platform, including pages visited, downloads, search queries, and time spent on our site. (3) Device Information: We collect information about your device, including IP address, browser type, operating system, and device identifiers. (4) Cookies and Tracking Data: We use cookies and similar technologies to collect information about your browsing behavior and preferences."
+      },
+      "informationUse": {
+        "title": "How We Use Your Information",
+        "content": "We use the information we collect for various purposes, including: (1) Providing and maintaining our services, including processing downloads and managing your account. (2) Personalizing your experience and improving our platform based on your preferences and usage patterns. (3) Communicating with you about your account, updates, and promotional offers (with your consent). (4) Processing payments and preventing fraud. (5) Complying with legal obligations and protecting our rights and the rights of others. (6) Analyzing usage trends to improve our services and develop new features."
+      },
+      "dataSharing": {
+        "title": "Data Sharing and Disclosure",
+        "content": "We do not sell, rent, or trade your personal information to third parties. However, we may share your information in the following circumstances: (1) Service Providers: We may share information with trusted third-party service providers who assist us in operating our platform, processing payments, or providing customer support. (2) Legal Requirements: We may disclose information when required by law, court order, or government request. (3) Business Transfers: In the event of a merger, acquisition, or sale of assets, your information may be transferred as part of the transaction. (4) Consent: We may share information with your explicit consent for specific purposes."
+      },
+      "cookiesTracking": {
+        "title": "Cookies and Tracking Technologies",
+        "content": "We use cookies, web beacons, and similar tracking technologies to enhance your browsing experience and collect information about how you use our platform. These technologies help us: (1) Remember your preferences and settings. (2) Analyze site traffic and usage patterns. (3) Provide personalized content and recommendations. (4) Improve our services and user experience. You can control cookie settings through your browser preferences, but disabling cookies may affect the functionality of our platform."
+      },
+      "dataSecurity": {
+        "title": "Data Security",
+        "content": "We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. These measures include: (1) Encryption of sensitive data in transit and at rest. (2) Regular security assessments and updates. (3) Access controls and authentication mechanisms. (4) Employee training on data protection practices. However, no method of transmission over the internet or electronic storage is 100% secure, and we cannot guarantee absolute security."
+      },
+      "userRights": {
+        "title": "Your Rights and Choices",
+        "content": "Depending on your location, you may have certain rights regarding your personal information, including: (1) Access: The right to request access to your personal information. (2) Correction: The right to request correction of inaccurate or incomplete information. (3) Deletion: The right to request deletion of your personal information (subject to certain exceptions). (4) Portability: The right to receive your personal information in a portable format. (5) Objection: The right to object to certain processing of your personal information. (6) Withdrawal of Consent: The right to withdraw consent where processing is based on consent. To exercise these rights, please contact us using the information provided below."
+      },
+      "internationalTransfers": {
+        "title": "International Data Transfers",
+        "content": "Your information may be transferred to and processed in countries other than your country of residence. These countries may have different data protection laws than your country. When we transfer your information internationally, we ensure appropriate safeguards are in place to protect your information, including: (1) Adequacy decisions by relevant authorities. (2) Standard contractual clauses approved by relevant authorities. (3) Certification schemes and codes of conduct. (4) Other legally recognized transfer mechanisms."
+      },
+      "dataRetention": {
+        "title": "Data Retention",
+        "content": "We retain your personal information for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required or permitted by law. The retention period depends on various factors, including: (1) The type of information and the purposes for which it was collected. (2) Legal, regulatory, or contractual requirements. (3) The need to resolve disputes or enforce our agreements. (4) Your preferences and choices regarding data retention. When we no longer need your information, we will securely delete or anonymize it."
+      },
+      "childrensPrivacy": {
+        "title": "Children's Privacy",
+        "content": "Our platform is not intended for children under the age of 13 (or the minimum age required in your jurisdiction). We do not knowingly collect personal information from children under this age. If we become aware that we have collected personal information from a child under the applicable age without parental consent, we will take steps to delete such information. If you believe we have collected information from a child, please contact us immediately."
+      },
+      "thirdPartyServices": {
+        "title": "Third-Party Services",
+        "content": "Our platform may contain links to third-party websites, services, or applications that are not owned or controlled by us. This Privacy Policy does not apply to these third-party services. We encourage you to review the privacy policies of any third-party services you access through our platform. We are not responsible for the privacy practices or content of these third-party services."
+      },
+      "policyUpdates": {
+        "title": "Updates to This Policy",
+        "content": "We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. We will notify you of any material changes by posting the updated policy on our website and updating the 'Last Updated' date. For significant changes, we may also provide additional notice, such as email notification. Your continued use of our platform after any changes indicates your acceptance of the updated policy."
+      },
+      "contactInformation": {
+        "title": "Contact Information",
+        "content": "If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us at: Email: privacy@resourcehub.com | Phone: +1 (555) 123-4567 | Address: ResourceHub Privacy Team, 123 Privacy Street, Data City, DC 12345, United States. We will respond to your inquiries within a reasonable timeframe and in accordance with applicable law."
+      }
+    }
+  },
+  "cookiePolicy": {
+    "title": "Cookie Policy",
+    "description": "Understanding how we use cookies to enhance your browsing experience and provide better services.",
+    "lastUpdated": "Last updated: January 15, 2025",
+    "introduction": {
+      "content": "This Cookie Policy explains how ResourceHub uses cookies and similar tracking technologies when you visit our website. We want to be transparent about the data we collect, how we use it, and the choices you have regarding cookies. By continuing to use our website, you consent to our use of cookies as described in this policy."
+    },
+    "sections": {
+      "essential": {
+        "title": "Essential Cookies",
+        "content": "Essential cookies are necessary for the basic functionality of our website. These cookies enable core features such as security, network management, and accessibility. Without these cookies, services you have asked for cannot be provided. Essential cookies are always enabled and cannot be disabled.",
+        "examples": {
+          "title": "Examples of Essential Cookies:",
+          "sessionCookies": "Session cookies for user authentication and security",
+          "securityCookies": "Security cookies to prevent fraudulent activity",
+          "loadBalancing": "Load balancing cookies to distribute server load"
+        }
+      },
+      "analytics": {
+        "title": "Analytics Cookies",
+        "content": "Analytics cookies help us understand how visitors interact with our website by collecting and reporting information anonymously. These cookies allow us to count visits, identify traffic sources, and understand which pages are most popular. This information helps us improve our website and user experience.",
+        "examples": {
+          "title": "Examples of Analytics Cookies:",
+          "googleAnalytics": "Google Analytics cookies to track website usage",
+          "pageViews": "Page view tracking cookies to understand content popularity",
+          "userBehavior": "User behavior analysis cookies to improve site navigation"
+        }
+      },
+      "marketing": {
+        "title": "Marketing Cookies",
+        "content": "Marketing cookies are used to track visitors across websites with the intention of displaying relevant and engaging advertisements. These cookies may be set by us or by third-party advertising partners. They help us deliver personalized content and measure the effectiveness of our advertising campaigns.",
+        "examples": {
+          "title": "Examples of Marketing Cookies:",
+          "advertising": "Advertising cookies to display relevant ads",
+          "retargeting": "Retargeting cookies to show personalized content",
+          "socialMedia": "Social media cookies for sharing and engagement tracking"
+        }
+      },
+      "thirdParty": {
+        "title": "Third-Party Cookies",
+        "content": "Third-party cookies are set by domains other than ResourceHub. These cookies are typically used by external services we integrate with, such as social media platforms, payment processors, or analytics providers. We do not control these cookies, and their use is governed by the privacy policies of the respective third parties.",
+        "examples": {
+          "title": "Examples of Third-Party Cookies:",
+          "socialPlugins": "Social media plugins and sharing buttons",
+          "embeddedContent": "Embedded content from external platforms",
+          "paymentProcessors": "Payment processing and security services"
+        }
+      },
+      "management": {
+        "title": "Cookie Management",
+        "content": "You have several options to manage and control cookies on our website. You can modify your browser settings to accept or reject cookies, delete existing cookies, or receive notifications when cookies are being set. Please note that disabling certain cookies may affect the functionality of our website.",
+        "options": {
+          "title": "Cookie Management Options:",
+          "browserSettings": "Browser settings to control cookie acceptance and deletion",
+          "cookiePreferences": "Cookie preference center to customize your choices",
+          "optOut": "Opt-out links for specific third-party services"
+        }
+      },
+      "userRights": {
+        "title": "Your Rights",
+        "content": "Under applicable privacy laws, you have certain rights regarding cookies and the data they collect. You have the right to be informed about cookie usage, give or withdraw consent, and access information about the cookies we use. We respect your privacy choices and provide tools to exercise these rights.",
+        "rights": {
+          "title": "Your Cookie Rights:",
+          "consent": "Right to give or refuse consent for non-essential cookies",
+          "withdraw": "Right to withdraw consent at any time",
+          "information": "Right to information about cookies and their purposes"
+        }
+      },
+      "contact": {
+        "title": "Contact Information",
+        "content": "If you have any questions, concerns, or requests regarding this Cookie Policy or our cookie practices, please don't hesitate to contact us. We are committed to addressing your inquiries promptly and transparently.",
+        "info": {
+          "title": "Contact Details:",
+          "email": "Email: cookies@resourcehub.com",
+          "phone": "Phone: +1 (555) 123-4567",
+          "address": "Address: ResourceHub Cookie Team, 123 Cookie Street, Data City, DC 12345, United States"
+        }
+      }
+    },
+    "updates": {
+      "title": "Policy Updates",
+      "content": "We may update this Cookie Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. We will notify you of any material changes by posting the updated policy on our website and updating the 'Last Updated' date. We encourage you to review this policy periodically."
+    }
+  },
+  "register": {
+    "title": "Create Your Account",
+    "subtitle": "Join our community today.",
+    "form": {
+      "firstName": {
+        "label": "First Name",
+        "placeholder": "Enter your first name"
+      },
+      "lastName": {
+        "label": "Last Name",
+        "placeholder": "Enter your last name"
+      },
+      "email": {
+        "label": "Email Address",
+        "placeholder": "Enter your email address"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "Enter your phone number",
+        "otpMessage": "OTP code will be sent to you via WhatsApp",
+        "sendCodeButton": "Send Code",
+        "sendingCode": "Sending Code...",
+        "codeSent": "Code sent to your WhatsApp"
+      },
+      "otp": {
+        "label": "Verification Code",
+        "placeholder": "Enter 6-digit code",
+        "verifyButton": "Verify Code",
+        "verifying": "Verifying...",
+        "resendCode": "Resend Code",
+        "resending": "Resending..."
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Create a strong password"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "placeholder": "Confirm your password"
+      },
+      "terms": {
+        "label": "I agree to the",
+        "termsLink": "Terms of Service",
+        "and": "and",
+        "privacyLink": "Privacy Policy"
+      },
+      "submitButton": "Create Account",
+      "submitting": "Creating Account..."
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "emailRequired": "Email address is required",
+      "invalidEmail": "Please enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "invalidPhone": "Please enter a valid phone number",
+      "phoneCountryCode": "Phone number must include country code (e.g., +1234567890)",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 8 characters long",
+      "passwordWeak": "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "termsRequired": "You must agree to the Terms of Service and Privacy Policy",
+      "otpRequired": "Verification code is required",
+      "invalidOtp": "Please enter a valid 6-digit code",
+      "otpIncorrect": "The code is wrong, please try again",
+      "phoneNotVerified": "Please verify your phone number first"
+    },
+    "footer": {
+      "alreadyHaveAccount": "Already have an account?",
+      "loginLink": "Login"
+    }
+  },
+  "search": {
+    "title": "Search Results",
+    "searchPlaceholder": "Search for images, vectors, and more...",
+    "searchButton": "Search",
+    "filters": {
+      "title": "Filters",
+      "providers": "Providers",
+      "fileType": "File Type",
+      "all": "all",
+      "items": "items"
+    },
+    "fileTypes": {
+      "photos": "photos",
+      "vectors": "vectors",
+      "illustrations": "illustrations",
+      "icons": "icons",
+      "templates": "templates",
+      "noData": "No file types available",
+      "searchToSeeTypes": "Search to see available file types"
+    },
+    "providers": {
+      "noData": "No providers available",
+      "searchToSeeProviders": "Search to see available providers"
+    },
+    "pagination": {
+      "previous": "Previous Items",
+      "next": "Next Items",
+      "page": "Page {{current}} of {{total}}"
+    },
+    "suggestions": {
+      "title": "Suggestions:"
+    },
+    "actions": {
+      "download": "Download",
+      "simillars": "Show Similar Images",
+      "favorite": "Add to favorites",
+      "share": "Share"
+    },
+    "toggleFilters": "Toggle filters",
+    "imageDialog": {
+      "creditRequired": "Credit required:",
+      "addToCart": "Add to cart",
+      "like": "Like",
+      "viewFullImage": "View Full Image"
+    },
+    "results": {
+      "stockImages": "Stock images related to",
+      "defaultQuery": "search",
+      "description": "There is more than {{count}} stock images and vectors to {{query}}, enjoy!",
+      "vectorsText": "vectors"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline",
+      "someProvidersOffline": "Some providers are currently offline",
+      "offlineProvidersMessage": "The following providers are temporarily unavailable. Results from these sources may be limited."
+    },
+    "errors": {
+      "emptyQuery": "Please enter a search term",
+      "tooShort": "Search term must be at least 2 characters long",
+      "tooLong": "Search term must be less than 100 characters",
+      "urlNotAllowed": "URLs are not allowed in search queries",
+      "invalid": "Invalid search query",
+      "navigation": "Failed to navigate to search results"
+    }
+  },
+  "mediaDetail": {
+    "title": "Media Details",
+    "backToSearch": "Back to Search",
+    "notFound": {
+      "title": "Media Not Found",
+      "description": "The requested media could not be found.",
+      "backButton": "Back to Search"
+    },
+    "provider": {
+      "title": "Provider Information",
+      "source": "Source",
+      "fileType": "File Type",
+      "mediaId": "Media ID"
+    },
+    "details": {
+      "title": "Details",
+      "basicInfo": "Basic Information",
+      "fileType": "File Type",
+      "provider": "Provider",
+      "mediaId": "Media ID",
+      "dimensions": "Dimensions",
+      "aspectRatio": "Aspect Ratio",
+      "fileSize": "File Size",
+      "resolution": "Resolution",
+      "format": "Format"
+    },
+    "keywords": {
+      "title": "Keywords",
+      "showMore": "Show More",
+      "showLess": "Show Less",
+      "count": "{{count}} keywords",
+      "searchByKeyword": "Search by this keyword"
+    },
+    "relatedFiles": {
+      "title": "Related Files",
+      "description": "Discover similar content from the same provider",
+      "showingCount": "Showing {{count}} of {{total}} related files",
+      "viewDetails": "View Details",
+      "noRelatedFiles": "No related files found"
+    },
+    "actions": {
+      "title": "Actions",
+      "download": "Download",
+      "downloading": "Downloading...",
+      "viewSimilar": "View Similar",
+      "viewFullMedia": "View Full Media",
+      "viewFullImage": "View Full Image",
+      "viewFullVideo": "View Full Video",
+      "viewFullAudio": "View Full Audio",
+      "viewOnProvider": "View on {{provider}}",
+      "copyLink": "Copy Link",
+      "share": "Share",
+      "addToFavorites": "Add to Favorites",
+      "removeFromFavorites": "Remove from Favorites"
+    },
+    "mediaViewer": {
+      "title": "Media Viewer",
+      "fullScreenTitle": "Full Screen View",
+      "videoControls": {
+        "play": "Play",
+        "pause": "Pause",
+        "mute": "Mute",
+        "unmute": "Unmute",
+        "fullscreen": "Fullscreen",
+        "seekForward": "Seek forward 10s",
+        "seekBackward": "Seek backward 10s",
+        "volumeUp": "Volume up",
+        "volumeDown": "Volume down"
+      },
+      "keyboardShortcuts": {
+        "title": "Keyboard Shortcuts",
+        "space": "Space: Play/Pause",
+        "leftRight": "←/→: Seek ±10s",
+        "upDown": "↑/↓: Volume",
+        "m": "M: Mute/Unmute",
+        "f": "F: Fullscreen",
+        "esc": "Esc: Exit"
+      }
+    },
+    "loading": {
+      "title": "Loading Media Details...",
+      "description": "Please wait while we fetch the media information"
+    },
+    "error": {
+      "title": "Error Loading Media",
+      "description": "Failed to load media details. Please try again.",
+      "retry": "Retry"
+    },
+    "highResolution": {
+      "title": "High Resolution Details",
+      "titleAudio": "High Quality Audio Details",
+      "dimensions": "Dimensions",
+      "aspectRatio": "Aspect Ratio",
+      "totalPixels": "Total Pixels",
+      "viewImage": "View High Resolution Image",
+      "viewVideo": "View High Resolution Video",
+      "viewAudio": "View High Quality Audio"
+    },
+    "providerData": {
+      "loadingTitle": "Loading Enhanced Details...",
+      "errorTitle": "Failed to Load Enhanced Details",
+      "retryButton": "Try Again"
+    },
+    "videoPlayer": {
+      "loadingVideo": "Loading video...",
+      "browserNotSupported": "Your browser does not support the video tag.",
+      "downloadVideo": "Download the video",
+      "fullScreenLoadingVideo": "Loading video...",
+      "fullScreenBrowserNotSupported": "Your browser does not support the video tag.",
+      "fullScreenDownloadVideo": "Download the video"
+    },
+    "audioPlayer": {
+      "loadingAudio": "Loading audio...",
+      "clickToPlay": "Click play to listen to this audio",
+      "browserNotSupported": "Your browser does not support the audio tag.",
+      "downloadAudio": "Download the audio"
+    },
+    "copyLink": {
+      "success": "Link copied successfully!",
+      "successAr": "تم نسخ الرابط بنجاح!"
+    }
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "Discover our comprehensive range of creative services designed to meet all your digital content needs",
+    "viewService": "View Service",
+    "learnMore": "Learn More",
+    "breadcrumb": {
+      "home": "Home",
+      "services": "Services"
+    },
+    "details": {
+      "salesTime": "Sales Time",
+      "subscriptionPeriod": "Subscription Period",
+      "quantity": "Quantity",
+      "contactUs": "Contact Us",
+      "removeFromFavorites": "Remove from Favorites",
+      "subscriptionOptions": {
+        "1year": "1 Year",
+        "2years": "2 Years"
+      },
+      "pricing": {
+        "originalPrice": "Original Price",
+        "discountedPrice": "Discounted Price",
+        "perYear": "per year",
+        "save": "Save"
+      },
+      "specifications": {
+        "title": "Specifications",
+        "features": "Features",
+        "compatibility": "Compatibility",
+        "support": "Support"
+      },
+      "reviews": {
+        "title": "Customer Reviews",
+        "totalReviews": "Total Reviews",
+        "averageRating": "Average Rating"
+      }
+    },
+    "items": {
+      "youtube": {
+        "title": "YouTube Premium",
+        "description": "Access premium YouTube content with ad-free viewing, background play, and exclusive features for content creators.",
+        "price": "179.00",
+        "rating": "4.8",
+        "salesTime": "Limited Time Offer",
+        "totalReviews": "535",
+        "features": [
+          "Ad-free viewing experience",
+          "Background play functionality",
+          "YouTube Music Premium included",
+          "Offline downloads",
+          "Creator exclusive content"
+        ],
+        "compatibility": "All devices and platforms",
+        "support": "24/7 customer support"
+      },
+      "adobe": {
+        "title": "Adobe Creative Cloud",
+        "description": "Complete suite of Adobe creative applications including Photoshop, Illustrator, After Effects, and more professional tools.",
+        "price": "79.00",
+        "rating": "4.9",
+        "salesTime": "Best Value Package",
+        "totalReviews": "1,247",
+        "features": [
+          "Full Adobe Creative Suite",
+          "Cloud storage and sync",
+          "Regular updates and new features",
+          "Professional templates",
+          "Collaboration tools"
+        ],
+        "compatibility": "Windows, macOS, iOS, Android",
+        "support": "Professional support team"
+      },
+      "microsoft": {
+        "title": "Microsoft Office 365",
+        "description": "Professional Microsoft Office suite with Word, Excel, PowerPoint, Teams, and cloud storage solutions.",
+        "price": "89.00",
+        "rating": "4.7",
+        "salesTime": "Business Essential",
+        "totalReviews": "892",
+        "features": [
+          "Word, Excel, PowerPoint",
+          "Microsoft Teams",
+          "OneDrive cloud storage",
+          "Outlook email",
+          "Real-time collaboration"
+        ],
+        "compatibility": "All major platforms",
+        "support": "Enterprise support"
+      },
+      "canva": {
+        "title": "Canva Pro",
+        "description": "Advanced design platform with premium templates, brand kit, background remover, and team collaboration features.",
+        "price": "24.00",
+        "rating": "4.6",
+        "salesTime": "Popular Choice",
+        "totalReviews": "2,156",
+        "features": [
+          "Premium templates library",
+          "Brand kit and fonts",
+          "Background remover",
+          "Team collaboration",
+          "Magic resize feature"
+        ],
+        "compatibility": "Web, iOS, Android",
+        "support": "Community and email support"
+      }
+    }
+  },
+  "helpCenter": {
+    "hero": {
+      "title": "Frequently Asked",
+      "titleHighlight": "Questions",
+      "description": "Find quick answers to the most common questions about our platform"
+    },
+    "search": {
+      "placeholder": "Search for help articles, guides, and FAQs...",
+      "button": "Search",
+      "noResults": "No results found",
+      "searching": "Searching...",
+      "resultsFor": "Results for",
+      "showingResults": "Showing {count} results"
+    },
+    "categories": {
+      "title": "Browse Help Topics",
+      "description": "Find the information you need organized by category",
+      "gettingStarted": {
+        "title": "Getting Started",
+        "description": "Learn the basics of using our platform and downloading resources",
+        "articles": "12 articles"
+      },
+      "accountManagement": {
+        "title": "Account Management",
+        "description": "Manage your profile, settings, and account preferences",
+        "articles": "8 articles"
+      },
+      "billingPayments": {
+        "title": "Billing & Payments",
+        "description": "Understand pricing, manage subscriptions, and payment methods",
+        "articles": "15 articles"
+      },
+      "downloadsUsage": {
+        "title": "Downloads & Usage",
+        "description": "Learn how to download, use, and manage your creative resources",
+        "articles": "20 articles"
+      },
+      "troubleshooting": {
+        "title": "Troubleshooting",
+        "description": "Solve common issues and technical problems",
+        "articles": "18 articles"
+      },
+      "platformSupport": {
+        "title": "Platform Support",
+        "description": "Information about supported websites and platforms",
+        "articles": "10 articles"
+      },
+      "contactSupport": {
+        "title": "Contact Support",
+        "description": "Get in touch with our support team for personalized help",
+        "articles": "5 articles"
+      },
+      "apiDevelopers": {
+        "title": "API & Developers",
+        "description": "Technical documentation and developer resources",
+        "articles": "14 articles"
+      }
+    },
+    "popularArticles": {
+      "title": "Popular Articles",
+      "description": "Most viewed help articles this month",
+      "viewAll": "View All Articles"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "description": "Common tasks and shortcuts",
+      "downloadGuide": "Download Guide",
+      "accountSettings": "Account Settings",
+      "billingInfo": "Billing Information",
+      "contactUs": "Contact Us",
+      "reportIssue": "Report an Issue",
+      "requestFeature": "Request Feature"
+    },
+    "contact": {
+      "title": "Still need help?",
+      "description": "Can't find what you're looking for? Our support team is here to help.",
+      "methods": {
+        "email": {
+          "title": "Email Support",
+          "description": "Get detailed help via email",
+          "action": "Send Email",
+          "responseTime": "Response within 24 hours"
+        },
+        "chat": {
+          "title": "Live Chat",
+          "description": "Chat with our support team",
+          "action": "Start Chat",
+          "availability": "Available 24/7"
+        },
+        "phone": {
+          "title": "Phone Support",
+          "description": "Speak directly with support",
+          "action": "Call Now",
+          "hours": "Mon-Fri 9AM-6PM EST"
+        }
+      }
+    },
+    "feedback": {
+      "title": "Was this helpful?",
+      "yes": "Yes",
+      "no": "No",
+      "thanks": "Thank you for your feedback!",
+      "improve": "How can we improve this article?",
+      "submit": "Submit Feedback"
+    }
+  },
+  "broadcast": {
+    "title": "Broadcast",
+    "description": "Send broadcast messages to users",
+    "stats": {
+      "totalUsers": {
+        "title": "Total Users",
+        "description": "Registered users"
+      },
+      "messagesSentToday": {
+        "title": "Sent Today",
+        "description": "Messages Sent today"
+      }
+    },
+    "form": {
+      "title": "Send New Broadcast Message",
+      "description": "Send a message to all users or a specific group",
+      "messageTitle": "Message Title",
+      "messageContent": "Message Content",
+      "targetAudience": "Target Audience",
+      "allUsers": "All Users",
+      "activeUsers": "Active Users Only",
+      "premiumUsers": "Premium Users Only",
+      "messageCategory": "Message Category",
+      "textOnly": "Text Only",
+      "textWithImage": "Text with Image",
+      "uploadImage": "Upload Image",
+      "imageUpload": {
+        "title": "Upload Image for Message",
+        "description": "Choose an image to attach with your message",
+        "dragAndDrop": "Drag and drop image here",
+        "orClickToBrowse": "or click to browse",
+        "supportedFormats": "Supported formats: JPG, PNG, GIF (max 5MB)",
+        "uploading": "Uploading...",
+        "uploadSuccess": "Image uploaded successfully",
+        "uploadError": "Failed to upload image",
+        "removeImage": "Remove Image",
+        "imagePreview": "Image Preview"
+      },
+      "sending": "Sending...",
+      "send": "Send Message",
+      "placeholders": {
+        "messageTitle": "Enter message title",
+        "messageContent": "Write your message content here..."
+      },
+      "validation": {
+        "titleRequired": "Message title is required",
+        "contentRequired": "Message content is required",
+        "audienceRequired": "Please select target audience",
+        "categoryRequired": "Please select message category"
+      }
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "description": "Latest sent messages and activities",
+      "noActivity": "No recent activity",
+      "noActivityDescription": "Sent messages will appear here",
+      "showAll": "Show All",
+      "allActivities": {
+        "title": "All Activities",
+        "description": "Complete history of all broadcast activities"
+      },
+      "messageTypes": {
+        "broadcast": "Broadcast Message",
+        "notification": "Notification",
+        "announcement": "Announcement",
+        "alert": "Alert"
+      },
+      "timeAgo": {
+        "now": "Now",
+        "minutesAgo": "{{count}}m ago",
+        "minutesAgo_one": "1 minute ago",
+        "minutesAgo_other": "{{count}} minutes ago",
+        "hoursAgo": "{{count}}h ago",
+        "hoursAgo_one": "1 hour ago",
+        "hoursAgo_other": "{{count}} hours ago",
+        "daysAgo": "{{count}}d ago",
+        "daysAgo_one": "1 day ago",
+        "daysAgo_other": "{{count}} days ago"
+      }
+    },
+    "toast": {
+      "sendSuccess": "Message sent successfully",
+      "sendError": "Failed to send message"
+    },
+    "messagesLog": {
+      "title": "Messages Log",
+      "description": "Broadcast messages history",
+      "table": {
+        "headers": {
+          "broadcastName": "Broadcast Name",
+          "broadcastDetails": "Broadcast Details",
+          "targetRecipients": "Target Recipients",
+          "sentSuccessfully": "Sent Successfully",
+          "failed": "Failed",
+          "date": "Date",
+          "status": "Status"
+        },
+        "status": {
+          "completed": "Completed",
+          "sending": "Sending"
+        }
+      },
+      "empty": {
+        "title": "No Messages",
+        "description": "No broadcast messages have been sent yet"
+      }
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "viewAll": "View All",
+    "learnMore": "Learn More",
+    "month": "Month",
+    "download": "Download",
+    "scrollToTop": "Scroll to top",
+    "type": "Type",
+    "dimensions": "Dimensions"
+  }
+}

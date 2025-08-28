@@ -1,0 +1,219 @@
+openapi: 3.0.3
+info:
+  title: Stockaty API
+  description: Stock media platform aggregation API
+  version: 1.0.0
+servers:
+  - url: /
+    description: Local server
+paths:
+  /v1/providers/data:
+    post:
+      summary: Get detailed data for a specific file from a stock media platform
+      description: |
+        Retrieves comprehensive information about a specific file from supported stock media platforms.
+        This includes high-resolution details, metadata, keywords, and related files.
+      tags:
+        - Providers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetDataRequest'
+            example:
+              platform: "Shutterstock"
+              file_url: "https://www.shutterstock.com/image-photo/example-123456"
+              file_id: "123456789"
+      responses:
+        '200':
+          description: Successfully retrieved file data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDataSuccessResponse'
+        '400':
+          description: Bad request - Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_platform:
+                  summary: Missing platform parameter
+                  value:
+                    success: false
+                    error:
+                      id: 0
+                      message: "Platform is required."
+                missing_file_url:
+                  summary: Missing file_url parameter
+                  value:
+                    success: false
+                    error:
+                      id: 1
+                      message: "File URL is required."
+                missing_file_id:
+                  summary: Missing file_id parameter
+                  value:
+                    success: false
+                    error:
+                      id: 2
+                      message: "File ID is required."
+                platform_not_exists:
+                  summary: Platform does not exist
+                  value:
+                    success: false
+                    error:
+                      id: 3
+                      message: "Platform does not exist."
+                platform_not_supported:
+                  summary: Platform does not support data retrieval
+                  value:
+                    success: false
+                    error:
+                      id: 4
+                      message: "Platform does not support data."
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error:
+                  id: "except"
+                  message: "Internal processing error"
+
+components:
+  schemas:
+    GetDataRequest:
+      type: object
+      required:
+        - platform
+        - file_url
+        - file_id
+      properties:
+        platform:
+          type: string
+          description: The name of the stock media platform
+          enum:
+            - AdobeStock
+            - CreativeFabrica
+            - Envato
+            - Freepik
+            - MotionElements
+            - PngTree
+            - Shutterstock
+            - Storyblocks
+            - Vecteezy
+          example: "Shutterstock"
+        file_url:
+          type: string
+          format: uri
+          description: The URL of the file on the platform
+          example: "https://www.shutterstock.com/image-photo/example-123456"
+        file_id:
+          type: string
+          description: The unique identifier of the file on the platform
+          example: "123456789"
+    
+    GetDataSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/FileData'
+    
+    FileData:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the file
+          example: "Beautiful sunset landscape"
+        high_resolution:
+          $ref: '#/components/schemas/ImageDetails'
+        keywords:
+          type: array
+          items:
+            type: string
+          description: List of keywords associated with the file
+          example: ["sunset", "landscape", "nature", "sky"]
+        related:
+          type: array
+          items:
+            $ref: '#/components/schemas/RelatedFile'
+    
+    ImageDetails:
+      type: object
+      properties:
+        src:
+          type: string
+          format: uri
+          description: URL of the image
+          example: "https://example.com/high-res-image.jpg"
+        width:
+          type: integer
+          description: Width of the image in pixels
+          example: 1920
+        height:
+          type: integer
+          description: Height of the image in pixels
+          example: 1080
+    
+    RelatedFile:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL of the related file
+          example: "https://example.com/related-file"
+        file_id:
+          type: string
+          description: ID of the related file
+          example: "987654321"
+        metadata:
+          $ref: '#/components/schemas/FileMetadata'
+        preview:
+          $ref: '#/components/schemas/ImageDetails'
+    
+    FileMetadata:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the file
+          example: "Similar sunset view"
+        description:
+          type: string
+          nullable: true
+          description: Description of the file
+          example: null
+    
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          $ref: '#/components/schemas/ErrorDetails'
+    
+    ErrorDetails:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: integer
+            - type: string
+          description: Error identifier
+          example: 0
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Platform is required."

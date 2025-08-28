@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: Cookie Management API
+  version: "1.0.0"
+
+paths:
+  /v1/cookies/add:
+    post:
+      summary: Add cookies for a platform
+      description: |
+        Validates and stores cookies for a given platform.
+        Requires an admin JWT token in the `Authorization` header.
+      tags:
+        - Cookies
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cookies
+                - platform_name
+              properties:
+                cookies:
+                  type: string
+                  description: Cookies in JSON format (stringified)
+                  example: '{"session":"abcd1234"}'
+                platform_name:
+                  type: string
+                  description: Target platform name
+                  example: "twitter"
+      responses:
+        "200":
+          description: Cookies added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@example.com"
+                      user_id:
+                        type: string
+                        example: "123456789"
+                      is_premium:
+                        type: boolean
+                        example: true
+        "400":
+          description: Bad request, validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: Error code
+                        example: 2
+                      message:
+                        type: string
+                        description: Error message
+                        example: "cookie must be json."
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "except"
+                      message:
+                        type: string
+                        description: Exception message
+                        example: "Unexpected error occurred"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

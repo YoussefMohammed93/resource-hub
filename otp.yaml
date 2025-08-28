@@ -1,0 +1,84 @@
+openapi: 3.0.3
+info:
+  title: OTP Service API
+  version: 1.0.0
+  description: API for sending OTP messaging system.
+
+paths:
+  /v1/otp/send:
+    post:
+      summary: Send OTP to phone number
+      operationId: sendOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phoneNum
+                - token
+              properties:
+                phoneNum:
+                  type: string
+                  example: "+1234567890"
+                  description: Phone number to send the OTP to. Must start with `+`.
+                token:
+                  type: string
+                  example: "encrypted_token_string"
+                  description: Encrypted token containing expiration timestamp.
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: OTP sent successfully.
+        '400':
+          description: Client error (validation or sending failure)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 5
+                      message:
+                        type: string
+                        example: failed to send OTP.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 6
+                      message:
+                        type: string
+                        example: Unexpected server error

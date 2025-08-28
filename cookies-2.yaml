@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: Cookies API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+
+paths:
+  /v1/cookies/add:
+    post:
+      summary: Add cookies for a platform
+      description: Validates and stores cookies for a given platform.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cookies
+                - platform_name
+              properties:
+                cookies:
+                  type: string
+                  description: JSON string of cookies
+                  example: '{"sessionid":"abc123"}'
+                platform_name:
+                  type: string
+                  description: Platform name
+                  example: Freepik
+      responses:
+        "200":
+          description: Cookies added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    description: Account info extracted from cookies
+                    properties:
+                      email:
+                        type: string
+                        example: user@example.com
+                      user_id:
+                        type: integer
+                        example: 123456
+                      is_premium:
+                        type: boolean
+                        example: true
+                      credits:
+                        type: integer
+                        example: 100
+        "400":
+          description: Invalid request (missing/invalid data)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      message:
+                        type: string
+        "500":
+          description: Internal server error
+
+  /v1/cookies/delete:
+    post:
+      summary: Delete cookies for a specific platform account
+      description: Deletes cookies stored for a platform and email.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - platform_name
+                - email
+              properties:
+                platform_name:
+                  type: string
+                  description: Platform name
+                  example: Freepik
+                email:
+                  type: string
+                  description: Email associated with the account
+                  example: user@example.com
+      responses:
+        "200":
+          description: Cookies deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Cookies deleted successfully.
+                      platform_name:
+                        type: string
+                        example: Freepik
+                      email:
+                        type: string
+                        example: user@example.com
+        "400":
+          description: Invalid request (missing session, platform_name, or email)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      message:
+                        type: string
+        "500":
+          description: Internal server error
+
+  /v1/cookies/get:
+    get:
+      summary: Get list of stored cookies
+      description: Returns all stored cookies grouped by platform.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successfully retrieved cookies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          email:
+                            type: string
+                            example: user@example.com
+                          user_id:
+                            type: integer
+                            example: 147756168
+                          is_premium:
+                            type: boolean
+                            example: true
+                          credits:
+                            type: integer
+                            example: 50
+        "400":
+          description: Invalid session
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      message:
+                        type: string
+        "500":
+          description: Internal server error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,243 @@
+openapi: 3.0.3
+info:
+  title: Broadcast API
+  version: 1.0.0
+  description: API for creating and monitoring broadcast messages.
+
+servers:
+  - url: https://yourdomain.com
+
+paths:
+  /v1/broadcast/create:
+    post:
+      summary: Create a new broadcast
+      operationId: createBroadcast
+      tags:
+        - Broadcast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - message
+                - audience
+              properties:
+                title:
+                  type: string
+                message:
+                  type: string
+                image_content:
+                  type: string
+                  description: Base64-encoded image data URL (optional)
+                audience:
+                  type: string
+                  enum: [all, premium, online]
+      responses:
+        '200':
+          description: Broadcast created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      message:
+                        type: string
+        '400':
+          description: Invalid request or missing fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /v1/broadcast/status:
+    get:
+      summary: Get broadcast status
+      operationId: getBroadcastStatus
+      tags:
+        - Broadcast
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Broadcast status information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      status:
+                        type: string
+                      progress:
+                        type: number
+                      total_users:
+                        type: integer
+                      sent_count:
+                        type: integer
+                      failed_count:
+                        type: integer
+        '400':
+          description: Missing or invalid session or broadcast ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /v1/broadcast/activity:
+    get:
+      summary: Get recent broadcast activity
+      operationId: getBroadcastActivity
+      tags:
+        - Broadcast
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Recent broadcast activity
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  recent_broadcasts:
+                    - id: "abc123def456"
+                      title: "عرض خاص لمدة محدودة!"
+                      message: "احصل على خصم 50% على جميع الخطط الآن"
+                      audience: "premium"
+                      target_recipients: 25
+                      sent_successfully: 23
+                      failed_count: 2
+                      created_at: "2024-01-15 14:30:00"
+                      created_date: "2024-01-15"
+                      status: "Completed"
+                    - id: "def789ghi012"
+                      title: "تحديث مهم للخدمة"
+                      message: "تم إضافة مواقع جديدة للمنصة"
+                      audience: "all"
+                      target_recipients: 150
+                      sent_successfully: 120
+                      failed_count: 5
+                      created_at: "2024-01-15 12:15:00"
+                      created_date: "2024-01-15"
+                      status: "Sending"
+                  today_broadcasts_count: 3
+                  total_recent_shown: 2
+                  last_updated: "2024-01-15 16:45:00"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      recent_broadcasts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            message:
+                              type: string
+                            audience:
+                              type: string
+                            target_recipients:
+                              type: integer
+                            sent_successfully:
+                              type: integer
+                            failed_count:
+                              type: integer
+                            created_at:
+                              type: string
+                              format: date-time
+                            created_date:
+                              type: string
+                              format: date
+                            status:
+                              type: string
+                      today_broadcasts_count:
+                        type: integer
+                      total_recent_shown:
+                        type: integer
+                      last_updated:
+                        type: string
+                        format: date-time
+        '400':
+          description: Session or token error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            id:
+              type: integer
+            message:
+              type: string
