@@ -55,8 +55,21 @@ const getMediaUrl = (item: DownloadHistoryEntry): string => {
     downloadUrl: item.data.downloadUrl,
   });
 
-  // Use direct URLs from API response instead of media proxy
-  console.log("[Profile] Using direct URL from API response:", item.data.downloadUrl);
+  // For local files (mock data), use them directly
+  if (item.data.downloadUrl.startsWith("/")) {
+    console.log("[Profile] Using local file:", item.data.downloadUrl);
+    return item.data.downloadUrl;
+  }
+
+  // For external URLs (Freepik page URLs), use the media proxy to extract actual images
+  if (item.data.downloadUrl.startsWith("http")) {
+    const proxyUrl = `/api/media-proxy?url=${encodeURIComponent(item.data.downloadUrl)}`;
+    console.log("[Profile] Using media proxy for Freepik page URL:", proxyUrl);
+    return proxyUrl;
+  }
+
+  // Fallback to the original file URL
+  console.log("[Profile] Using fallback URL:", item.data.downloadUrl);
   return item.data.downloadUrl;
 };
 

@@ -82,6 +82,7 @@ export async function GET(request: NextRequest) {
             Connection: "keep-alive",
             "Upgrade-Insecure-Requests": "1",
           },
+          signal: AbortSignal.timeout(10000), // 10 second timeout
         });
 
         if (pageResponse.ok) {
@@ -163,6 +164,7 @@ export async function GET(request: NextRequest) {
                       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
                     Referer: url,
                   },
+                  signal: AbortSignal.timeout(15000), // 15 second timeout for images
                 });
 
                 if (imageResponse.ok) {
@@ -215,6 +217,7 @@ export async function GET(request: NextRequest) {
               "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             Referer: urlObj.origin,
           },
+          signal: AbortSignal.timeout(15000), // 15 second timeout
         });
 
         console.log(
