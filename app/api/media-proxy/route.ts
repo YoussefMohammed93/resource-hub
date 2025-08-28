@@ -53,63 +53,120 @@ export async function GET(request: NextRequest) {
     // Extract media information using the utility
     const mediaInfo = extractMediaInfo(url);
 
-    // Try to fetch the media from the extracted URL
-    const urlsToTry = [mediaInfo.url];
-
-    // If it's a Freepik page URL, try multiple possible URLs
+    // If it's a Freepik page URL, scrape the actual image URL
     if (url.includes("freepik.com") && !url.includes("img.freepik.com")) {
-      const pageId = extractFreepikId(url);
-      if (pageId) {
-        // Determine the content type from the URL
-        let contentType = "photo";
-        if (url.includes("free-video")) contentType = "video";
-        else if (url.includes("free-vector")) contentType = "vector";
+      try {
+        console.log("[Media Proxy] Scraping Freepik page for image URL:", url);
+        
+        const pageResponse = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+          },
+        });
 
-        // Add more possible URLs based on the media type and different formats
-        const possibleUrls = [
-          // Try the specific content type first with different extensions
-          `https://img.freepik.com/free-${contentType}/${pageId}.jpg`,
-          `https://img.freepik.com/free-${contentType}/${pageId}.jpeg`,
-          `https://img.freepik.com/free-${contentType}/${pageId}.webp`,
-          `https://img.freepik.com/free-${contentType}/${pageId}.png`,
-
-          // Try CDN versions
-          `https://cdn.freepik.com/free-${contentType}/${pageId}.jpg`,
-          `https://cdn.freepik.com/free-${contentType}/${pageId}.jpeg`,
-          `https://cdn.freepik.com/free-${contentType}/${pageId}.webp`,
-
-          // Try all content types in case URL classification is wrong
-          `https://img.freepik.com/free-photo/${pageId}.jpg`,
-          `https://img.freepik.com/free-vector/${pageId}.jpg`,
-          `https://img.freepik.com/free-video/${pageId}.jpg`,
-
-          // Try with different path structures
-          `https://img.freepik.com/${contentType}/${pageId}.jpg`,
-          `https://img.freepik.com/photos/${pageId}.jpg`,
-          `https://img.freepik.com/vectors/${pageId}.jpg`,
-          `https://img.freepik.com/videos/${pageId}.jpg`,
-
-          // Try with premium prefix (sometimes works)
-          `https://img.freepik.com/premium-${contentType}/${pageId}.jpg`,
-
-          // Try with different size variants
-          `https://img.freepik.com/free-${contentType}/${pageId}_size2.jpg`,
-          `https://img.freepik.com/free-${contentType}/${pageId}_size1.jpg`,
-
-          // Try with thumbnail versions
-          `https://img.freepik.com/free-${contentType}/${pageId}_thumb.jpg`,
-          `https://img.freepik.com/free-${contentType}/thumb/${pageId}.jpg`,
-        ];
-
-        console.log(
-          "Generated possible URLs for ID",
-          pageId,
-          ":",
-          possibleUrls.slice(0, 5)
-        );
-        urlsToTry.push(...possibleUrls);
+        if (pageResponse.ok) {
+          const html = await pageResponse.text();
+          
+          // Extract image URLs from various meta tags and JSON-LD
+          const imageUrls = [];
+          
+          // Try Open Graph image
+          const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
+          if (ogImageMatch) imageUrls.push(ogImageMatch[1]);
+          
+          // Try Twitter card image
+          const twitterImageMatch = html.match(/<meta name="twitter:image" content="([^"]+)"/);
+          if (twitterImageMatch) imageUrls.push(twitterImageMatch[1]);
+          
+          // Try to find high-res images in JSON-LD
+          const jsonLdMatches = html.match(/<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/g);
+          if (jsonLdMatches) {
+            for (const jsonLdMatch of jsonLdMatches) {
+              try {
+                const jsonContent = jsonLdMatch.replace(/<script[^>]*>/, '').replace(/<\/script>/, '');
+                const data = JSON.parse(jsonContent);
+                if (data.image) {
+                  if (Array.isArray(data.image)) {
+                    imageUrls.push(...data.image);
+                  } else if (typeof data.image === 'string') {
+                    imageUrls.push(data.image);
+                  } else if (data.image.url) {
+                    imageUrls.push(data.image.url);
+                  }
+                }
+              } catch (e) {
+                // Ignore JSON parse errors
+                console.log("[Media Proxy] JSON parse error:", e);
+              }
+            }
+          }
+          
+          // Try to find img tags with high-res sources
+          const imgMatches = html.match(/<img[^>]+src="([^"]*img\.freepik\.com[^"]+)"/g);
+          if (imgMatches) {
+            for (const imgMatch of imgMatches) {
+              const srcMatch = imgMatch.match(/src="([^"]+)"/);
+              if (srcMatch) imageUrls.push(srcMatch[1]);
+            }
+          }
+          
+          // Filter and prioritize URLs
+          const filteredUrls = imageUrls
+            .filter(url => url && url.includes('img.freepik.com'))
+            .filter(url => !url.includes('thumb') && !url.includes('small'))
+            .sort((a, b) => {
+              // Prioritize larger images
+              if (a.includes('size2') || a.includes('large')) return -1;
+              if (b.includes('size2') || b.includes('large')) return 1;
+              return 0;
+            });
+          
+          console.log("[Media Proxy] Found image URLs:", filteredUrls);
+          
+          if (filteredUrls.length > 0) {
+            // Try the best image URL first
+            for (const imageUrl of filteredUrls) {
+              try {
+                const imageResponse = await fetch(imageUrl, {
+                  headers: {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                    "Referer": url,
+                  },
+                });
+                
+                if (imageResponse.ok) {
+                  const mediaBuffer = await imageResponse.arrayBuffer();
+                  const contentType = imageResponse.headers.get("Content-Type") || "image/jpeg";
+                  
+                  console.log(`[Media Proxy] Successfully fetched image from ${imageUrl}`);
+                  
+                  return new NextResponse(mediaBuffer, {
+                    headers: {
+                      "Content-Type": contentType,
+                      "Cache-Control": "public, max-age=3600",
+                    },
+                  });
+                }
+              } catch (e) {
+                console.log(`[Media Proxy] Failed to fetch ${imageUrl}:`, e);
+                continue;
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.log("[Media Proxy] Failed to scrape Freepik page:", error);
       }
     }
+
+    // Fallback: Try to fetch from the original URL
+    const urlsToTry = [mediaInfo.url];
 
     // Try to fetch from each possible URL
     console.log(`Trying to fetch media from ${urlsToTry.length} possible URLs`);
@@ -164,43 +221,6 @@ export async function GET(request: NextRequest) {
     // Return a sample image on error
     return await generateSampleImageResponse("unknown");
   }
-}
-
-function extractFreepikId(url: string): string | null {
-  // Extract ID from Freepik URLs - updated patterns for current URL structure
-  const patterns = [
-    // Pattern: /free-photo/side-view-hand-wearing-bracelet_31842933.htm
-    /\/free-(?:photo|video|vector)\/[^_]+_(\d+)\.htm$/,
-    // Pattern: /free-video/close-up-cat-s-face-eyes_171159 (no .htm)
-    /\/free-(?:photo|video|vector)\/[^_]+_(\d+)$/,
-    // Pattern: /free-photo/description-31842933.htm
-    /\/free-(?:photo|video|vector)\/[^-]+-(\d+)\.htm$/,
-    // Pattern: /free-video/description-171159
-    /\/free-(?:photo|video|vector)\/[^-]+-(\d+)$/,
-    // Pattern: /free-photo/description/31842933
-    /\/free-(?:photo|video|vector)\/[^\/]+\/(\d+)$/,
-    // Pattern: just the number at the end after underscore
-    /_(\d+)\.htm?$/,
-    // Pattern: just the number at the end
-    /_(\d+)$/,
-  ];
-
-  console.log("[Media Proxy] Extracting ID from URL:", url);
-
-  for (let i = 0; i < patterns.length; i++) {
-    const pattern = patterns[i];
-    const match = url.match(pattern);
-    if (match && match[1]) {
-      console.log(
-        `[Media Proxy] Found ID: ${match[1]} using pattern ${i + 1}:`,
-        pattern
-      );
-      return match[1];
-    }
-  }
-
-  console.log("[Media Proxy] No ID found for URL:", url);
-  return null;
 }
 
 async function generateSampleImageResponse(

@@ -15,7 +15,6 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -57,16 +56,16 @@ const getMediaUrl = (item: DownloadHistoryEntry): string => {
     downloadUrl: item.data.downloadUrl,
   });
 
-  // For local files (mock data), use them directly - they work on both localhost and Vercel
+  // For local files (mock data), use them directly
   if (item.data.downloadUrl.startsWith("/")) {
     console.log("[Profile] Using local file:", item.data.downloadUrl);
-    return item.data.downloadUrl; // This will be "/freepik-1.jpg" from mock data
+    return item.data.downloadUrl;
   }
 
-  // For external URLs (Freepik, etc.), use the media proxy
+  // For external URLs (Freepik, etc.), use the media proxy to get actual images
   if (item.data.downloadUrl.startsWith("http")) {
     const proxyUrl = `/api/media-proxy?url=${encodeURIComponent(item.data.downloadUrl)}`;
-    console.log("[Profile] Using media proxy:", proxyUrl);
+    console.log("[Profile] Using media proxy for real image:", proxyUrl);
     return proxyUrl;
   }
 
@@ -985,20 +984,18 @@ export default function ProfilePage() {
                           {isVideoItem(item) ? (
                             // Video preview with play button overlay
                             <div className="relative w-full h-full">
-                              <Image
+                              <img
                                 src={getMediaUrl(item)}
                                 alt={`Media from ${item.data.from}`}
-                                fill
-                                className="object-cover transition-transform duration-500"
-                                onLoadingComplete={() => {
+                                className="w-full h-full object-cover transition-transform duration-500"
+                                onLoad={() => {
                                   setImageLoading((prev) => {
                                     const newSet = new Set(prev);
                                     newSet.delete(index);
                                     return newSet;
                                   });
                                 }}
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                onError={(e: any) => {
+                                onError={(e) => {
                                   console.log(
                                     "[Profile] Image load error for item:",
                                     {
@@ -1027,20 +1024,18 @@ export default function ProfilePage() {
                             </div>
                           ) : (
                             // Regular image display
-                            <Image
+                            <img
                               src={getMediaUrl(item)}
                               alt={`Media from ${item.data.from}`}
-                              fill
-                              className="object-cover transition-transform duration-500"
-                              onLoadingComplete={() => {
+                              className="w-full h-full object-cover transition-transform duration-500"
+                              onLoad={() => {
                                 setImageLoading((prev) => {
                                   const newSet = new Set(prev);
                                   newSet.delete(index);
                                   return newSet;
                                 });
                               }}
-                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                              onError={(e: any) => {
+                              onError={(e) => {
                                 console.log(
                                   "[Profile] Image load error for item:",
                                   {
