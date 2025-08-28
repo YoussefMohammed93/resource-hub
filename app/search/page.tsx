@@ -46,6 +46,7 @@ import { HeaderControls } from "@/components/header-controls";
 import { useState, Suspense, useEffect, useCallback, useRef } from "react";
 import { searchApi } from "@/lib/api";
 import { useAuth } from "@/components/auth-provider";
+import { DownloadVerificationSheet } from "@/components/download-verification-sheet";
 
 // Type definitions for API response
 interface ApiSearchResult {
@@ -277,6 +278,8 @@ function SearchContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+  const [isDownloadSheetOpen, setIsDownloadSheetOpen] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState("");
 
   // API state
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -550,8 +553,70 @@ function SearchContent() {
     }
   };
 
+  // Enhanced URL detection for supported platforms (same as home page)
+  const detectSupportedUrl = (query: string): boolean => {
+    const trimmedQuery = query.trim();
+    
+    // Check for common URL patterns
+    const urlPatterns = [
+      /^https?:\/\//i, // Starts with http:// or https://
+      /^www\./i, // Starts with www.
+      /\.(com|org|net|edu|gov|io|co|uk|de|fr|es|it|jp|cn|ru|br|in|au|ca|mx|nl|se|no|dk|fi|pl|cz|hu|ro|bg|hr|si|sk|ee|lv|lt|mt|cy|lu|be|at|ch|li|mc|sm|va|ad|is|fo|gl|sj|bv|hm|cc|tv|tk|ml|ga|cf|gq|st|td|ne|bf|ml|sn|gm|gw|cv|mr|dz|tn|ly|eg|sd|ss|er|et|so|dj|ke|ug|tz|rw|bi|mw|zm|zw|bw|na|sz|ls|za|mg|mu|sc|km|yt|re|sh|ac|ta|fk|gs|pn|ck|nu|nf|tv|ki|nr|pw|fm|mh|mp|gu|as|pr|vi|vg|ai|ms|kn|ag|dm|lc|vc|gd|bb|tt|gy|sr|gf|br|uy|py|bo|pe|ec|co|ve|cl|ar|fj|sb|vu|nc|pf|wf|ws|to|tv|tk|nu|ck|ki|nr|pw|fm|mh|mp|gu|as|pr|vi|vg|ai|ms|kn|ag|dm|lc|vc|gd|bb|tt|gy|sr|gf)$/i,
+      /freepik\.com/i,
+      /shutterstock\.com/i,
+      /adobe\.com/i,
+      /stock\.adobe\.com/i,
+      /gettyimages\.com/i,
+      /unsplash\.com/i,
+      /pexels\.com/i,
+      /pixabay\.com/i,
+      /vecteezy\.com/i,
+      /dreamstime\.com/i,
+      /123rf\.com/i,
+      /depositphotos\.com/i,
+      /istockphoto\.com/i,
+      /elements\.envato\.com/i,
+      /creativemarket\.com/i,
+      /canva\.com/i,
+      /figma\.com/i,
+      /flaticon\.com/i,
+      /icons8\.com/i,
+      /thenounproject\.com/i,
+      /storyset\.com/i
+    ];
+    
+    const urlRegex = /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/ \w \.-]*)*\/?$/i;
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+    
+    return urlPatterns.some(pattern => pattern.test(trimmedQuery)) || 
+           urlRegex.test(trimmedQuery) || 
+           domainRegex.test(trimmedQuery);
+  };
+
   // Handle search button click
   const handleSearch = () => {
+    const trimmedQuery = searchQuery.trim();
+    
+    if (!trimmedQuery) {
+      return;
+    }
+
+    // Check if the input is a URL from supported platforms
+    if (detectSupportedUrl(trimmedQuery)) {
+      // Open download verification sheet for URLs
+      let processedUrl = trimmedQuery;
+      
+      // Add https:// if no protocol is specified
+      if (!processedUrl.match(/^https?:\/\//i)) {
+        processedUrl = `https://${processedUrl}`;
+      }
+      
+      setDownloadUrl(processedUrl);
+      setIsDownloadSheetOpen(true);
+      return;
+    }
+
+    // For regular text searches, proceed normally
     if (searchQuery.trim()) {
       // Update URL without page reload
       const url = new URL(window.location.href);
@@ -1756,7 +1821,12 @@ function SearchContent() {
                       placeholder={t("search.searchPlaceholder")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleSearch();
+                        }
+                      }}
                       className={`${isRTL ? "pr-12 pl-4" : "pl-12 pr-4"} placeholder:text-base py-3 !h-14 text-base border-2 border-border focus:border-primary rounded-xl bg-background`}
                       dir={isRTL ? "rtl" : "ltr"}
                     />
@@ -2586,6 +2656,13 @@ function SearchContent() {
           </div>
         </main>
       </div>
+
+      {/* Download Verification Sheet */}
+      <DownloadVerificationSheet
+        isOpen={isDownloadSheetOpen}
+        onClose={() => setIsDownloadSheetOpen(false)}
+        downloadUrl={downloadUrl}
+      />
     </div>
   );
 }
