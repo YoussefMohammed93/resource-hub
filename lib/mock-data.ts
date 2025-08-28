@@ -74,7 +74,8 @@ export const mockDownloadHistory: DownloadHistoryEntry[] = [
     type: "download",
     data: {
       id: "b71fb71fb0f44dd0a0a5191858392b00",
-      downloadUrl: "https://www.freepik.com/free-photo/tree-with-white-background_977959.htm",
+      downloadUrl:
+        "https://www.freepik.com/free-photo/tree-with-white-background_977959.htm",
       from: "Freepik",
       price: 1,
     },
@@ -83,7 +84,8 @@ export const mockDownloadHistory: DownloadHistoryEntry[] = [
     type: "download",
     data: {
       id: "473bedc3571c43a2971423049ce18820",
-      downloadUrl: "https://www.freepik.com/free-photo/woman-blowing-kiss-instagram-icon_3469717.htm#fromView=search&page=1&position=1&uuid=2541cfcb-b9e2-4c50-bfeb-ac6b87fbbb9c&query=Instagram+logo",
+      downloadUrl:
+        "https://www.freepik.com/free-photo/woman-blowing-kiss-instagram-icon_3469717.htm#fromView=search&page=1&position=1&uuid=2541cfcb-b9e2-4c50-bfeb-ac6b87fbbb9c&query=Instagram+logo",
       from: "Freepik",
       price: 1,
     },
@@ -92,7 +94,8 @@ export const mockDownloadHistory: DownloadHistoryEntry[] = [
     type: "download",
     data: {
       id: "a8c9f2e1d5b7a3c4e6f8d9b2c5e7f1a3",
-      downloadUrl: "https://www.freepik.com/free-video/close-up-cat-s-face-eyes_171159",
+      downloadUrl:
+        "https://www.freepik.com/free-video/close-up-cat-s-face-eyes_171159",
       from: "Freepik",
       price: 5,
     },
@@ -101,7 +104,8 @@ export const mockDownloadHistory: DownloadHistoryEntry[] = [
     type: "download",
     data: {
       id: "f3e7d9c1b5a8f2e4c6d8b9a2c5e7f1d3",
-      downloadUrl: "https://www.freepik.com/free-vector/flat-design-spring-landscape-concept_6718313.htm",
+      downloadUrl:
+        "https://www.freepik.com/free-vector/flat-design-spring-landscape-concept_6718313.htm",
       from: "Freepik",
       price: 3,
     },
@@ -110,7 +114,8 @@ export const mockDownloadHistory: DownloadHistoryEntry[] = [
     type: "download",
     data: {
       id: "d2c5e8f1a4b7d9c2e5f8a1b4c7e9f2d5",
-      downloadUrl: "https://www.freepik.com/free-photo/modern-office-space_12345678.htm",
+      downloadUrl:
+        "https://www.freepik.com/free-photo/modern-office-space_12345678.htm",
       from: "Freepik",
       price: 2,
     },
@@ -607,3 +612,235 @@ export function clearCurrentMockUserEmail(): void {
     sessionStorage.removeItem("mock_current_user_email");
   }
 }
+
+// Mock data for download verification responses
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mockDownloadVerificationResponses: Record<string, any> = {
+  // Successful verification - supported site with sufficient credits
+  "https://www.freepik.com/premium-photo/example": {
+    success: true,
+    data: {
+      is_supported: true,
+      is_allowed: true,
+      can_afford: true,
+      site: {
+        name: "Freepik",
+        url: "https://www.freepik.com",
+        icon: "/freepik-1.jpg",
+        price: 1,
+        external: true,
+        last_reset: "2024-01-01T00:00:00Z",
+      },
+    },
+    subscription: {
+      active: true,
+      plan: "Premium",
+      credits: { remaining: 45, plan: 50 },
+      until: "2024-12-31T23:59:59Z",
+      allowed_sites: ["freepik", "adobe", "shutterstock"],
+    },
+  },
+
+  // Successful verification - Adobe Stock with premium requirement
+  "https://stock.adobe.com/premium-image": {
+    success: true,
+    data: {
+      is_supported: true,
+      is_allowed: true,
+      can_afford: true,
+      site: {
+        name: "Adobe Stock",
+        url: "https://stock.adobe.com",
+        icon: "/adobe.jpg",
+        price: 3,
+        external: true,
+        last_reset: "2024-01-01T00:00:00Z",
+      },
+    },
+    subscription: {
+      active: true,
+      plan: "Premium",
+      credits: { remaining: 45, plan: 50 },
+      until: "2024-12-31T23:59:59Z",
+      allowed_sites: ["adobe", "freepik", "shutterstock"],
+    },
+  },
+
+  // Insufficient credits scenario
+  "https://www.shutterstock.com/expensive-image": {
+    success: true,
+    data: {
+      is_supported: true,
+      is_allowed: true,
+      can_afford: false,
+      site: {
+        name: "Shutterstock",
+        url: "https://www.shutterstock.com",
+        icon: "/shutterstock.png",
+        price: 50,
+        external: true,
+        last_reset: "2024-01-01T00:00:00Z",
+      },
+    },
+    subscription: {
+      active: true,
+      plan: "Premium",
+      credits: { remaining: 45, plan: 50 },
+      until: "2024-12-31T23:59:59Z",
+      allowed_sites: ["shutterstock", "freepik", "adobe"],
+    },
+  },
+
+  // Unsupported site scenario
+  "https://unsupported-site.com/image": {
+    success: true,
+    data: {
+      is_supported: false,
+      is_allowed: false,
+      can_afford: false,
+      site: {
+        name: "Unknown Site",
+        url: "https://unsupported-site.com",
+        icon: null,
+        price: 0,
+        external: true,
+        last_reset: "2024-01-01T00:00:00Z",
+      },
+    },
+    subscription: {
+      active: true,
+      plan: "Premium",
+      credits: { remaining: 45, plan: 50 },
+      until: "2024-12-31T23:59:59Z",
+      allowed_sites: ["freepik", "adobe", "shutterstock"],
+    },
+  },
+
+  // Basic plan user with limited access
+  "https://www.freepik.com/premium-only": {
+    success: true,
+    data: {
+      is_supported: true,
+      is_allowed: false,
+      can_afford: false,
+      site: {
+        name: "Freepik",
+        url: "https://www.freepik.com",
+        icon: "/freepik-1.jpg",
+        price: 1,
+        external: true,
+        last_reset: "2024-01-01T00:00:00Z",
+      },
+    },
+    subscription: {
+      active: true,
+      plan: "Basic",
+      credits: { remaining: 10, plan: 15 },
+      until: "2024-12-31T23:59:59Z",
+      allowed_sites: ["freepik"],
+    },
+  },
+
+  // Unlimited plan user
+  "https://www.pexels.com/unlimited-access": {
+    success: true,
+    data: {
+      is_supported: true,
+      is_allowed: true,
+      can_afford: true,
+      site: {
+        name: "Pexels",
+        url: "https://www.pexels.com",
+        icon: "/pexels.png",
+        price: 0,
+        external: true,
+        last_reset: "2024-01-01T00:00:00Z",
+      },
+    },
+    subscription: {
+      active: true,
+      plan: "Unlimited",
+      credits: { remaining: 999, plan: 999 },
+      until: "2024-12-31T23:59:59Z",
+      allowed_sites: ["pexels", "freepik", "adobe", "shutterstock"],
+    },
+  },
+};
+
+// Mock data for download creation responses
+export const mockDownloadCreationResponses = {
+  success: {
+    success: true,
+    data: {
+      message: "Download task created successfully",
+      task_id: "dl_" + Math.random().toString(36).substr(2, 9),
+    },
+  },
+
+  failure: {
+    success: false,
+    error: {
+      id: "DOWNLOAD_FAILED",
+      message: "Failed to process download request",
+    },
+  },
+
+  rateLimited: {
+    success: false,
+    error: {
+      id: "RATE_LIMITED",
+      message: "Too many download requests. Please wait before trying again.",
+    },
+  },
+
+  insufficientCredits: {
+    success: false,
+    error: {
+      id: "INSUFFICIENT_CREDITS",
+      message: "Not enough credits to complete this download",
+    },
+  },
+};
+
+// Mock API functions for download verification and creation
+export const mockDownloadApi = {
+  verifyDownload: async (params: { downloadUrl: string }) => {
+    await simulateNetworkDelay(800);
+
+    console.log("[Mock API] Verifying download for URL:", params.downloadUrl);
+    console.log(
+      "[Mock API] Available mock URLs:",
+      Object.keys(mockDownloadVerificationResponses)
+    );
+
+    // Return specific mock response based on URL, or default to successful response
+    const mockResponse =
+      mockDownloadVerificationResponses[params.downloadUrl] ||
+      mockDownloadVerificationResponses[
+        "https://www.freepik.com/premium-photo/example"
+      ];
+
+    console.log("[Mock API] Returning response:", mockResponse);
+    return mockResponse;
+  },
+
+  createDownload: async (params: { downloadUrl: string }) => {
+    await simulateNetworkDelay(1200);
+
+    // Simulate different outcomes based on URL patterns
+    if (params.downloadUrl.includes("insufficient-credits")) {
+      return mockDownloadCreationResponses.insufficientCredits;
+    }
+
+    if (params.downloadUrl.includes("rate-limited")) {
+      return mockDownloadCreationResponses.rateLimited;
+    }
+
+    if (params.downloadUrl.includes("fail")) {
+      return mockDownloadCreationResponses.failure;
+    }
+
+    // Default to success
+    return mockDownloadCreationResponses.success;
+  },
+};

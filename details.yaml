@@ -1,0 +1,149 @@
+openapi: 3.0.3
+info:
+  title: Download Verification API
+  version: 1.0.0
+  description: |
+    Endpoint to verify if a user is allowed to download a file from a given URL.
+servers:
+  - url: https://api.example.com
+paths:
+  /v1/download/verify:
+    post:
+      summary: Verify download eligibility
+      description: |
+        Checks if the user session is valid, whether the download URL is supported,
+        and if the user has an active subscription and enough credits to download.
+      tags:
+        - Downloads
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                downloadUrl:
+                  type: string
+                  description: URL of the file to verify
+                  example: "https://www.freepik.com/file/example.png"
+      responses:
+        "200":
+          description: Successful verification
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      is_supported:
+                        type: boolean
+                        example: true
+                      is_allowed:
+                        type: boolean
+                        example: true
+                      can_afford:
+                        type: boolean
+                        example: true
+                      site:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "Freepik"
+                          url:
+                            type: string
+                            example: "freepik.com"
+                          icon:
+                            type: string
+                            format: uri
+                            example: "https://cdn-icons-png.flaticon.com/128/14649/14649043.png"
+                          price:
+                            type: number
+                            example: 1
+                          external:
+                            type: boolean
+                            example: false
+                          last_reset:
+                            type: string
+                            format: date
+                            example: "2025-08-25"
+                  subscription:
+                    type: object
+                    properties:
+                      active:
+                        type: boolean
+                        example: true
+                      plan:
+                        type: string
+                        example: "Premium Plan"
+                      credits:
+                        type: object
+                        properties:
+                          remaining:
+                            type: integer
+                            example: 230
+                          plan:
+                            type: integer
+                            example: 250
+                      until:
+                        type: string
+                        format: date-time
+                        example: "2025-09-23 23:28:22"
+                      allowed_sites:
+                        type: array
+                        items:
+                          type: string
+                        example: ["freepik.com", "adobe.com"]
+        "400":
+          description: Client error (missing session, invalid session, unsupported URL, etc.)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        oneOf:
+                          - type: integer
+                          - type: string
+                        example: 2
+                      message:
+                        type: string
+                        example: "Download URL is missing. Please provide a valid download URL."
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "except"
+                      message:
+                        type: string
+                        example: "Unexpected server error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

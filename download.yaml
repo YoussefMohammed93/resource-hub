@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: Downloader API
+  version: 1.0.0
+
+servers:
+  - url: /v1
+
+paths:
+  /download/tasks:
+    get:
+      summary: Get user download tasks
+      description: Returns the status of all download tasks for the authenticated user.
+      tags:
+        - Download
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: task_id
+          schema:
+            type: string
+          required: false
+          description: Optional task ID to filter results.
+      responses:
+        "200":
+          description: Successful response with task(s).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          example: download
+                        progress:
+                          type: object
+                          properties:
+                            status:
+                              type: string
+                              example: completed
+                            progress:
+                              type: integer
+                              example: 100
+                        data:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            downloadUrl:
+                              type: string
+                            platform_name:
+                              type: string
+                            price:
+                              type: integer
+                        download:
+                          type: object
+                          properties:
+                            downloadUrl:
+                              type: string
+                            filename:
+                              type: string
+        "400":
+          description: Invalid or missing session / bad request.
+        "500":
+          description: Internal server error.
+
+  /download/create:
+    post:
+      summary: Create a new download task
+      description: Starts a new download task for the authenticated user.
+      tags:
+        - Download
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                downloadUrl:
+                  type: string
+                  description: The URL to download from.
+                  example: "https://www.freepik.com/some-file"
+      responses:
+        "200":
+          description: Download task created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Download started.
+                      task_id:
+                        type: string
+        "400":
+          description: Invalid session, missing URL, or insufficient credits.
+        "500":
+          description: Internal server error.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
