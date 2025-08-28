@@ -1692,5 +1692,123 @@
     "scrollToTop": "Scroll to top",
     "type": "Type",
     "dimensions": "Dimensions"
+  },
+  "download": {
+    "verification": {
+      "title": "Download Verification",
+      "description": "Verify download eligibility and view site information",
+      "checking": "Verifying download eligibility...",
+      "checkingDescription": "Please wait while we verify your download...",
+      "downloading": "Starting download...",
+      "startDownload": "Start Download",
+      "cannotDownload": "Cannot Download",
+      "retry": "Try Again",
+      "close": "Close",
+      "status": {
+        "title": "Download Status",
+        "supported": "Supported",
+        "allowed": "Allowed",
+        "affordable": "Affordable",
+        "readyToDownload": "Ready to Download",
+        "downloadNotAvailable": "Download Not Available",
+        "readyToDownloadDescription": "All verification checks have passed successfully. You can proceed with downloading this content.",
+        "downloadNotAvailableDescription": "Download cannot proceed due to the following issues: {{issues}}.",
+        "supportedDescription": "Platform is supported",
+        "notSupportedDescription": "Platform not supported",
+        "allowedDescription": "Download is permitted",
+        "notAllowedDescription": "Download not permitted",
+        "affordableDescription": "Sufficient credits available",
+        "notAffordableDescription": "Insufficient credits"
+      },
+      "site": {
+        "title": "Site Information",
+        "credits": "Credits",
+        "lastReset": "Last reset: {{date}}",
+        "external": "External"
+      },
+      "subscription": {
+        "title": "Subscription Details",
+        "active": "Active",
+        "inactive": "Inactive",
+        "credits": "Credits",
+        "expires": "Expires",
+        "daysRemaining": "days remaining",
+        "allowedSites": "Allowed Sites",
+        "allowedSitesCount": "{{count}} sites: {{sites}}",
+        "noActiveSubscription": "No Active Subscription",
+        "noActiveSubscriptionDescription": "You don't have an active subscription plan.",
+        "noInformation": "No subscription information available"
+      },
+      "progress": {
+        "preparing": "Preparing download...",
+        "downloading": "Downloading...",
+        "completed": "Download completed!",
+        "failed": "Download failed",
+        "initializing": "Initializing download process...",
+        "downloadingFromSource": "Downloading file from source...",
+        "fileDownloadedSuccessfully": "File downloaded successfully!",
+        "preparingStatus": "Preparing...",
+        "downloadingProgress": "Downloading {{progress}}%",
+        "completedStatus": "Completed!"
+      },
+      "reasons": {
+        "siteNotSupported": "Site not supported",
+        "downloadNotAllowed": "Download not allowed",
+        "insufficientCredits": "Insufficient credits"
+      },
+      "detailedReasons": {
+        "siteNotSupported": {
+          "title": "Platform Not Supported",
+          "description": "This website is not currently supported by our platform. We are constantly adding new platforms to our service.",
+          "suggestion": "Please try content from supported platforms like Freepik, Shutterstock, or Adobe Stock."
+        },
+        "downloadNotAllowed": {
+          "title": "Download Not Permitted",
+          "description": "Your current subscription plan does not include access to this platform or content type.",
+          "suggestion": "Consider upgrading your plan to access this content, or contact support for assistance."
+        },
+        "insufficientCredits": {
+          "title": "Insufficient Credits",
+          "description": "You don't have enough credits to download this content. This download requires {{requiredCredits}} credits, but you only have {{availableCredits}} remaining.",
+          "suggestion": "You can purchase more credits or wait for your subscription to renew to get additional credits."
+        },
+        "subscriptionExpired": {
+          "title": "Subscription Expired",
+          "description": "Your subscription has expired on {{expiryDate}}. You need an active subscription to download content.",
+          "suggestion": "Please renew your subscription to continue downloading premium content."
+        },
+        "accountSuspended": {
+          "title": "Account Suspended",
+          "description": "Your account has been temporarily suspended due to policy violations or payment issues.",
+          "suggestion": "Please contact our support team to resolve this issue and restore your account access."
+        },
+        "contentUnavailable": {
+          "title": "Content Unavailable",
+          "description": "This content is no longer available on the source platform or has been removed by the creator.",
+          "suggestion": "Try searching for similar content or browse our recommended alternatives."
+        },
+        "dailyLimitReached": {
+          "title": "Daily Download Limit Reached",
+          "description": "You have reached your daily download limit of {{dailyLimit}} downloads. Your limit will reset in {{resetTime}}.",
+          "suggestion": "Wait for the limit to reset or upgrade to a plan with higher daily limits."
+        },
+        "fileTooBig": {
+          "title": "File Size Too Large",
+          "description": "This file ({{fileSize}}) exceeds your plan's maximum download size limit of {{maxSize}}.",
+          "suggestion": "Upgrade to a premium plan for larger file downloads or choose a smaller version."
+        },
+        "regionRestricted": {
+          "title": "Geographic Restriction",
+          "description": "This content is not available in your region due to licensing restrictions.",
+          "suggestion": "Try browsing other available content or contact support for region-specific alternatives."
+        }
+      },
+      "error": {
+        "title": "Verification Failed",
+        "verificationFailed": "Verification Failed",
+        "unableToVerify": "Unable to verify download eligibility"
+      },
+      "tryAgain": "Try Again"
+    }
   }
 }

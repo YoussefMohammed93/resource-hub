@@ -1692,5 +1692,119 @@
     "scrollToTop": "العودة إلى الأعلى",
     "type": "النوع",
     "dimensions": "الأبعاد"
+  },
+  "download": {
+    "verification": {
+      "title": "التحقق من التحميل",
+      "issuesTitle": "مشاكل تمنع التحميل",
+      "description": "التحقق من أهلية التحميل وعرض معلومات الموقع",
+      "checkingDescription": "التحقق من أهلية التحميل وعرض معلومات الموقع",
+      "checking": "جاري التحقق من أهلية التحميل...",
+      "downloading": "جاري بدء التحميل...",
+      "startDownload": "بدء التحميل",
+      "cannotDownload": "لا يمكن التحميل",
+      "retry": "المحاولة مرة أخرى",
+      "close": "إغلاق",
+      "status": {
+        "title": "حالة التحميل",
+        "supported": "مدعوم",
+        "allowed": "مسموح",
+        "affordable": "متاح",
+        "readyToDownload": "جاهز للتحميل",
+        "downloadNotAvailable": "التحميل غير متاح",
+        "readyToDownloadDescription": "تم اجتياز جميع فحوصات التحقق بنجاح. يمكنك المتابعة مع تحميل هذا المحتوى.",
+        "downloadNotAvailableDescription": "لا يمكن تحميل المحتوى بسبب المشاكل التالية: {{issues}}.",
+        "supportedDescription": "المنصة مدعومة",
+        "notSupportedDescription": "المنصة غير مدعومة",
+        "allowedDescription": "التحميل مسموح",
+        "notAllowedDescription": "التحميل غير مسموح",
+        "affordableDescription": "رصيد كافي متاح",
+        "notAffordableDescription": "رصيد غير كافي"
+      },
+      "site": {
+        "credits": "الرصيد",
+        "lastReset": "آخر إعادة تعيين: {{date}}",
+        "external": "خارجي"
+      },
+      "subscription": {
+        "title": "تفاصيل الاشتراك",
+        "active": "نشط",
+        "inactive": "غير نشط",
+        "credits": "الرصيد",
+        "expires": "ينتهي في",
+        "allowedSites": "المواقع المسموحة",
+        "noActiveSubscription": "لا يوجد اشتراك نشط",
+        "noActiveSubscriptionDescription": "ليس لديك خطة اشتراك نشطة."
+      },
+      "progress": {
+        "preparing": "جاري تحضير التحميل...",
+        "downloading": "جاري التحميل...",
+        "completed": "تم التحميل بنجاح!",
+        "failed": "فشل التحميل",
+        "initializing": "جاري تهيئة عملية التحميل...",
+        "downloadingFromSource": "جاري تحميل الملف من المصدر...",
+        "fileDownloadedSuccessfully": "تم تحميل الملف بنجاح!",
+        "preparingStatus": "جاري التحضير...",
+        "downloadingProgress": "جاري التحميل {{progress}}%",
+        "completedStatus": "مكتمل!"
+      },
+      "reasons": {
+        "siteNotSupported": "الموقع غير مدعوم",
+        "downloadNotAllowed": "التحميل غير مسموح",
+        "insufficientCredits": "رصيد غير كافي"
+      },
+      "detailedReasons": {
+        "siteNotSupported": {
+          "title": "المنصة غير مدعومة",
+          "description": "هذا الموقع غير مدعوم حالياً من قبل منصتنا. نحن نضيف منصات جديدة باستمرار إلى خدمتنا.",
+          "suggestion": "يرجى تجربة المحتوى من المنصات المدعومة مثل Freepik أو Shutterstock أو Adobe Stock."
+        },
+        "downloadNotAllowed": {
+          "title": "التحميل غير مسموح",
+          "description": "خطة اشتراكك الحالية لا تتضمن الوصول إلى هذه المنصة أو نوع المحتوى.",
+          "suggestion": "فكر في ترقية خطتك للوصول إلى هذا المحتوى، أو تواصل مع الدعم للحصول على المساعدة."
+        },
+        "insufficientCredits": {
+          "title": "رصيد غير كافي",
+          "description": "ليس لديك رصيد كافي لتحميل هذا المحتوى. يتطلب هذا التحميل {{requiredCredits}} نقطة، لكن لديك {{availableCredits}} فقط متبقية.",
+          "suggestion": "يمكنك شراء المزيد من النقاط أو انتظار تجديد اشتراكك للحصول على نقاط إضافية."
+        },
+        "subscriptionExpired": {
+          "title": "انتهت صلاحية الاشتراك",
+          "description": "انتهت صلاحية اشتراكك في {{expiryDate}}. تحتاج إلى اشتراك نشط لتحميل المحتوى.",
+          "suggestion": "يرجى تجديد اشتراكك لمواصلة تحميل المحتوى المميز."
+        },
+        "accountSuspended": {
+          "title": "الحساب معلق",
+          "description": "تم تعليق حسابك مؤقتاً بسبب انتهاكات السياسة أو مشاكل في الدفع.",
+          "suggestion": "يرجى التواصل مع فريق الدعم لحل هذه المشكلة واستعادة الوصول إلى حسابك."
+        },
+        "contentUnavailable": {
+          "title": "المحتوى غير متاح",
+          "description": "هذا المحتوى لم يعد متاحاً على المنصة المصدر أو تم حذفه من قبل المنشئ.",
+          "suggestion": "جرب البحث عن محتوى مشابه أو تصفح البدائل الموصى بها."
+        },
+        "dailyLimitReached": {
+          "title": "تم الوصول للحد اليومي",
+          "description": "لقد وصلت إلى الحد اليومي للتحميل وهو {{dailyLimit}} تحميل. سيتم إعادة تعيين الحد خلال {{resetTime}}.",
+          "suggestion": "انتظر حتى يتم إعادة تعيين الحد أو قم بالترقية إلى خطة بحدود يومية أعلى."
+        },
+        "fileTooBig": {
+          "title": "حجم الملف كبير جداً",
+          "description": "هذا الملف ({{fileSize}}) يتجاوز الحد الأقصى لحجم التحميل في خطتك وهو {{maxSize}}.",
+          "suggestion": "قم بالترقية إلى خطة مميزة لتحميل ملفات أكبر أو اختر نسخة أصغر."
+        },
+        "regionRestricted": {
+          "title": "قيود جغرافية",
+          "description": "هذا المحتوى غير متاح في منطقتك بسبب قيود الترخيص.",
+          "suggestion": "جرب تصفح محتوى آخر متاح أو تواصل مع الدعم للحصول على بدائل خاصة بمنطقتك."
+        }
+      },
+      "error": {
+        "title": "فشل التحقق",
+        "generic": "فشل في التحقق من أهلية التحميل",
+        "network": "حدث خطأ في الشبكة"
+      }
+    }
   }
 }

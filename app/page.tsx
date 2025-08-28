@@ -74,6 +74,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/i18n-provider";
 import { HeaderControls } from "@/components/header-controls";
 import { ImageSearchDialog } from "@/components/image-search-dialog";
+import { DownloadVerificationSheet } from "@/components/download-verification-sheet";
 import { publicApi, type PricingPlan, type Site } from "@/lib/api";
 import { useAnimatedCounter } from "@/hooks/use-animated-counter";
 import {
@@ -709,6 +710,8 @@ export default function HomePage() {
   const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [isDownloadSheetOpen, setIsDownloadSheetOpen] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState("");
 
   // Pricing plans state
   const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([]);
@@ -727,9 +730,46 @@ export default function HomePage() {
 
   // URL validation regex patterns
   const urlRegex =
-    /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+    /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/ \w \.-]*)*\/?$/i;
   const domainRegex =
     /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+  
+  // Enhanced URL detection for supported platforms
+  const detectSupportedUrl = (query: string): boolean => {
+    const trimmedQuery = query.trim();
+    
+    // Check for common URL patterns
+    const urlPatterns = [
+      /^https?:\/\//i, // Starts with http:// or https://
+      /^www\./i, // Starts with www.
+      /\.(com|org|net|edu|gov|io|co|uk|de|fr|es|it|jp|cn|ru|br|in|au|ca|mx|nl|se|no|dk|fi|pl|cz|hu|ro|bg|hr|si|sk|ee|lv|lt|mt|cy|lu|be|at|ch|li|mc|sm|va|ad|is|fo|gl|sj|bv|hm|cc|tv|tk|ml|ga|cf|gq|st|td|ne|bf|ml|sn|gm|gw|cv|mr|dz|tn|ly|eg|sd|ss|er|et|so|dj|ke|ug|tz|rw|bi|mw|zm|zw|bw|na|sz|ls|za|mg|mu|sc|km|yt|re|sh|ac|ta|fk|gs|pn|ck|nu|nf|tv|ki|nr|pw|fm|mh|mp|gu|as|pr|vi|vg|ai|ms|kn|ag|dm|lc|vc|gd|bb|tt|gy|sr|gf|br|uy|py|bo|pe|ec|co|ve|cl|ar|fj|sb|vu|nc|pf|wf|ws|to|tv|tk|nu|ck|ki|nr|pw|fm|mh|mp|gu|as|pr|vi|vg|ai|ms|kn|ag|dm|lc|vc|gd|bb|tt|gy|sr|gf)$/i,
+      /freepik\.com/i,
+      /shutterstock\.com/i,
+      /adobe\.com/i,
+      /stock\.adobe\.com/i,
+      /gettyimages\.com/i,
+      /unsplash\.com/i,
+      /pexels\.com/i,
+      /pixabay\.com/i,
+      /vecteezy\.com/i,
+      /dreamstime\.com/i,
+      /123rf\.com/i,
+      /depositphotos\.com/i,
+      /istockphoto\.com/i,
+      /elements\.envato\.com/i,
+      /creativemarket\.com/i,
+      /canva\.com/i,
+      /figma\.com/i,
+      /flaticon\.com/i,
+      /icons8\.com/i,
+      /thenounproject\.com/i,
+      /storyset\.com/i
+    ];
+    
+    return urlPatterns.some(pattern => pattern.test(trimmedQuery)) || 
+           urlRegex.test(trimmedQuery) || 
+           domainRegex.test(trimmedQuery);
+  };
 
   // Validate and clean search query
   const validateAndCleanQuery = (
@@ -761,14 +801,8 @@ export default function HomePage() {
       };
     }
 
-    // Check if it's a URL
-    if (urlRegex.test(trimmedQuery) || domainRegex.test(trimmedQuery)) {
-      return {
-        isValid: false,
-        cleanedQuery: "",
-        error: t("search.errors.urlNotAllowed"),
-      };
-    }
+    // URLs are now handled separately in handleSearch, so we don't need to block them here
+    // This validation is only for regular text searches
 
     // Remove special characters that might cause issues
     const cleanedQuery = trimmedQuery
@@ -786,6 +820,30 @@ export default function HomePage() {
   };
 
   const handleSearch = async () => {
+    const trimmedQuery = searchQuery.trim();
+    
+    if (!trimmedQuery) {
+      setSearchError(t("search.errors.emptyQuery"));
+      return;
+    }
+
+    // Check if the input is a URL from supported platforms
+    if (detectSupportedUrl(trimmedQuery)) {
+      // Open download verification sheet for URLs
+      let processedUrl = trimmedQuery;
+      
+      // Add https:// if no protocol is specified
+      if (!processedUrl.match(/^https?:\/\//i)) {
+        processedUrl = `https://${processedUrl}`;
+      }
+      
+      setDownloadUrl(processedUrl);
+      setIsDownloadSheetOpen(true);
+      setSearchError(null);
+      return;
+    }
+
+    // For regular text searches, validate and proceed normally
     const validation = validateAndCleanQuery(searchQuery);
 
     if (!validation.isValid) {
@@ -1761,6 +1819,13 @@ export default function HomePage() {
             console.log("Image uploaded:", file.name);
             // Handle image upload logic here
           }}
+        />
+
+        {/* Download Verification Sheet */}
+        <DownloadVerificationSheet
+          isOpen={isDownloadSheetOpen}
+          onClose={() => setIsDownloadSheetOpen(false)}
+          downloadUrl={downloadUrl}
         />
       </section>
       {/* Supported Platforms Section */}
