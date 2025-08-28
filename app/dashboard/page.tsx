@@ -2625,7 +2625,7 @@ export default function DashboardPage() {
                       </div>
                     ) : enhancedCreditHistory.length > 0 ? (
                       <div className="space-y-3">
-                        <div className="space-y-3 max-h-60 overflow-y-auto">
+                        <div className="space-y-3 max-h-80 overflow-y-auto">
                           {enhancedCreditHistory
                             .slice(0, 5)
                             .map((entry, index) => {

@@ -33,7 +33,10 @@ import {
   Info,
 } from "lucide-react";
 import { downloadApi } from "@/lib/api";
-import { downloadFile, DownloadProgress } from "@/lib/download-utils";
+import {
+  downloadFileWithSaveDialog,
+} from "@/lib/download-utils";
+import { useLanguage } from "./i18n-provider";
 
 interface ApiVerificationResponse {
   success: boolean;
@@ -83,6 +86,7 @@ export function DownloadVerificationSheet({
   const [downloadStatus, setDownloadStatus] = useState<
     "idle" | "preparing" | "downloading" | "completed" | "failed"
   >("idle");
+  const [showProgress, setShowProgress] = useState(false);
   const [verificationData, setVerificationData] =
     useState<ApiVerificationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -109,12 +113,9 @@ export function DownloadVerificationSheet({
     }
   };
 
-  const performRealDownload = async () => {
-    setDownloadProgress(0);
-    setDownloadStatus("preparing");
-
+  const performNewDownload = async () => {
     try {
-      // First, create the download task via API
+      // First, create the download task via API (this charges credits)
       const response = await downloadApi.createDownload({ downloadUrl });
 
       if (!response.success) {
@@ -128,14 +129,10 @@ export function DownloadVerificationSheet({
         throw new Error("No task ID received from server");
       }
 
-      // Start polling for task completion
-      setDownloadStatus("downloading");
-
+      // Start polling for task completion (no progress UI yet)
       const pollTaskStatus = async (retryCount = 0): Promise<void> => {
         try {
           const taskResponse = await downloadApi.getDownloadTasks(taskId);
-
-          console.log("Task response:", taskResponse);
 
           if (!taskResponse.success) {
             throw new Error(
@@ -143,15 +140,11 @@ export function DownloadVerificationSheet({
             );
           }
 
-          // According to download.yaml, the response structure is { success: boolean, data: array }
           const tasks = taskResponse.data?.data || taskResponse.data;
-          console.log("Tasks array:", tasks);
 
           if (!Array.isArray(tasks)) {
-            // If it's not an array, it might be a single task object
             const singleTask = taskResponse.data;
             if (singleTask && typeof singleTask === "object") {
-              console.log("Single task:", singleTask);
               await handleTaskData(singleTask);
               return;
             }
@@ -159,9 +152,7 @@ export function DownloadVerificationSheet({
           }
 
           if (tasks.length === 0) {
-            // Task might not be ready yet, retry a few times
             if (retryCount < 5) {
-              console.log(`Task not found, retrying... (${retryCount + 1}/5)`);
               setTimeout(() => pollTaskStatus(retryCount + 1), 3000);
               return;
             }
@@ -169,8 +160,6 @@ export function DownloadVerificationSheet({
           }
 
           const task = tasks.find((t) => t.data?.id === taskId) || tasks[0];
-          console.log("Selected task:", task);
-
           await handleTaskData(task);
         } catch (error) {
           console.error("Task polling error:", error);
@@ -181,6 +170,7 @@ export function DownloadVerificationSheet({
           setError(errorMessage);
           setDownloadStatus("failed");
           setIsDownloading(false);
+          setShowProgress(false);
         }
       };
 
@@ -190,23 +180,17 @@ export function DownloadVerificationSheet({
           throw new Error("Task data is invalid");
         }
 
-        // Safely extract progress and status with fallbacks
-        const progress = task.progress?.progress ?? task.progress ?? 0;
         const status = task.progress?.status ?? task.status ?? "pending";
 
-        console.log("Progress:", progress, "Status:", status);
-
-        // Update progress
-        setDownloadProgress(Math.min(95, progress)); // Cap at 95% until file download
-
         if (status === "completed" && task.download?.downloadUrl) {
-          // Task completed, now download the file directly
-          await downloadFile(task.download.downloadUrl, {
+          // Now show progress UI and start actual file download
+          setShowProgress(true);
+          setDownloadStatus("downloading");
+          setDownloadProgress(0);
+
+          // Use the new download function that shows save dialog first
+          await downloadFileWithSaveDialog(task.download.downloadUrl, {
             filename: task.download?.filename,
-            onProgress: (progress: DownloadProgress) => {
-              // File download progress (separate from task progress)
-              setDownloadProgress(Math.max(95, progress.percentage));
-            },
             onComplete: (filename: string) => {
               setDownloadProgress(100);
               setDownloadStatus("completed");
@@ -231,6 +215,7 @@ export function DownloadVerificationSheet({
                 setIsDownloading(false);
                 setDownloadStatus("idle");
                 setDownloadProgress(0);
+                setShowProgress(false);
                 onClose();
               }, 2000);
             },
@@ -239,13 +224,14 @@ export function DownloadVerificationSheet({
               setError(error.message || "File download failed");
               setDownloadStatus("failed");
               setIsDownloading(false);
+              setShowProgress(false);
             },
           });
         } else if (status === "failed") {
           throw new Error("Download task failed on server");
         } else {
-          // Task still in progress, poll again
-          setTimeout(() => pollTaskStatus(), 2000); // Poll every 2 seconds
+          // Task still in progress, poll again (no progress UI yet)
+          setTimeout(() => pollTaskStatus(), 2000);
         }
       };
 
@@ -258,6 +244,7 @@ export function DownloadVerificationSheet({
       setError(errorMessage);
       setDownloadStatus("failed");
       setIsDownloading(false);
+      setShowProgress(false);
     }
   };
 
@@ -266,9 +253,10 @@ export function DownloadVerificationSheet({
 
     setIsDownloading(true);
     setError(null);
+    setShowProgress(false); // Don't show progress initially
 
-    // Start the real download process
-    await performRealDownload();
+    // Start the new download process
+    await performNewDownload();
   };
 
   const getStatusIcon = (status: boolean) => {
@@ -320,6 +308,8 @@ export function DownloadVerificationSheet({
       })
     : null;
 
+  const { isRTL } = useLanguage();
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-full sm:w-[90vw] sm:!max-w-lg overflow-y-auto bg-muted/75">
@@ -330,7 +320,9 @@ export function DownloadVerificationSheet({
             </div>
             {t("download.verification.title")}
           </SheetTitle>
-          <SheetDescription className={`text-base text-muted-foreground`}>
+          <SheetDescription
+            className={`text-base text-muted-foreground ${isRTL ? "text-right" : "text-left"}`}
+          >
             {t("download.verification.description")}
           </SheetDescription>
         </SheetHeader>
@@ -821,7 +813,7 @@ export function DownloadVerificationSheet({
                     className="gap-2"
                   >
                     <AlertCircle className="w-4 h-4" />
-                    {t("download.verification.tryAgain")}
+                    {isRTL ? "اعد المحاولة" : "Try again"}
                   </Button>
                 </div>
               </CardContent>
@@ -832,8 +824,8 @@ export function DownloadVerificationSheet({
         {/* Footer with action buttons */}
         {verificationData?.success && verificationData.data && !isVerifying && (
           <div>
-            {/* Download Progress Section */}
-            {isDownloading && (
+            {/* Download Progress Section - Only show when file is actually downloading */}
+            {isDownloading && showProgress && (
               <div className="space-y-4 pt-6 border-t mt-6">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">

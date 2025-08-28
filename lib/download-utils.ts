@@ -497,6 +497,55 @@ function getExtensionFromMimeType(mimeType: string): string {
 }
 
 /**
+ * Downloads a file with browser save dialog first (no credit charging)
+ * @param url - The URL to download from
+ * @param options - Download options including progress callbacks
+ */
+export async function downloadFileWithSaveDialog(
+  url: string,
+  options: DownloadOptions = {}
+): Promise<void> {
+  const { onComplete, onError, filename } = options;
+
+  try {
+    // First, try to trigger the browser's save dialog immediately
+    // This approach works for direct file URLs and signed URLs
+    const finalFilename = filename || extractFilenameFromUrl(url) || "download";
+    
+    // Create a temporary link to trigger the browser's save dialog
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = finalFilename;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    
+    // Add to DOM temporarily
+    document.body.appendChild(link);
+    
+    // Trigger the browser's save dialog
+    link.click();
+    
+    // Clean up immediately
+    document.body.removeChild(link);
+    
+    // Wait a moment for the download to potentially start
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Call completion callback
+    if (onComplete) {
+      onComplete(finalFilename);
+    }
+    
+  } catch (error) {
+    const downloadError = error instanceof Error ? error : new Error("Download failed");
+    if (onError) {
+      onError(downloadError);
+    }
+    throw downloadError;
+  }
+}
+
+/**
  * Validate if URL is downloadable
  * @param url - URL to validate
  * @returns True if URL appears to be downloadable

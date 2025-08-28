@@ -1747,6 +1747,7 @@
         "initializing": "Initializing download process...",
         "downloadingFromSource": "Downloading file from source...",
         "fileDownloadedSuccessfully": "File downloaded successfully!",
+        "fileSavedToDevice": "File has been saved to your device",
         "preparingStatus": "Preparing...",
         "downloadingProgress": "Downloading {{progress}}%",
         "completedStatus": "Completed!"
