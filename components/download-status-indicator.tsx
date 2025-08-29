@@ -90,6 +90,7 @@ export function DownloadStatusIndicator({
         const statusPriority = {
           completed: 1,
           downloading: 2,
+          in_progress: 2,
           preparing: 3,
           queued: 4,
           pending: 5,
@@ -117,6 +118,7 @@ export function DownloadStatusIndicator({
       const activeDownloads = sortedTasks.filter(
         (task) =>
           task.progress?.status === "downloading" ||
+          task.progress?.status === "in_progress" ||
           task.progress?.status === "preparing" ||
           task.progress?.status === "queued" ||
           task.progress?.status === "pending"
@@ -202,6 +204,7 @@ export function DownloadStatusIndicator({
       case "failed":
         return <XCircle className="w-4 h-4 text-red-500" />;
       case "downloading":
+      case "in_progress":
         return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />;
       case "preparing":
         return <Clock className="w-4 h-4 text-yellow-500" />;
@@ -219,6 +222,7 @@ export function DownloadStatusIndicator({
       case "failed":
         return t("download.indicator.status.failed", "Failed");
       case "downloading":
+      case "in_progress":
         return t("download.indicator.status.downloading", "Downloading");
       case "preparing":
         return t("download.indicator.status.preparing", "Preparing");
@@ -236,6 +240,7 @@ export function DownloadStatusIndicator({
       case "failed":
         return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
       case "downloading":
+      case "in_progress":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
       case "preparing":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
@@ -255,6 +260,7 @@ export function DownloadStatusIndicator({
   const activeTasks = downloadTasks.filter(
     (task) =>
       task.progress.status === "downloading" ||
+      task.progress.status === "in_progress" ||
       task.progress.status === "preparing" ||
       task.progress.status === "queued"
   ).length;
@@ -377,6 +383,7 @@ export function DownloadStatusIndicator({
                       </p>
 
                       {(task.progress.status === "downloading" ||
+                        task.progress.status === "in_progress" ||
                         task.progress.status === "preparing") && (
                         <div className="space-y-1">
                           <Progress
