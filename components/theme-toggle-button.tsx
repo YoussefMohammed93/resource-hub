@@ -24,7 +24,7 @@ export function ThemeToggleButton() {
       <Button
         variant="ghost"
         size="icon"
-        className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg hover:bg-muted/75 transition-colors"
+        className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg hover:bg-muted/75 transition-colors"
       >
         <div className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </Button>
@@ -42,11 +42,11 @@ export function ThemeToggleButton() {
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 sm:w-9 text-muted-foreground hover:text-muted-foreground sm:h-9 rounded-lg hover:bg-muted/75 transition-all duration-200 relative"
+          className="w-8 h-8 sm:w-11 sm:h-11 text-muted-foreground hover:text-muted-foreground rounded-lg hover:bg-muted/75 transition-all duration-200 relative"
           aria-label="Toggle theme"
         >
-          <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 scale-100 dark:scale-0 transition-all duration-300 absolute rotate-0 dark:-rotate-90" />
-          <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 scale-0 dark:scale-100 transition-all duration-300 absolute rotate-90 dark:rotate-0" />
+          <Sun className="w-3.5 h-3.5 sm:!w-6 sm:!h-6 scale-100 dark:scale-0 transition-all duration-300 absolute rotate-0 dark:-rotate-90" />
+          <Moon className="w-3.5 h-3.5 sm:!w-6 sm:!h-6 scale-0 dark:scale-100 transition-all duration-300 absolute rotate-90 dark:rotate-0" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[120px]">

@@ -48,6 +48,7 @@ export function DownloadStatusIndicator({
   const [recentlyDownloadedTasks, setRecentlyDownloadedTasks] = useState<
     Set<string>
   >(new Set());
+  const [notificationCounter, setNotificationCounter] = useState(0);
 
   // Fetch download tasks
   const fetchDownloadTasks = useCallback(async () => {
@@ -159,6 +160,9 @@ export function DownloadStatusIndicator({
         setShowAttentionAnimation(true);
         setTimeout(() => setShowAttentionAnimation(false), 3000);
 
+        // Increment notification counter
+        setNotificationCounter(prev => prev + 1);
+
         // Store task details for later credit deduction
         const { taskId, sitePrice } = event.detail;
         if (taskId && sitePrice) {
@@ -258,6 +262,10 @@ export function DownloadStatusIndicator({
   // Handle popover open/close
   const handlePopoverChange = (open: boolean) => {
     setIsOpen(open);
+    // Reset notification counter when user opens the popover
+    if (open && notificationCounter > 0) {
+      setNotificationCounter(0);
+    }
   };
 
   return (
@@ -268,20 +276,27 @@ export function DownloadStatusIndicator({
           size="sm"
           data-download-indicator
           className={cn(
-            "relative h-8 w-8 p-0 hover:bg-accent hover:text-accent-foreground transition-all duration-300",
+            "relative h-11 w-11 p-0 hover:bg-accent hover:text-accent-foreground transition-all duration-300",
             showAttentionAnimation && "animate-pulse bg-primary/20 scale-110",
             className
           )}
         >
           <FileDown
             className={cn(
-              "h-4 w-4 transition-colors text-muted-foreground duration-300",
+              "!h-6 !w-6 transition-colors text-muted-foreground duration-300",
               showAttentionAnimation && "text-primary"
             )}
           />
           {hasActiveDownloads && (
             <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-blue-500 flex items-center justify-center">
               <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
+            </div>
+          )}
+          {notificationCounter > 0 && (
+            <div className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-xs font-bold text-white">
+                {notificationCounter > 9 ? '9+' : notificationCounter}
+              </span>
             </div>
           )}
           {showAttentionAnimation && (

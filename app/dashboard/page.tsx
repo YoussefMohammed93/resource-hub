@@ -469,7 +469,9 @@ export default function DashboardPage() {
                       ? entryObj.amount
                       : undefined,
                   reason:
-                    typeof entryObj.reason === "string" ? entryObj.reason : undefined,
+                    typeof entryObj.reason === "string"
+                      ? entryObj.reason
+                      : undefined,
                 };
               });
             setEnhancedCreditHistory(enhancedEntries);
@@ -2587,7 +2589,7 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
 
-                {/* Enhanced Credit History Card */}
+                {/* Credit History Card */}
                 <Card className="dark:bg-muted/50">
                   <CardHeader>
                     <div className="flex items-center space-x-3">
@@ -2844,8 +2846,13 @@ export default function DashboardPage() {
                                         {planName}
                                       </span>
                                     </div>
-                                    <span className={`flex items-center gap-2 text-sm font-bold text-primary ${isRTL ? "flex-row-reverse" : "flex-row"}`}>
-                                      {credits.toLocaleString()} <span className={`text-muted-foreground ${isRTL && "text-xs"}`}>{`${isRTL ? "نقطة" : "Credits"}`}</span>
+                                    <span
+                                      className={`flex items-center gap-2 text-sm font-bold text-primary ${isRTL ? "flex-row-reverse" : "flex-row"}`}
+                                    >
+                                      {credits.toLocaleString()}{" "}
+                                      <span
+                                        className={`text-muted-foreground ${isRTL && "text-xs"}`}
+                                      >{`${isRTL ? "نقطة" : "Credits"}`}</span>
                                     </span>
                                   </div>
                                 ))}
