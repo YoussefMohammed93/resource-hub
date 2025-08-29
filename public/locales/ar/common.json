@@ -1805,6 +1805,45 @@
         "title": "فشل التحقق من التحميل",
         "verificationFailed": "فشل التحقق",
         "unableToVerify": "غير قادر على التحقق من أهلية التحميل"
+      },
+      "tryAgain": "حاول مرة أخرى"
+    },
+    "indicator": {
+      "title": "التحميلات",
+      "empty": "لا توجد تحميلات بعد",
+      "activeCount": "{{count}} نشط، {{total}} إجمالي",
+      "totalCount": "{{count}} تحميل",
+      "downloadFile": "حفظ الملف",
+      "status": {
+        "completed": "مكتمل",
+        "failed": "فشل",
+        "downloading": "جاري التحميل",
+        "preparing": "جاري التحضير",
+        "queued": "في الانتظار",
+        "pending": "معلق",
+        "unknown": "غير معروف"
+      },
+      "messages": {
+        "fetchingTasks": "جاري جلب مهام التحميل...",
+        "taskCreated": "تم إنشاء مهمة التحميل",
+        "noTasks": "لا توجد مهام تحميل متاحة",
+        "loadingTasks": "جاري تحميل مهام التحميل...",
+        "errorFetching": "فشل في جلب مهام التحميل",
+        "unknownPlatform": "منصة غير معروفة",
+        "attentionAnimation": "تحميل جديد متاح"
+      },
+      "progress": {
+        "percentage": "{{percent}}%",
+        "preparing": "جاري تحضير التحميل...",
+        "downloading": "جاري تحميل الملف...",
+        "completed": "اكتمل التحميل",
+        "failed": "فشل التحميل"
+      },
+      "actions": {
+        "retry": "إعادة المحاولة",
+        "cancel": "إلغاء التحميل",
+        "openFile": "فتح الملف",
+        "showInFolder": "إظهار في المجلد"
       }
     }
   }

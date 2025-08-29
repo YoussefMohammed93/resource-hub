@@ -7,6 +7,7 @@ import { useLanguage } from "@/components/i18n-provider";
 import { UserDropdown } from "@/components/user-dropdown";
 import { ThemeToggleButton } from "@/components/theme-toggle-button";
 import { LanguageToggleButton } from "@/components/language-toggle-button";
+import { DownloadStatusIndicator } from "@/components/download-status-indicator";
 
 export function HeaderControls() {
   const { isRTL } = useLanguage();
@@ -24,6 +25,8 @@ export function HeaderControls() {
       <div className="hidden xs:block">
         <LanguageToggleButton />
       </div>
+      {/* Download Status Indicator */}
+      <DownloadStatusIndicator />
       {/* Mobile Controls - Show only on very small screens */}
       <div className="flex items-center gap-1 xs:hidden">
         <ThemeToggleButton />

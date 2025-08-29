@@ -556,7 +556,7 @@ function SearchContent() {
   // Enhanced URL detection for supported platforms (same as home page)
   const detectSupportedUrl = (query: string): boolean => {
     const trimmedQuery = query.trim();
-    
+
     // Check for common URL patterns
     const urlPatterns = [
       /^https?:\/\//i, // Starts with http:// or https://
@@ -582,21 +582,25 @@ function SearchContent() {
       /flaticon\.com/i,
       /icons8\.com/i,
       /thenounproject\.com/i,
-      /storyset\.com/i
+      /storyset\.com/i,
     ];
-    
-    const urlRegex = /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/ \w \.-]*)*\/?$/i;
-    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
-    
-    return urlPatterns.some(pattern => pattern.test(trimmedQuery)) || 
-           urlRegex.test(trimmedQuery) || 
-           domainRegex.test(trimmedQuery);
+
+    const urlRegex =
+      /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/ \w \.-]*)*\/?$/i;
+    const domainRegex =
+      /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+
+    return (
+      urlPatterns.some((pattern) => pattern.test(trimmedQuery)) ||
+      urlRegex.test(trimmedQuery) ||
+      domainRegex.test(trimmedQuery)
+    );
   };
 
   // Handle search button click
   const handleSearch = () => {
     const trimmedQuery = searchQuery.trim();
-    
+
     if (!trimmedQuery) {
       return;
     }
@@ -605,12 +609,12 @@ function SearchContent() {
     if (detectSupportedUrl(trimmedQuery)) {
       // Open download verification sheet for URLs
       let processedUrl = trimmedQuery;
-      
+
       // Add https:// if no protocol is specified
       if (!processedUrl.match(/^https?:\/\//i)) {
         processedUrl = `https://${processedUrl}`;
       }
-      
+
       setDownloadUrl(processedUrl);
       setIsDownloadSheetOpen(true);
       return;
@@ -1299,9 +1303,7 @@ function SearchContent() {
 
                 <div className="bg-background dark:bg-muted/35 border border-border dark:border-primary/20 rounded-lg p-4 space-y-3">
                   {/* User Avatar and Name */}
-                  <div
-                    className={`flex items-center gap-3`}
-                  >
+                  <div className={`flex items-center gap-3`}>
                     <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center border-2 border-primary/30">
                       {user.account?.picture ? (
                         <img
@@ -1323,7 +1325,9 @@ function SearchContent() {
                         className={`flex items-center gap-1 text-xs text-muted-foreground ${isRTL ? "flex-row-reverse" : ""}`}
                       >
                         <Mail className="w-3 h-3" />
-                        <span className="truncate text-sm">{user.account?.email}</span>
+                        <span className="truncate text-sm">
+                          {user.account?.email}
+                        </span>
                       </div>
                     </div>
                   </div>

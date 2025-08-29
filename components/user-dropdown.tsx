@@ -70,7 +70,7 @@ export function UserDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div
-          className={`flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-muted/75 rounded-lg px-2 py-1 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
+          className={`flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-muted/75 rounded-lg px-2 py-1 transition-colors ${isRTL ? "flex-row" : ""}`}
         >
           <Avatar className="w-7 h-7 sm:w-8 sm:h-8">
             <AvatarImage
@@ -84,11 +84,11 @@ export function UserDropdown() {
           <span className="hidden sm:block text-sm text-muted-foreground">
             {getUserFullName()}
           </span>
-          <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground transition-transform duration-200" />
+          <ChevronDown className="hidden sm:block w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground transition-transform duration-200" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <div className="px-2 py-1.5">
+        <div className={`px-2 py-1.5 ${isRTL ? "text-right" : ""}`}>
           <p className="text-sm font-medium text-foreground">
             {getUserFullName()}
           </p>
