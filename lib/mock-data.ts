@@ -774,6 +774,7 @@ export const mockDownloadCreationResponses = {
     data: {
       message: "Download task created successfully",
       task_id: "dl_" + Math.random().toString(36).substr(2, 9),
+      download_url: "https://mock-download-server.com/files/sample-file.zip",
     },
   },
 

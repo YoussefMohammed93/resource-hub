@@ -1,0 +1,501 @@
+openapi: 3.0.3
+info:
+  title: Credits and Tasks Management API
+  description: API for managing user credits and tasks
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: https://staging-api.example.com
+    description: Staging server
+
+paths:
+  /v1/credit/add:
+    post:
+      tags:
+        - Credits Management
+      summary: Add credits to user account
+      description: Add additional credits to a user's subscription account (Admin only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - credits
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: "user@example.com"
+                credits:
+                  type: integer
+                  minimum: 1
+                  description: Number of credits to add
+                  example: 100
+      responses:
+        '200':
+          description: Credits added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  account:
+                    type: object
+                    description: Updated account information
+                  subscription:
+                    type: object
+                    description: Updated subscription information
+                  credits_added:
+                    type: integer
+                    example: 100
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                MissingSession:
+                  $ref: '#/components/examples/MissingSession'
+                InvalidSession:
+                  $ref: '#/components/examples/InvalidSession'
+                MissingEmail:
+                  $ref: '#/components/examples/MissingEmail'
+                MissingCredits:
+                  $ref: '#/components/examples/MissingCredits'
+                InvalidCreditsFormat:
+                  $ref: '#/components/examples/InvalidCreditsFormat'
+                InvalidCreditsValue:
+                  $ref: '#/components/examples/InvalidCreditsValue'
+        '403':
+          description: Forbidden - Admin access required
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/credit/decrease:
+    post:
+      tags:
+        - Credits Management
+      summary: Decrease credits from user account
+      description: Remove credits from a user's subscription account (Admin only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - credits
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: "user@example.com"
+                credits:
+                  type: integer
+                  minimum: 1
+                  description: Number of credits to decrease
+                  example: 50
+      responses:
+        '200':
+          description: Credits decreased successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  account:
+                    type: object
+                    description: Updated account information
+                  subscription:
+                    type: object
+                    description: Updated subscription information
+                  credits_decreased:
+                    type: integer
+                    example: 50
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                MissingSession:
+                  $ref: '#/components/examples/MissingSession'
+                InvalidSession:
+                  $ref: '#/components/examples/InvalidSession'
+                MissingEmail:
+                  $ref: '#/components/examples/MissingEmail'
+                MissingCredits:
+                  $ref: '#/components/examples/MissingCredits'
+                InvalidCreditsFormat:
+                  $ref: '#/components/examples/InvalidCreditsFormat'
+                InvalidCreditsValue:
+                  $ref: '#/components/examples/InvalidCreditsValue'
+        '403':
+          description: Forbidden - Admin access required
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/download/tasks:
+    get:
+      tags:
+        - Tasks Management
+      summary: Get user tasks or all tasks
+      description: Retrieve task status information for the authenticated user or all users (if admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: task_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Specific task ID to retrieve
+          example: "f240758b2065419d97d7f98257a9d14d"
+        - name: get_all
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Get all tasks from all users (Admin only)
+          example: false
+      responses:
+        '200':
+          description: Tasks retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    oneOf:
+                      - $ref: '#/components/schemas/SingleTask'
+                      - $ref: '#/components/schemas/UserTasksList'
+                      - $ref: '#/components/schemas/AllTasksList'
+              examples:
+                UserTasks:
+                  summary: User's own tasks (get_all=false or not specified)
+                  value:
+                    success: true
+                    data:
+                      - type: "download"
+                        progress:
+                          status: "completed"
+                          progress: 100
+                        data:
+                          id: "f240758b2065419d97d7f98257a9d14d"
+                          downloadUrl: "https://www.freepik.com/free-photo/lavender-field-sunset-near-valensole_35758793.htm"
+                          platform_name: "Freepik"
+                          price: 1
+                        created_at: "2025-08-29 02:57:20"
+                        download:
+                          downloadUrl: "https://s3.eu-central-003.backblazeb2.com/stockaty/storage/4d41000b863a60a2aa7d4733c809e9e4_archive.zip"
+                          filename: "4d41000b863a60a2aa7d4733c809e9e4_archive.zip"
+                      - type: "download"
+                        progress:
+                          status: "failed"
+                          progress: 0
+                        data:
+                          id: "aa838d4f3a0346de82dfe4530b96bfd8"
+                          downloadUrl: "https://www.freepik.com/free-ai-image/beautiful-various-landscape_395335091.htm"
+                          platform_name: "Freepik"
+                          price: 1
+                        created_at: "2025-08-29 02:57:01"
+                AllTasks:
+                  summary: All tasks from all users (get_all=true, Admin only)
+                  value:
+                    success: true
+                    data:
+                      - email: "user1@example.com"
+                        data:
+                          type: "download"
+                          progress:
+                            status: "completed"
+                            progress: 100
+                          data:
+                            id: "f240758b2065419d97d7f98257a9d14d"
+                            downloadUrl: "https://www.freepik.com/free-photo/lavender-field-sunset-near-valensole_35758793.htm"
+                            platform_name: "Freepik"
+                            price: 1
+                          created_at: "2025-08-29 02:57:20"
+                          download:
+                            downloadUrl: "https://s3.eu-central-003.backblazeb2.com/stockaty/storage/4d41000b863a60a2aa7d4733c809e9e4_archive.zip"
+                            filename: "4d41000b863a60a2aa7d4733c809e9e4_archive.zip"
+                      - email: "user1@example.com"
+                        data:
+                          type: "download"
+                          progress:
+                            status: "failed"
+                            progress: 0
+                          data:
+                            id: "aa838d4f3a0346de82dfe4530b96bfd8"
+                            downloadUrl: "https://www.freepik.com/free-ai-image/beautiful-various-landscape_395335091.htm"
+                            platform_name: "Freepik"
+                            price: 1
+                          created_at: "2025-08-29 02:57:01"
+                      - email: "user2@example.com"
+                        data:
+                          type: "download"
+                          progress:
+                            status: "in_progress"
+                            progress: 45
+                          data:
+                            id: "bb938d4f3a0346de82dfe4530b96bfd9"
+                            downloadUrl: "https://www.freepik.com/free-vector/mountain-landscape-illustration_8562341.htm"
+                            platform_name: "Freepik"
+                            price: 1
+                          created_at: "2025-08-29 03:15:30"
+                      - email: "user3@example.com"
+                        data:
+                          type: "download"
+                          progress:
+                            status: "completed"
+                            progress: 100
+                          data:
+                            id: "cc938d4f3a0346de82dfe4530b96bfd0"
+                            downloadUrl: "https://www.freepik.com/free-photo/beautiful-shot-lake-forest_10728191.htm"
+                            platform_name: "Freepik"
+                            price: 1
+                          created_at: "2025-08-29 01:45:12"
+                          download:
+                            downloadUrl: "https://s3.eu-central-003.backblazeb2.com/stockaty/storage/7e92b71834f3d16576ef64c28dabc1c0_archive.zip"
+                            filename: "7e92b71834f3d16576ef64c28dabc1c0_archive.zip"
+                SingleTask:
+                  summary: Single task by task_id
+                  value:
+                    success: true
+                    data:
+                      type: "download"
+                      progress:
+                        status: "completed"
+                        progress: 100
+                      data:
+                        id: "f240758b2065419d97d7f98257a9d14d"
+                        downloadUrl: "https://www.freepik.com/free-photo/lavender-field-sunset-near-valensole_35758793.htm"
+                        platform_name: "Freepik"
+                        price: 1
+                      created_at: "2025-08-29 02:57:20"
+                      download:
+                        downloadUrl: "https://s3.eu-central-003.backblazeb2.com/stockaty/storage/4d41000b863a60a2aa7d4733c809e9e4_archive.zip"
+                        filename: "4d41000b863a60a2aa7d4733c809e9e4_archive.zip"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                MissingSession:
+                  $ref: '#/components/examples/MissingSession'
+                InvalidSession:
+                  $ref: '#/components/examples/InvalidSession'
+        '403':
+          description: Forbidden - Admin privileges required for get_all=true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 2
+                      message:
+                        type: string
+                        example: "Admin privileges required to access all tasks."
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+  
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            id:
+              oneOf:
+                - type: integer
+                - type: string
+              example: 1
+            message:
+              type: string
+              example: "Error message description"
+
+    TaskProgress:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["completed", "failed", "in_progress", "pending"]
+          example: "completed"
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 100
+
+    TaskData:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "f240758b2065419d97d7f98257a9d14d"
+        downloadUrl:
+          type: string
+          format: uri
+          example: "https://www.freepik.com/free-photo/lavender-field-sunset-near-valensole_35758793.htm"
+        platform_name:
+          type: string
+          example: "Freepik"
+        price:
+          type: integer
+          example: 1
+
+    DownloadInfo:
+      type: object
+      properties:
+        downloadUrl:
+          type: string
+          format: uri
+          example: "https://s3.eu-central-003.backblazeb2.com/stockaty/storage/4d41000b863a60a2aa7d4733c809e9e4_archive.zip"
+        filename:
+          type: string
+          example: "4d41000b863a60a2aa7d4733c809e9e4_archive.zip"
+
+    SingleTask:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "download"
+        progress:
+          $ref: '#/components/schemas/TaskProgress'
+        data:
+          $ref: '#/components/schemas/TaskData'
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-08-29 02:57:20"
+        download:
+          $ref: '#/components/schemas/DownloadInfo'
+
+    UserTasksList:
+      type: array
+      items:
+        $ref: '#/components/schemas/SingleTask'
+
+    AllTasksList:
+      type: array
+      items:
+        type: object
+        properties:
+          email:
+            type: string
+            format: email
+            example: "user@example.com"
+          data:
+            $ref: '#/components/schemas/SingleTask'
+
+  examples:
+    MissingSession:
+      value:
+        success: false
+        error:
+          id: 0
+          message: "Session cookie is missing. Please log in to access this resource."
+    InvalidSession:
+      value:
+        success: false
+        error:
+          id: 1
+          message: "Invalid session. Please log in again."
+    MissingEmail:
+      value:
+        success: false
+        error:
+          id: 2
+          message: "Email is missing."
+    MissingCredits:
+      value:
+        success: false
+        error:
+          id: 3
+          message: "Credits amount is missing."
+    InvalidCreditsFormat:
+      value:
+        success: false
+        error:
+          id: 4
+          message: "Credits amount must be a valid number."
+    InvalidCreditsValue:
+      value:
+        success: false
+        error:
+          id: 5
+          message: "Credits amount must be greater than 0."
+    OperationFailed:
+      value:
+        success: false
+        error:
+          id: 6
+          message: "No active subscription found or could not process credits."
+
+tags:
+  - name: Credits Management
+    description: Operations for managing user credits
+  - name: Tasks Management
+    description: Operations for managing and retrieving tasks

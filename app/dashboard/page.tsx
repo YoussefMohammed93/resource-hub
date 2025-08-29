@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 "use client";
 
 import {
@@ -35,6 +38,7 @@ import {
   Mail,
   X,
   Cookie,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -86,9 +90,21 @@ import {
 import {
   siteApi,
   pricingApi,
+  creditApi,
+  userApi,
+  downloadApi,
   type SiteInput,
   type Site,
   type PricingPlanInput,
+  type CreditStatistics,
+  type CreditHistoryEntry,
+  type EnhancedCreditHistoryEntry,
+  type UsersStatisticsResponse,
+  type UserAccount,
+  type AddCreditsRequest,
+  type DecreaseCreditsRequest,
+  type DownloadTask,
+  type DownloadStatistics,
 } from "@/lib/api";
 
 // Extended Site interface for frontend use
@@ -98,17 +114,10 @@ interface FrontendSite extends Site {
   addedDate?: string;
 }
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  creditApi,
-  userApi,
-  type CreditStatistics,
-  type CreditHistoryEntry,
-  type EnhancedCreditHistoryEntry,
-  type UsersStatisticsResponse,
-  type UserAccount,
-} from "@/lib/api";
 import { AdminRouteGuard } from "@/components/admin-route-guard";
 import { useAuth } from "@/components/auth-provider";
+import { Progress } from "@/components/ui/progress";
+import i18next from "i18next";
 
 // Type definitions
 interface PricingPlan {
@@ -137,11 +146,43 @@ export default function DashboardPage() {
   // Sidebar state for mobile
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
+  // Add Credits states
+  const [addCreditsEmail, setAddCreditsEmail] = useState<string>("");
+  const [addCreditsAmount, setAddCreditsAmount] = useState<string>("");
+  const [isAddingCredits, setIsAddingCredits] = useState<boolean>(false);
+  const [addCreditsEmailError, setAddCreditsEmailError] = useState<string>("");
+  const [addCreditsAmountError, setAddCreditsAmountError] =
+    useState<string>("");
+
+  // Decrease Credits states
+  const [decreaseCreditsEmail, setDecreaseCreditsEmail] = useState<string>("");
+  const [decreaseCreditsAmount, setDecreaseCreditsAmount] =
+    useState<string>("");
+  const [isDecreasingCredits, setIsDecreasingCredits] =
+    useState<boolean>(false);
+  const [decreaseCreditsEmailError, setDecreaseCreditsEmailError] =
+    useState<string>("");
+  const [decreaseCreditsAmountError, setDecreaseCreditsAmountError] =
+    useState<string>("");
+
   // Upgrade Subscription states
   const [upgradeEmail, setUpgradeEmail] = useState<string>("");
   const [upgradeNewPlan, setUpgradeNewPlan] = useState<string>("");
   const [isUpgradeSubmitting, setIsUpgradeSubmitting] =
     useState<boolean>(false);
+
+  // Download History and Statistics states
+  const [downloadTasks, setDownloadTasks] = useState<DownloadTask[]>([]);
+  const [downloadStatistics, setDownloadStatistics] =
+    useState<DownloadStatistics>({
+      totalDownloads: 0,
+      successRate: 0,
+      creditsSpent: 0,
+      topPlatforms: [],
+      thisMonth: 0,
+    });
+  const [isLoadingDownloads, setIsLoadingDownloads] = useState<boolean>(false);
+  const [downloadError, setDownloadError] = useState<string>("");
   const [upgradeEmailError, setUpgradeEmailError] = useState<string>("");
   const [upgradeNewPlanError, setUpgradeNewPlanError] = useState<string>("");
 
@@ -279,6 +320,11 @@ export default function DashboardPage() {
   const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false);
   const [usersError, setUsersError] = useState<string>("");
 
+  // Sites data for filtering
+  const [sitesDataForFilter, setSitesDataForFilter] = useState<any[]>([]);
+  const [selectedPlatformFilter, setSelectedPlatformFilter] =
+    useState<string>("all");
+
   // Helper function to format timestamp
   const formatTimestamp = (timestamp: string, locale: string) => {
     const date = new Date(timestamp);
@@ -300,6 +346,94 @@ export default function DashboardPage() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Fetch download tasks and calculate statistics
+  const fetchDownloadTasks = async () => {
+    setIsLoadingDownloads(true);
+    setDownloadError("");
+
+    try {
+      const response = await downloadApi.getDownloadTasks();
+
+      if (response.success && response.data) {
+        // API returns data directly as an array, not nested under data.data
+        const tasks = Array.isArray(response.data) ? response.data : [];
+        setDownloadTasks(tasks);
+
+        // Calculate statistics
+        const totalDownloads = tasks.length;
+        const completedTasks = tasks.filter(
+          (task) => task.progress.status === "completed"
+        );
+        const successRate =
+          totalDownloads > 0
+            ? (completedTasks.length / totalDownloads) * 100
+            : 0;
+
+        const creditsSpent = tasks.reduce((total, task) => {
+          return task.progress.status === "completed"
+            ? total + (task.data.price || 0)
+            : total;
+        }, 0);
+
+        // Calculate top platforms
+        const platformCounts: { [key: string]: number } = {};
+        tasks.forEach((task) => {
+          const platform = task.platform || "Unknown";
+          platformCounts[platform] = (platformCounts[platform] || 0) + 1;
+        });
+
+        const topPlatforms = Object.entries(platformCounts)
+          .map(([platform, count]) => ({ platform, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 3);
+
+        // Calculate this month's downloads
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const thisMonth = tasks.filter((task) => {
+          const timestamp = task.created_at;
+          if (!timestamp) return false;
+          const taskDate = new Date(timestamp);
+          return (
+            taskDate.getMonth() === currentMonth &&
+            taskDate.getFullYear() === currentYear
+          );
+        }).length;
+
+        setDownloadStatistics({
+          totalDownloads,
+          successRate,
+          creditsSpent,
+          topPlatforms,
+          thisMonth,
+        });
+      } else {
+        setDownloadError(
+          response.error?.message || "Failed to load download tasks"
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching download tasks:", error);
+      setDownloadError("An error occurred while loading download tasks");
+    } finally {
+      setIsLoadingDownloads(false);
+    }
+  };
+
+  // Fetch sites data for filtering
+  const fetchSitesForFilter = async () => {
+    try {
+      const response = await fetch("/api/proxy/v1/sites/get");
+      const data = await response.json();
+
+      if (data.success && data.data && data.data.sites) {
+        setSitesDataForFilter(data.data.sites);
+      }
+    } catch (error) {
+      console.error("Error fetching sites for filter:", error);
+    }
   };
 
   // Helper function to get transaction type styling
@@ -361,6 +495,30 @@ export default function DashboardPage() {
       return matchesSearch && matchesType;
     });
   }, [enhancedCreditHistory, historySearchTerm, historyTypeFilter]);
+
+  // Filter download tasks by platform
+  const filteredDownloadTasks = useMemo(() => {
+    if (selectedPlatformFilter === "all") {
+      return downloadTasks;
+    }
+    return downloadTasks.filter((task) => {
+      const taskData = task.data as any;
+      const platform = taskData.platform_name || "Unknown";
+      return platform
+        .toLowerCase()
+        .includes(selectedPlatformFilter.toLowerCase());
+    });
+  }, [downloadTasks, selectedPlatformFilter]);
+
+  // Get the selected platform name for display
+  const selectedPlatformName = useMemo(() => {
+    if (selectedPlatformFilter === "all")
+      return t("downloadHistory.filters.allPlatforms");
+    const selectedSite = sitesDataForFilter.find(
+      (site) => site.name === selectedPlatformFilter
+    );
+    return selectedSite ? selectedSite.name : selectedPlatformFilter;
+  }, [selectedPlatformFilter, sitesDataForFilter]);
 
   const clearHistoryFilters = () => {
     setHistorySearchTerm("");
@@ -802,7 +960,12 @@ export default function DashboardPage() {
       loadSites();
       loadPricingPlans();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // Load download tasks for all authenticated users
+    if (isAuthenticated && user) {
+      fetchDownloadTasks();
+      fetchSitesForFilter();
+    }
   }, [isAuthenticated, user]);
 
   // Email validation
@@ -818,6 +981,156 @@ export default function DashboardPage() {
       return true;
     } catch {
       return false;
+    }
+  };
+
+  // Handle add credits
+  const handleAddCredits = async () => {
+    // Reset errors
+    setAddCreditsEmailError("");
+    setAddCreditsAmountError("");
+
+    // Validate email
+    if (!addCreditsEmail.trim()) {
+      setAddCreditsEmailError(
+        t("dashboard.addCredits.validation.emailRequired")
+      );
+      return;
+    }
+    if (!validateEmail(addCreditsEmail)) {
+      setAddCreditsEmailError(
+        t("dashboard.addCredits.validation.invalidEmail")
+      );
+      return;
+    }
+
+    // Validate credits amount
+    if (!addCreditsAmount.trim()) {
+      setAddCreditsAmountError(
+        t("dashboard.addCredits.validation.creditsRequired")
+      );
+      return;
+    }
+    const creditsNum = parseInt(addCreditsAmount);
+    if (isNaN(creditsNum) || creditsNum <= 0) {
+      setAddCreditsAmountError(
+        t("dashboard.addCredits.validation.invalidCredits")
+      );
+      return;
+    }
+
+    setIsAddingCredits(true);
+
+    try {
+      const creditsData: AddCreditsRequest = {
+        email: addCreditsEmail,
+        credits: creditsNum,
+      };
+
+      const response = await creditApi.addCredits(creditsData);
+
+      if (response.success) {
+        // Reset form
+        setAddCreditsEmail("");
+        setAddCreditsAmount("");
+
+        // Show success toast
+        toast.success(
+          t("dashboard.addCredits.toast.success", {
+            credits: creditsNum,
+            email: addCreditsEmail,
+          })
+        );
+
+        // Refresh analytics and history to show updated data
+        await loadCreditAnalytics();
+        await loadEnhancedCreditHistory();
+      } else {
+        // Handle API error
+        const errorMessage =
+          response.error?.message || t("dashboard.addCredits.toast.error");
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.error("Failed to add credits:", error);
+      toast.error(t("dashboard.addCredits.toast.error"));
+    } finally {
+      setIsAddingCredits(false);
+    }
+  };
+
+  // Handle decrease credits
+  const handleDecreaseCredits = async () => {
+    // Reset errors
+    setDecreaseCreditsEmailError("");
+    setDecreaseCreditsAmountError("");
+
+    // Validate email
+    if (!decreaseCreditsEmail.trim()) {
+      setDecreaseCreditsEmailError(
+        t("dashboard.decreaseCredits.validation.emailRequired")
+      );
+      return;
+    }
+    if (!validateEmail(decreaseCreditsEmail)) {
+      setDecreaseCreditsEmailError(
+        t("dashboard.decreaseCredits.validation.invalidEmail")
+      );
+      return;
+    }
+
+    // Validate credits amount
+    if (!decreaseCreditsAmount.trim()) {
+      setDecreaseCreditsAmountError(
+        t("dashboard.decreaseCredits.validation.creditsRequired")
+      );
+      return;
+    }
+    const creditsNum = parseInt(decreaseCreditsAmount);
+    if (isNaN(creditsNum) || creditsNum <= 0) {
+      setDecreaseCreditsAmountError(
+        t("dashboard.decreaseCredits.validation.invalidCredits")
+      );
+      return;
+    }
+
+    setIsDecreasingCredits(true);
+
+    try {
+      const creditsData: DecreaseCreditsRequest = {
+        email: decreaseCreditsEmail,
+        credits: creditsNum,
+      };
+
+      const response = await creditApi.decreaseCredits(creditsData);
+
+      if (response.success) {
+        // Reset form
+        setDecreaseCreditsEmail("");
+        setDecreaseCreditsAmount("");
+
+        // Show success toast
+        toast.success(
+          t("dashboard.decreaseCredits.toast.success", {
+            credits: creditsNum,
+            email: decreaseCreditsEmail,
+          })
+        );
+
+        // Refresh analytics and history to show updated data
+        await loadCreditAnalytics();
+        await loadEnhancedCreditHistory();
+      } else {
+        // Handle API error
+        const errorMessage =
+          response.error?.message || t("dashboard.decreaseCredits.toast.error");
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.error("Failed to decrease credits:", error);
+      toast.error(t("dashboard.decreaseCredits.toast.error"));
+    } finally {
+      setIsDecreasingCredits(false);
     }
   };
 
@@ -2000,8 +2313,8 @@ export default function DashboardPage() {
                     <div className="flex items-start justify-between">
                       <div className="space-y-3 sm:space-y-4 flex-1">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
-                            <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500/10 border border-emerald-500/10 rounded-xl flex items-center justify-center">
+                            <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
                           </div>
                           <div>
                             <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
@@ -2014,7 +2327,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-primary transition-colors">
+                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-emerald-500 transition-colors">
                               {sites?.length?.toLocaleString() || "0"}
                             </span>
                           </div>
@@ -2029,7 +2342,7 @@ export default function DashboardPage() {
                     <div className="flex items-start justify-between">
                       <div className="space-y-3 sm:space-y-4 flex-1">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center relative">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-600/10 border border-yellow-600/10 rounded-xl flex items-center justify-center relative">
                             <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                           </div>
@@ -2044,8 +2357,135 @@ export default function DashboardPage() {
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-primary transition-colors">
+                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-yellow-600 transition-colors">
                               {usersData?.online_users?.toLocaleString() || "0"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Download Statistics Cards */}
+            {isLoadingDownloads ? (
+              <DashboardStatsCardsSkeleton />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                {/* Total Downloads Card */}
+                <Card className="group dark:bg-muted/50">
+                  <CardContent>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3 sm:space-y-4 flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600/10 border border-blue-600/10 rounded-xl flex items-center justify-center">
+                            <Download className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                              {t("statisticsCards.totalDownloads")}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                              {t("statisticsCards.allTime")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-baseline space-x-2">
+                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-blue-600 transition-colors">
+                              {downloadStatistics.totalDownloads.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Success Rate Card */}
+                <Card className="group dark:bg-muted/50">
+                  <CardContent>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3 sm:space-y-4 flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-600/10 border border-green-600/10 rounded-xl flex items-center justify-center">
+                            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                              {t("statisticsCards.successRate")}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                              {t("statisticsCards.allTime")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-baseline space-x-2">
+                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                              {downloadStatistics.successRate.toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Credits Spent Card */}
+                <Card className="group dark:bg-muted/50">
+                  <CardContent>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3 sm:space-y-4 flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500/10 border border-red-500/10 rounded-xl flex items-center justify-center">
+                            <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                              {t("statisticsCards.creditsSpent")}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                              {t("statisticsCards.allTime")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-baseline space-x-2">
+                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-red-600 transition-colors">
+                              {downloadStatistics.creditsSpent.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* This Month Downloads Card */}
+                <Card className="group dark:bg-muted/50">
+                  <CardContent>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3 sm:space-y-4 flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-violet-500/10 border border-violet-500/10 rounded-xl flex items-center justify-center">
+                            <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                              {t("statisticsCards.thisMonth")}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                              {t("statisticsCards.totalDownloads")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-baseline space-x-2">
+                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                              {downloadStatistics.thisMonth.toLocaleString()}
                             </span>
                           </div>
                         </div>
@@ -2472,11 +2912,1007 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
+            {/* Download History Table */}
+            <Card className="dark:bg-muted/50">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row gap-5 items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-foreground">
+                      {t("downloadHistory.title")}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t("downloadHistory.description")}
+                    </p>
+                  </div>
+                  {/* Platform Filter */}
+                  <div className="w-full sm:w-auto flex items-center space-x-2">
+                    <Select
+                      value={selectedPlatformFilter}
+                      onValueChange={setSelectedPlatformFilter}
+                    >
+                      <SelectTrigger className="w-full sm:w-48">
+                        <Filter className="w-4 h-4 text-muted-foreground" />
+                        <SelectValue placeholder="Filter by platform" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          {t("downloadHistory.filters.allPlatforms")}
+                        </SelectItem>
+                        {sitesDataForFilter.map((site) => (
+                          <SelectItem key={site.name} value={site.name}>
+                            <div className="flex items-center space-x-2">
+                              <img
+                                src={site.icon}
+                                alt={site.name}
+                                className="w-4 h-4 rounded"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = "none";
+                                }}
+                              />
+                              <span>{site.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {/* Desktop Table View */}
+                <div className="hidden lg:block overflow-x-auto max-h-[278px] overflow-y-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th
+                          className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
+                        >
+                          {t("downloadHistory.columns.file")}
+                        </th>
+                        <th
+                          className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
+                        >
+                          {t("downloadHistory.columns.platform")}
+                        </th>
+                        <th
+                          className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
+                        >
+                          {t("downloadHistory.columns.status")}
+                        </th>
+                        <th
+                          className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
+                        >
+                          {t("downloadHistory.columns.progress")}
+                        </th>
+                        <th
+                          className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
+                        >
+                          {t("downloadHistory.columns.price")}
+                        </th>
+                        <th
+                          className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
+                        >
+                          {t("downloadHistory.columns.date")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {isLoadingDownloads ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center">
+                            <div className="flex flex-col items-center space-y-3">
+                              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                              <div>
+                                <p className="text-sm font-medium text-foreground">
+                                  Loading downloads...
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : downloadError ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center">
+                            <div className="flex flex-col items-center space-y-3">
+                              <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
+                                <AlertCircle className="w-6 h-6 text-destructive" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-foreground">
+                                  Error loading downloads
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {downloadError}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : filteredDownloadTasks.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center">
+                            <div className="flex flex-col items-center space-y-3">
+                              <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                                <Download className="w-6 h-6 text-muted-foreground" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-foreground">
+                                  {t("downloadHistory.empty")}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredDownloadTasks.map((task, index) => {
+                          // Status Badge Component
+                          const StatusBadge = ({
+                            status,
+                          }: {
+                            status: string;
+                          }) => {
+                            const getStatusVariant = (status: string) => {
+                              switch (status) {
+                                case "completed":
+                                  return "default";
+                                case "failed":
+                                  return "destructive";
+                                case "in_progress":
+                                  return "secondary";
+                                case "pending":
+                                  return "outline";
+                                default:
+                                  return "outline";
+                              }
+                            };
+
+                            return (
+                              <Badge variant={getStatusVariant(status)}>
+                                {t(`downloadHistory.status.${status}`)}
+                              </Badge>
+                            );
+                          };
+
+                          // Task Progress Component
+                          const TaskProgress = ({
+                            task,
+                          }: {
+                            task: DownloadTask;
+                          }) => {
+                            const progressValue = task.progress.progress || 0;
+
+                            if (task.progress.status === "completed") {
+                              return (
+                                <div className="flex items-center space-x-2">
+                                  <Progress value={100} className="w-16" />
+                                  <span className="text-xs text-muted-foreground">
+                                    100%
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            if (task.progress.status === "failed") {
+                              return (
+                                <span className="text-sm text-destructive">
+                                  Failed
+                                </span>
+                              );
+                            }
+
+                            if (task.progress.status === "in_progress") {
+                              return (
+                                <div className="flex items-center space-x-2">
+                                  <Progress
+                                    value={progressValue}
+                                    className="w-16"
+                                  />
+                                  <span className="text-xs text-muted-foreground">
+                                    {progressValue}%
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <span className="text-sm text-muted-foreground">
+                                -
+                              </span>
+                            );
+                          };
+
+                          const taskData = task.data as any;
+                          const fileName =
+                            task.download?.filename || "Unknown File";
+                          const platform = taskData.platform_name || "Unknown";
+                          const timestamp = task.created_at;
+                          const originalUrl = taskData.downloadUrl;
+
+                          return (
+                            <tr
+                              key={`${taskData.id}-${index}`}
+                              className="hover:bg-muted/50 transition-colors"
+                            >
+                              <td className="py-4 px-6">
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                    <FileText className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div>
+                                    {originalUrl ? (
+                                      <a
+                                        href={originalUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm font-medium text-primary hover:text-primary/80 underline truncate max-w-[200px] block"
+                                      >
+                                        {fileName}
+                                      </a>
+                                    ) : (
+                                      <p className="text-sm font-medium text-foreground truncate max-w-[200px]">
+                                        {fileName}
+                                      </p>
+                                    )}
+                                    {taskData.fileSize && (
+                                      <p className="text-xs text-muted-foreground">
+                                        {taskData.fileSize}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6">
+                                <span className="text-sm text-foreground">
+                                  {platform}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6">
+                                <StatusBadge status={task.progress.status} />
+                              </td>
+                              <td className="py-4 px-6">
+                                <TaskProgress task={task} />
+                              </td>
+                              <td className="py-4 px-6">
+                                <div className="flex items-center space-x-1">
+                                  <Coins className="w-4 h-4 text-orange-500" />
+                                  <span className="text-sm font-medium text-foreground">
+                                    {taskData.price || 0}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6">
+                                <span className="text-sm text-muted-foreground">
+                                  {timestamp
+                                    ? formatTimestamp(
+                                        timestamp,
+                                        i18next.language
+                                      )
+                                    : "-"}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="lg:hidden space-y-3 max-h-[400px] overflow-y-auto">
+                  {isLoadingDownloads ? (
+                    <div className="py-12 text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            Loading downloads...
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : downloadError ? (
+                    <div className="py-12 text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
+                          <AlertCircle className="w-6 h-6 text-destructive" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            Error loading downloads
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {downloadError}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : filteredDownloadTasks.length === 0 ? (
+                    <div className="py-12 text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                          <Download className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            {t("downloadHistory.empty")}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    filteredDownloadTasks.map((task, index) => {
+                      // Status Badge Component
+                      const StatusBadge = ({ status }: { status: string }) => {
+                        const getStatusVariant = (status: string) => {
+                          switch (status) {
+                            case "completed":
+                              return "default";
+                            case "failed":
+                              return "destructive";
+                            case "in_progress":
+                              return "secondary";
+                            case "pending":
+                              return "outline";
+                            default:
+                              return "outline";
+                          }
+                        };
+
+                        return (
+                          <Badge variant={getStatusVariant(status)}>
+                            {t(`downloadHistory.status.${status}`)}
+                          </Badge>
+                        );
+                      };
+
+                      // Task Progress Component
+                      const TaskProgress = ({
+                        task,
+                      }: {
+                        task: DownloadTask;
+                      }) => {
+                        const progressValue = task.progress.progress || 0;
+
+                        if (task.progress.status === "completed") {
+                          return (
+                            <div className="flex items-center space-x-2">
+                              <Progress value={100} className="w-20" />
+                              <span className="text-xs text-muted-foreground">
+                                100%
+                              </span>
+                            </div>
+                          );
+                        }
+
+                        if (task.progress.status === "failed") {
+                          return (
+                            <span className="text-sm text-destructive">
+                              Failed
+                            </span>
+                          );
+                        }
+
+                        if (task.progress.status === "in_progress") {
+                          return (
+                            <div className="flex items-center space-x-2">
+                              <Progress
+                                value={progressValue}
+                                className="w-20"
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                {progressValue}%
+                              </span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <span className="text-sm text-muted-foreground">
+                            -
+                          </span>
+                        );
+                      };
+
+                      const taskData = task.data as any;
+                      const fileName =
+                        task.download?.filename || "Unknown File";
+                      const platform = taskData.platform_name || "Unknown";
+                      const timestamp = task.created_at;
+                      const originalUrl = taskData.downloadUrl;
+
+                      return (
+                        <div
+                          key={`${taskData.id}-${index}`}
+                          className="bg-card border border-border rounded-xl p-4 space-y-4 hover:bg-muted/20 transition-colors"
+                        >
+                          {/* Header with File Info and Status */}
+                          <div className="flex items-start justify-between space-x-3">
+                            <div className="flex items-center space-x-3 flex-1 min-w-0">
+                              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <FileText className="w-5 h-5 text-primary" />
+                              </div>
+                              <div className="max-w-[100px] sm:max-w-auto min-w-0 flex-1">
+                                {originalUrl ? (
+                                  <a
+                                    href={originalUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-semibold text-primary hover:text-primary/80 underline truncate block max-w-[200px]"
+                                  >
+                                    {fileName}
+                                  </a>
+                                ) : (
+                                  <p className="text-sm font-semibold text-foreground truncate max-w-[200px]">
+                                    {fileName}
+                                  </p>
+                                )}
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {platform}
+                                </p>
+                                {taskData.fileSize && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {taskData.fileSize}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <StatusBadge status={task.progress.status} />
+                          </div>
+
+                          {/* Progress, Price and Date Grid */}
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                {t("downloadHistory.columns.progress")}
+                              </div>
+                              <TaskProgress task={task} />
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                Price
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Coins className="w-3 h-3 text-orange-500" />
+                                <span className="text-sm font-medium text-foreground">
+                                  {taskData.price || 0}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                {t("downloadHistory.columns.date")}
+                              </div>
+                              <div className="text-sm font-medium text-foreground flex items-center">
+                                <Clock className="w-3 h-3 mr-1" />
+                                {timestamp
+                                  ? formatTimestamp(timestamp, i18next.language)
+                                  : "-"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </CardContent>
+
+              {/* Status Summary */}
+              <div className="border-t border-border">
+                <div className="p-6 pb-0">
+                  {/* Filter Info */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-sm font-medium text-foreground">
+                        {t("downloadHistory.statusSummary.title")}
+                      </h3>
+                      {selectedPlatformFilter !== "all" && (
+                        <div className="flex items-center space-x-2 px-4 py-2 bg-primary/10 rounded-full">
+                          {sitesDataForFilter.find(
+                            (site) => site.name === selectedPlatformFilter
+                          ) && (
+                            <img
+                              src={
+                                sitesDataForFilter.find(
+                                  (site) => site.name === selectedPlatformFilter
+                                )?.icon
+                              }
+                              alt={selectedPlatformName}
+                              className="w-4 h-4 rounded"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                              }}
+                            />
+                          )}
+                          <span className="text-xs font-medium text-primary">
+                            {selectedPlatformName}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <span className="text-primary text-2xl font-semibold mx-1">
+                        {filteredDownloadTasks.length}
+                      </span>{" "}
+                      {filteredDownloadTasks.length === 1
+                        ? t("downloadHistory.fileCount.file")
+                        : t("downloadHistory.fileCount.files")}{" "}
+                      {selectedPlatformFilter !== "all"
+                        ? `${t("downloadHistory.fileCount.from")} ${selectedPlatformName}`
+                        : t("downloadHistory.fileCount.total")}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+              {/* Credit History Card */}
+              <Card className="dark:bg-muted/50">
+                <CardHeader>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-lg font-semibold">
+                        {t("dashboard.creditHistory.title")}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {t("dashboard.creditHistory.description")}
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingHistory ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : historyError ? (
+                    <div className="text-center py-8">
+                      <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+                      <p className="text-sm text-destructive mb-4">
+                        {historyError}
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={loadEnhancedCreditHistory}
+                      >
+                        {t("dashboard.creditHistory.retry")}
+                      </Button>
+                    </div>
+                  ) : enhancedCreditHistory.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="space-y-3 max-h-80 overflow-y-auto">
+                        {enhancedCreditHistory
+                          .slice(0, 5)
+                          .map((entry, index) => {
+                            const config = getTransactionTypeConfig(entry.type);
+                            const IconComponent = config.icon;
+
+                            return (
+                              <div
+                                key={`${entry.email}-${entry.timestamp}-${index}`}
+                                className={`relative flex items-center justify-between p-4 bg-card border rounded-lg hover:bg-muted/50 transition-colors ${config.borderColor}`}
+                              >
+                                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                  {/* Transaction Type Icon */}
+                                  <div
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center ${config.bgColor}`}
+                                  >
+                                    <IconComponent
+                                      className={`w-5 h-5 ${config.iconColor}`}
+                                    />
+                                  </div>
+
+                                  {/* Transaction Details */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between space-x-2 mb-1">
+                                      <span className="user-name-dashboard text-sm font-medium text-foreground truncate max-w-[120px]">
+                                        {entry.user_name}
+                                      </span>
+                                      <Badge
+                                        variant="secondary"
+                                        className={`text-xs absolute ${isRTL ? "left-3" : "right-3"}`}
+                                      >
+                                        {t(
+                                          `dashboard.creditHistory.transactions.types.${entry.type}`
+                                        )}
+                                      </Badge>
+                                    </div>
+
+                                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                                      <Mail className="w-3 h-3" />
+                                      <span className="truncate">
+                                        {entry.email}
+                                      </span>
+                                    </div>
+
+                                    {entry.plan && (
+                                      <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
+                                        <CreditCard className="w-3 h-3" />
+                                        <span>{entry.plan}</span>
+                                      </div>
+                                    )}
+
+                                    {entry.reason && (
+                                      <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
+                                        <Activity className="w-3 h-3" />
+                                        <span className="capitalize">
+                                          {t(
+                                            `dashboard.creditHistory.reasons.${entry.reason}`,
+                                            { defaultValue: entry.reason }
+                                          )}
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
+                                      <Calendar className="w-3 h-3" />
+                                      <span>
+                                        {formatTimestamp(
+                                          entry.timestamp,
+                                          isRTL ? "ar" : "en"
+                                        )}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Amount Display (only for add and use types) */}
+                                {entry.type !== "delete" &&
+                                  entry.amount !== undefined && (
+                                    <div className="text-right ml-4">
+                                      <div
+                                        className={`text-sm font-medium ${config.amountColor}`}
+                                      >
+                                        {config.amountPrefix}
+                                        {entry.amount}
+                                      </div>
+                                    </div>
+                                  )}
+                              </div>
+                            );
+                          })}
+                      </div>
+
+                      {enhancedCreditHistory.length > 5 && (
+                        <div className="pt-3 border-t border-border">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsCreditHistoryDialogOpen(true)}
+                            className="w-full"
+                          >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            {t("dashboard.creditHistory.showAll")} (
+                            {enhancedCreditHistory.length})
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center text-center p-20">
+                      <div>
+                        <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                        <p className="text-sm text-muted-foreground">
+                          {t("dashboard.creditHistory.noHistoryData")}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Credit Analytics Card */}
+              <Card className="dark:bg-muted/50">
+                <CardHeader>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg font-semibold text-foreground">
+                        {t("dashboard.creditAnalytics.title")}
+                      </CardTitle>
+                      <p className="text-xs text-muted-foreground">
+                        {t("dashboard.creditAnalytics.description")}
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {isLoadingAnalytics ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : analyticsError ? (
+                    <div className="text-center py-8">
+                      <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+                      <p className="text-sm text-destructive">
+                        {analyticsError}
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={loadCreditAnalytics}
+                        className="mt-2"
+                      >
+                        {t("dashboard.creditAnalytics.retry")}
+                      </Button>
+                    </div>
+                  ) : creditAnalytics ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1 text-center p-4 bg-primary/10 border border-primary/10 rounded-xl">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {t("dashboard.creditAnalytics.totalIssued")}
+                          </p>
+                          <p className="text-lg font-bold text-foreground">
+                            {creditAnalytics.total_credits_issued.toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="space-y-1 text-center p-4 bg-green-400/10 border border-green-400/10 rounded-xl">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {t("dashboard.creditAnalytics.totalUsed")}
+                          </p>
+                          <p className="text-lg font-bold text-foreground">
+                            {creditAnalytics.total_credits_used.toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="space-y-1 text-center p-4 bg-blue-400/10 border border-blue-400/10 rounded-xl">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {t("dashboard.creditAnalytics.remaining")}
+                          </p>
+                          <p className="text-lg font-bold text-forground">
+                            {creditAnalytics.total_remaining_credits.toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="space-y-1 text-center p-4 bg-pink-400/10 border border-pink-400/10 rounded-xl">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {t("dashboard.creditAnalytics.dailyAverage")}
+                          </p>
+                          <p className="text-lg font-bold text-foreground">
+                            {creditAnalytics.average_daily_usage.toFixed(1)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Credits by Plan Section */}
+                      {creditAnalytics.credits_by_plan &&
+                        Object.keys(creditAnalytics.credits_by_plan).length >
+                          0 && (
+                          <div className="space-y-3">
+                            <h4 className="text-sm font-semibold text-foreground">
+                              {t("dashboard.creditAnalytics.creditsByPlan")}
+                            </h4>
+                            <div className="space-y-2">
+                              {Object.entries(
+                                creditAnalytics.credits_by_plan
+                              ).map(([planName, credits]) => (
+                                <div
+                                  key={planName}
+                                  className="flex items-center justify-between p-3 bg-muted/50 border border-border/50 rounded-lg"
+                                >
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-3 h-3 bg-primary rounded-full"></div>
+                                    <span className="text-sm font-medium text-foreground">
+                                      {planName}
+                                    </span>
+                                  </div>
+                                  <span
+                                    className={`flex items-center gap-2 text-sm font-bold text-primary ${isRTL ? "flex-row-reverse" : "flex-row"}`}
+                                  >
+                                    {credits.toLocaleString()}{" "}
+                                    <span
+                                      className={`text-muted-foreground ${isRTL && "text-xs"}`}
+                                    >{`${isRTL ? "نقطة" : "Credits"}`}</span>
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-muted-foreground">
+                        {t("dashboard.creditAnalytics.noAnalyticsData")}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Second Row: Add New Subscription, Credit History, Credit Analytics */}
             {isLoadingAnalytics || isLoadingHistory || isLoadingPricingPlans ? (
               <DashboardActionCardsSkeleton />
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                {/* Add Credits Card */}
+                <Card className="dark:bg-muted/50">
+                  <CardHeader>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
+                        <Plus className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-semibold text-foreground">
+                          {t("dashboard.addCredits.title")}
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground">
+                          {t("dashboard.addCredits.description")}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="add-credits-email"
+                          className="text-sm font-medium text-foreground"
+                        >
+                          {t("dashboard.addCredits.form.email")}
+                        </Label>
+                        <Input
+                          id="add-credits-email"
+                          type="email"
+                          placeholder={t(
+                            "dashboard.addCredits.form.emailPlaceholder"
+                          )}
+                          value={addCreditsEmail}
+                          onChange={(e) => setAddCreditsEmail(e.target.value)}
+                          className={`text-sm ${addCreditsEmailError ? "border-destructive" : ""}`}
+                        />
+                        {addCreditsEmailError && (
+                          <p className="text-xs text-destructive">
+                            {addCreditsEmailError}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="add-credits-amount"
+                          className="text-sm font-medium text-foreground"
+                        >
+                          {t("dashboard.addCredits.form.credits")}
+                        </Label>
+                        <Input
+                          id="add-credits-amount"
+                          type="number"
+                          min="1"
+                          placeholder={t(
+                            "dashboard.addCredits.form.creditsPlaceholder"
+                          )}
+                          value={addCreditsAmount}
+                          onChange={(e) => setAddCreditsAmount(e.target.value)}
+                          className={`text-sm ${addCreditsAmountError ? "border-destructive" : ""}`}
+                        />
+                        {addCreditsAmountError && (
+                          <p className="text-xs text-destructive">
+                            {addCreditsAmountError}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleAddCredits}
+                      disabled={isAddingCredits}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {isAddingCredits ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          {t("dashboard.addCredits.form.adding")}
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4" />
+                          {t("dashboard.addCredits.form.submit")}
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Decrease Credits Card */}
+                <Card className="dark:bg-muted/50">
+                  <CardHeader>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
+                        <Minus className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-semibold text-foreground">
+                          {t("dashboard.decreaseCredits.title")}
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground">
+                          {t("dashboard.decreaseCredits.description")}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="decrease-credits-email"
+                          className="text-sm font-medium text-foreground"
+                        >
+                          {t("dashboard.decreaseCredits.form.email")}
+                        </Label>
+                        <Input
+                          id="decrease-credits-email"
+                          type="email"
+                          placeholder={t(
+                            "dashboard.decreaseCredits.form.emailPlaceholder"
+                          )}
+                          value={decreaseCreditsEmail}
+                          onChange={(e) =>
+                            setDecreaseCreditsEmail(e.target.value)
+                          }
+                          className={`text-sm ${decreaseCreditsEmailError ? "border-destructive" : ""}`}
+                        />
+                        {decreaseCreditsEmailError && (
+                          <p className="text-xs text-destructive">
+                            {decreaseCreditsEmailError}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="decrease-credits-amount"
+                          className="text-sm font-medium text-foreground"
+                        >
+                          {t("dashboard.decreaseCredits.form.credits")}
+                        </Label>
+                        <Input
+                          id="decrease-credits-amount"
+                          type="number"
+                          min="1"
+                          placeholder={t(
+                            "dashboard.decreaseCredits.form.creditsPlaceholder"
+                          )}
+                          value={decreaseCreditsAmount}
+                          onChange={(e) =>
+                            setDecreaseCreditsAmount(e.target.value)
+                          }
+                          className={`text-sm ${decreaseCreditsAmountError ? "border-destructive" : ""}`}
+                        />
+                        {decreaseCreditsAmountError && (
+                          <p className="text-xs text-destructive">
+                            {decreaseCreditsAmountError}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleDecreaseCredits}
+                      disabled={isDecreasingCredits}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      {isDecreasingCredits ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          {t("dashboard.decreaseCredits.form.submitting")}
+                        </>
+                      ) : (
+                        <>
+                          <Minus className="w-4 h-4" />
+                          {t("dashboard.decreaseCredits.form.submit")}
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
                 {/* Add New Subscription Card */}
                 <Card className="dark:bg-muted/50">
                   <CardHeader>
@@ -2586,287 +4022,6 @@ export default function DashboardPage() {
                         </div>
                       )}
                     </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Credit History Card */}
-                <Card className="dark:bg-muted/50">
-                  <CardHeader>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold">
-                          {t("dashboard.creditHistory.title")}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          {t("dashboard.creditHistory.description")}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingHistory ? (
-                      <div className="flex items-center justify-center py-12">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                      </div>
-                    ) : historyError ? (
-                      <div className="text-center py-8">
-                        <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
-                        <p className="text-sm text-destructive mb-4">
-                          {historyError}
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={loadEnhancedCreditHistory}
-                        >
-                          {t("dashboard.creditHistory.retry")}
-                        </Button>
-                      </div>
-                    ) : enhancedCreditHistory.length > 0 ? (
-                      <div className="space-y-3">
-                        <div className="space-y-3 max-h-80 overflow-y-auto">
-                          {enhancedCreditHistory
-                            .slice(0, 5)
-                            .map((entry, index) => {
-                              const config = getTransactionTypeConfig(
-                                entry.type
-                              );
-                              const IconComponent = config.icon;
-
-                              return (
-                                <div
-                                  key={`${entry.email}-${entry.timestamp}-${index}`}
-                                  className={`relative flex items-center justify-between p-4 bg-card border rounded-lg hover:bg-muted/50 transition-colors ${config.borderColor}`}
-                                >
-                                  <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                    {/* Transaction Type Icon */}
-                                    <div
-                                      className={`w-10 h-10 rounded-full flex items-center justify-center ${config.bgColor}`}
-                                    >
-                                      <IconComponent
-                                        className={`w-5 h-5 ${config.iconColor}`}
-                                      />
-                                    </div>
-
-                                    {/* Transaction Details */}
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center justify-between space-x-2 mb-1">
-                                        <span className="user-name-dashboard text-sm font-medium text-foreground truncate max-w-[120px]">
-                                          {entry.user_name}
-                                        </span>
-                                        <Badge
-                                          variant="secondary"
-                                          className={`text-xs absolute ${isRTL ? "left-3" : "right-3"}`}
-                                        >
-                                          {t(
-                                            `dashboard.creditHistory.transactions.types.${entry.type}`
-                                          )}
-                                        </Badge>
-                                      </div>
-
-                                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                        <Mail className="w-3 h-3" />
-                                        <span className="truncate">
-                                          {entry.email}
-                                        </span>
-                                      </div>
-
-                                      {entry.plan && (
-                                        <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
-                                          <CreditCard className="w-3 h-3" />
-                                          <span>{entry.plan}</span>
-                                        </div>
-                                      )}
-
-                                      {entry.reason && (
-                                        <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
-                                          <Activity className="w-3 h-3" />
-                                          <span className="capitalize">
-                                            {t(
-                                              `dashboard.creditHistory.reasons.${entry.reason}`,
-                                              { defaultValue: entry.reason }
-                                            )}
-                                          </span>
-                                        </div>
-                                      )}
-
-                                      <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
-                                        <Calendar className="w-3 h-3" />
-                                        <span>
-                                          {formatTimestamp(
-                                            entry.timestamp,
-                                            isRTL ? "ar" : "en"
-                                          )}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Amount Display (only for add and use types) */}
-                                  {entry.type !== "delete" &&
-                                    entry.amount !== undefined && (
-                                      <div className="text-right ml-4">
-                                        <div
-                                          className={`text-sm font-medium ${config.amountColor}`}
-                                        >
-                                          {config.amountPrefix}
-                                          {entry.amount}
-                                        </div>
-                                      </div>
-                                    )}
-                                </div>
-                              );
-                            })}
-                        </div>
-
-                        {enhancedCreditHistory.length > 5 && (
-                          <div className="pt-3 border-t border-border">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setIsCreditHistoryDialogOpen(true)}
-                              className="w-full"
-                            >
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              {t("dashboard.creditHistory.showAll")} (
-                              {enhancedCreditHistory.length})
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center text-center p-20">
-                        <div>
-                          <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                          <p className="text-sm text-muted-foreground">
-                            {t("dashboard.creditHistory.noHistoryData")}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Credit Analytics Card */}
-                <Card className="dark:bg-muted/50">
-                  <CardHeader>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg font-semibold text-foreground">
-                          {t("dashboard.creditAnalytics.title")}
-                        </CardTitle>
-                        <p className="text-xs text-muted-foreground">
-                          {t("dashboard.creditAnalytics.description")}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isLoadingAnalytics ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                      </div>
-                    ) : analyticsError ? (
-                      <div className="text-center py-8">
-                        <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
-                        <p className="text-sm text-destructive">
-                          {analyticsError}
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={loadCreditAnalytics}
-                          className="mt-2"
-                        >
-                          {t("dashboard.creditAnalytics.retry")}
-                        </Button>
-                      </div>
-                    ) : creditAnalytics ? (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1 text-center p-4 bg-primary/10 border border-primary/10 rounded-xl">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                              {t("dashboard.creditAnalytics.totalIssued")}
-                            </p>
-                            <p className="text-lg font-bold text-foreground">
-                              {creditAnalytics.total_credits_issued.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="space-y-1 text-center p-4 bg-green-400/10 border border-green-400/10 rounded-xl">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                              {t("dashboard.creditAnalytics.totalUsed")}
-                            </p>
-                            <p className="text-lg font-bold text-foreground">
-                              {creditAnalytics.total_credits_used.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="space-y-1 text-center p-4 bg-blue-400/10 border border-blue-400/10 rounded-xl">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                              {t("dashboard.creditAnalytics.remaining")}
-                            </p>
-                            <p className="text-lg font-bold text-forground">
-                              {creditAnalytics.total_remaining_credits.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="space-y-1 text-center p-4 bg-pink-400/10 border border-pink-400/10 rounded-xl">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                              {t("dashboard.creditAnalytics.dailyAverage")}
-                            </p>
-                            <p className="text-lg font-bold text-foreground">
-                              {creditAnalytics.average_daily_usage.toFixed(1)}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Credits by Plan Section */}
-                        {creditAnalytics.credits_by_plan &&
-                          Object.keys(creditAnalytics.credits_by_plan).length >
-                            0 && (
-                            <div className="space-y-3">
-                              <h4 className="text-sm font-semibold text-foreground">
-                                {t("dashboard.creditAnalytics.creditsByPlan")}
-                              </h4>
-                              <div className="space-y-2">
-                                {Object.entries(
-                                  creditAnalytics.credits_by_plan
-                                ).map(([planName, credits]) => (
-                                  <div
-                                    key={planName}
-                                    className="flex items-center justify-between p-3 bg-muted/50 border border-border/50 rounded-lg"
-                                  >
-                                    <div className="flex items-center space-x-2">
-                                      <div className="w-3 h-3 bg-primary rounded-full"></div>
-                                      <span className="text-sm font-medium text-foreground">
-                                        {planName}
-                                      </span>
-                                    </div>
-                                    <span
-                                      className={`flex items-center gap-2 text-sm font-bold text-primary ${isRTL ? "flex-row-reverse" : "flex-row"}`}
-                                    >
-                                      {credits.toLocaleString()}{" "}
-                                      <span
-                                        className={`text-muted-foreground ${isRTL && "text-xs"}`}
-                                      >{`${isRTL ? "نقطة" : "Credits"}`}</span>
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <p className="text-sm text-muted-foreground">
-                          {t("dashboard.creditAnalytics.noAnalyticsData")}
-                        </p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               </div>

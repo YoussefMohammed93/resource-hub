@@ -425,6 +425,49 @@
         "errorLoading": "لا يمكن العثور على المستخدمين"
       }
     },
+    "addCredits": {
+      "title": "إضافة رصيد",
+      "description": "إضافة رصيد إلى حساب المستخدم",
+      "form": {
+        "email": "البريد الإلكتروني للمستخدم",
+        "emailPlaceholder": "أدخل عنوان البريد الإلكتروني للمستخدم",
+        "credits": "مقدار الأرصدة",
+        "creditsPlaceholder": "أدخل عدد الأرصدة المراد إضافتها",
+        "submit": "إضافة رصيد"
+      },
+      "validation": {
+        "emailRequired": "البريد الإلكتروني مطلوب",
+        "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صالح",
+        "creditsRequired": "مقدار الأرصدة مطلوب",
+        "invalidCredits": "يرجى إدخال عدد صالح من الأرصدة"
+      },
+      "toast": {
+        "success": "تم إضافة {{credits}} رصيد بنجاح إلى {{email}}",
+        "error": "فشل في إضافة الأرصدة. يرجى المحاولة مرة أخرى."
+      }
+    },
+    "decreaseCredits": {
+      "title": "تقليل رصيد",
+      "description": "إزالة رصيد من حساب المستخدم",
+      "form": {
+        "email": "البريد الإلكتروني للمستخدم",
+        "emailPlaceholder": "أدخل عنوان البريد الإلكتروني للمستخدم",
+        "credits": "مقدار الرصيد",
+        "creditsPlaceholder": "أدخل عدد الرصيد المراد إزالتها",
+        "submit": "تقليل رصيد",
+        "submitting": "جاري التقليل..."
+      },
+      "validation": {
+        "emailRequired": "البريد الإلكتروني مطلوب",
+        "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صالح",
+        "creditsRequired": "مقدار الرصيد مطلوب",
+        "invalidCredits": "يرجى إدخال عدد صالح من الأرصدة"
+      },
+      "toast": {
+        "success": "تم إزالة {{credits}} رصيد بنجاح من {{email}}",
+        "error": "فشل في تقليل الأرصدة. يرجى المحاولة مرة أخرى."
+      }
+    },
     "addSubscription": {
       "title": "إضافة اشتراك جديد",
       "description": "إنشاء اشتراك للمستخدم",
@@ -446,7 +489,7 @@
       },
       "validation": {
         "emailRequired": "البريد الإلكتروني مطلوب",
-        "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صحيح",
+        "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
         "planRequired": "يرجى اختيار خطة اشتراك"
       }
     },
@@ -1847,5 +1890,53 @@
         "showInFolder": "إظهار في المجلد"
       }
     }
+  },
+  "downloadHistory": {
+    "title": "سجل التحميلات",
+    "description": "تتبع جميع أنشطة التحميل الخاصة بك",
+    "columns": {
+      "file": "الملف",
+      "platform": "المنصة",
+      "status": "الحالة",
+      "progress": "التقدم",
+      "price": "السعر",
+      "date": "التاريخ",
+      "actions": "الإجراءات"
+    },
+    "filters": {
+      "allPlatforms": "جميع المنصات",
+      "filterByPlatform": "تصفية حسب المنصة"
+    },
+    "statusSummary": {
+      "title": "ملخص حالة التحميلات",
+      "active": "نشط",
+      "expired": "منتهي الصلاحية",
+      "suspended": "معلق"
+    },
+    "fileCount": {
+      "file": "ملف",
+      "files": "ملفات",
+      "total": "المجموع",
+      "from": "من"
+    },
+    "status": {
+      "completed": "مكتمل",
+      "failed": "فشل",
+      "in_progress": "قيد التقدم",
+      "pending": "في الانتظار"
+    },
+    "actions": {
+      "download": "تحميل",
+      "retry": "إعادة المحاولة"
+    },
+    "empty": "لم يتم العثور على تحميلات"
+  },
+  "statisticsCards": {
+    "totalDownloads": "إجمالي التحميلات",
+    "successRate": "معدل النجاح",
+    "creditsSpent": "الرصيد المستخدم",
+    "topPlatforms": "أهم المنصات",
+    "thisMonth": "هذا الشهر",
+    "allTime": "كل الأوقات"
   }
 }

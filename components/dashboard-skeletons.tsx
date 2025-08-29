@@ -38,8 +38,8 @@ export function DashboardHeaderSkeleton({
 // Stats Cards Skeleton
 export function DashboardStatsCardsSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-      {Array.from({ length: 3 }, (_, i) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+      {Array.from({ length: 4 }, (_, i) => (
         <Card key={i} className="group dark:bg-muted/50">
           <CardContent>
             <div className="flex items-start justify-between">

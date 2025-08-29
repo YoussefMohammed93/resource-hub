@@ -292,6 +292,16 @@ export interface CreditHistoryResponse {
 }
 
 // Credit Management Request Types
+export interface AddCreditsRequest {
+  email: string;
+  credits: number;
+}
+
+export interface DecreaseCreditsRequest {
+  email: string;
+  credits: number;
+}
+
 export interface AddSubscriptionRequest {
   email: string;
   plan_name: string;
@@ -312,6 +322,20 @@ export interface DeleteSubscriptionRequest {
 }
 
 // Credit Management Response Types
+export interface AddCreditsResponse {
+  success: boolean;
+  account?: UserAccount;
+  subscription?: Subscription;
+  credits_added?: number;
+}
+
+export interface DecreaseCreditsResponse {
+  success: boolean;
+  account?: UserAccount;
+  subscription?: Subscription;
+  credits_decreased?: number;
+}
+
 export interface SubscriptionResponse {
   success: boolean;
   account?: UserAccount;
@@ -345,6 +369,14 @@ export interface DownloadHistoryEntry {
 export interface DownloadHistoryResponse {
   success: boolean;
   history: DownloadHistoryEntry[];
+}
+
+export interface DownloadStatistics {
+  totalDownloads: number;
+  successRate: number;
+  creditsSpent: number;
+  topPlatforms: { platform: string; count: number }[];
+  thisMonth: number;
 }
 
 // Login request data
@@ -585,6 +617,26 @@ export const userApi = {
 
 // Credit Management API functions
 export const creditApi = {
+  // Add credits to user account (from credits+users.yaml)
+  async addCredits(
+    data: AddCreditsRequest
+  ): Promise<ApiResponse<AddCreditsResponse>> {
+    return apiRequest<AddCreditsResponse>("/v1/credit/add", "POST", {
+      email: data.email,
+      credits: data.credits,
+    });
+  },
+
+  // Decrease credits from user account (from credits+users.yaml)
+  async decreaseCredits(
+    data: DecreaseCreditsRequest
+  ): Promise<ApiResponse<DecreaseCreditsResponse>> {
+    return apiRequest<DecreaseCreditsResponse>("/v1/credit/decrease", "POST", {
+      email: data.email,
+      credits: data.credits,
+    });
+  },
+
   // Add subscription (line 220 from swagger)
   async addSubscription(
     data: AddSubscriptionRequest
@@ -2071,6 +2123,7 @@ export interface DownloadCreateRequest {
 export interface DownloadCreateResponse {
   message: string;
   task_id: string;
+  download_url: string;
 }
 
 export interface DownloadTask {
@@ -2296,5 +2349,4 @@ export const downloadApi = {
       };
     }
   },
-
 };

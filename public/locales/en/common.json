@@ -425,6 +425,49 @@
         "errorLoading": "Error fetching users"
       }
     },
+    "addCredits": {
+      "title": "Add Credits",
+      "description": "Add credits to a user account",
+      "form": {
+        "email": "User Email",
+        "emailPlaceholder": "Enter user email address",
+        "credits": "Credits Amount",
+        "creditsPlaceholder": "Enter number of credits to add",
+        "submit": "Add Credits"
+      },
+      "validation": {
+        "emailRequired": "Email is required",
+        "invalidEmail": "Please enter a valid email address",
+        "creditsRequired": "Credits amount is required",
+        "invalidCredits": "Please enter a valid number of credits"
+      },
+      "toast": {
+        "success": "Successfully added {{credits}} credits to {{email}}",
+        "error": "Failed to add credits. Please try again."
+      }
+    },
+    "decreaseCredits": {
+      "title": "Decrease Credits",
+      "description": "Remove credits from a user account",
+      "form": {
+        "email": "User Email",
+        "emailPlaceholder": "Enter user email address",
+        "credits": "Credits Amount",
+        "creditsPlaceholder": "Enter number of credits to remove",
+        "submit": "Decrease Credits",
+        "submitting": "Decreasing..."
+      },
+      "validation": {
+        "emailRequired": "Email is required",
+        "invalidEmail": "Please enter a valid email address",
+        "creditsRequired": "Credits amount is required",
+        "invalidCredits": "Please enter a valid number of credits"
+      },
+      "toast": {
+        "success": "Successfully removed {{credits}} credits from {{email}}",
+        "error": "Failed to decrease credits. Please try again."
+      }
+    },
     "addSubscription": {
       "title": "Add New Subscription",
       "description": "Create a subscription for a user",
@@ -1850,5 +1893,53 @@
         "showInFolder": "Show in Folder"
       }
     }
+  },
+  "downloadHistory": {
+    "title": "Download History",
+    "description": "Track all your download activities",
+    "columns": {
+      "file": "File",
+      "platform": "Platform", 
+      "status": "Status",
+      "progress": "Progress",
+      "price": "Price",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "filters": {
+      "allPlatforms": "All Platforms",
+      "filterByPlatform": "Filter by platform"
+    },
+    "statusSummary": {
+      "title": "Download Status Summary",
+      "active": "Active",
+      "expired": "Expired",
+      "suspended": "Suspended"
+    },
+    "fileCount": {
+      "file": "file",
+      "files": "files",
+      "total": "total",
+      "from": "from"
+    },
+    "status": {
+      "completed": "Completed",
+      "failed": "Failed", 
+      "in_progress": "In Progress",
+      "pending": "Pending"
+    },
+    "actions": {
+      "download": "Download",
+      "retry": "Retry"
+    },
+    "empty": "No downloads found"
+  },
+  "statisticsCards": {
+    "totalDownloads": "Total Downloads",
+    "successRate": "Success Rate", 
+    "creditsSpent": "Credits Spent",
+    "topPlatforms": "Top Platforms",
+    "thisMonth": "This Month",
+    "allTime": "All Time"
   }
 }
