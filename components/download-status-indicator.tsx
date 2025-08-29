@@ -108,8 +108,10 @@ export function DownloadStatusIndicator({
           return aPriority - bPriority;
         }
 
-        // Then sort by creation time (assuming newer tasks have higher IDs)
-        return (b.data?.id || "").localeCompare(a.data?.id || "");
+        // Then sort by creation time (newest first)
+        const aTime = new Date(a.created_at || 0).getTime();
+        const bTime = new Date(b.created_at || 0).getTime();
+        return bTime - aTime;
       });
 
       setDownloadTasks(sortedTasks);

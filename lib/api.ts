@@ -2085,6 +2085,7 @@ export interface DownloadTask {
     platform_name: string;
     price: number;
   };
+  created_at: string;
   download?: {
     downloadUrl: string;
     filename: string;
