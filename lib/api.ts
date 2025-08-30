@@ -384,6 +384,7 @@ export interface LoginRequest {
   email: string;
   password: string;
   remember_me?: boolean;
+  recaptcha_token?: string;
 }
 
 // Register request data
@@ -394,6 +395,7 @@ export interface RegisterRequest {
   lastName: string;
   phone: string;
   otp: string;
+  recaptcha_token?: string;
 }
 
 // Generic API request function using axios
@@ -512,6 +514,7 @@ export const authApi = {
       password: encryptedPassword,
       token,
       remember_me: credentials.remember_me || false,
+      ...(credentials.recaptcha_token && { recaptcha_token: credentials.recaptcha_token }),
     });
   },
 
@@ -551,6 +554,7 @@ export const authApi = {
       phoneNum: userData.phone,
       otp: userData.otp,
       token,
+      ...(userData.recaptcha_token && { recaptcha_token: userData.recaptcha_token }),
     });
   },
 

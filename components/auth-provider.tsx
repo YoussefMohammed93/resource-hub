@@ -115,13 +115,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (
     email: string,
     password: string,
-    rememberMe: boolean = false
+    rememberMe: boolean = false,
+    captchaToken?: string
   ) => {
     try {
       const response = await authApi.login({
         email,
         password,
         remember_me: rememberMe,
+        recaptcha_token: captchaToken,
       });
 
       if (response.success && response.data) {
@@ -157,7 +159,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     firstName: string,
     lastName: string,
     phone: string,
-    otp: string
+    otp: string,
+    captchaToken?: string
   ) => {
     try {
       const response = await authApi.register({
@@ -167,6 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         lastName,
         phone,
         otp,
+        recaptcha_token: captchaToken,
       });
 
       if (response.success && response.data) {
