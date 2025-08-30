@@ -567,6 +567,38 @@ export const authApi = {
     return apiRequest("/v1/auth/logout", "POST");
   },
 
+  // Change user password
+  async changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Promise<ApiResponse<{ email: string; message: string }>> {
+    // Use mock data if enabled
+    if (shouldUseMockData()) {
+      console.log("[Auth API] Using mock change password data");
+      return {
+        success: true,
+        data: {
+          email: "user@example.com",
+          message: "Password changed successfully.",
+        },
+      };
+    }
+
+    const encryptedCurrentPassword = encryptPassword(currentPassword);
+    const encryptedNewPassword = encryptPassword(newPassword);
+    const token = generateTimestampToken();
+
+    return apiRequest<{ email: string; message: string }>(
+      "/v1/auth/change-password",
+      "POST",
+      {
+        current_password: encryptedCurrentPassword,
+        new_password: encryptedNewPassword,
+        token,
+      }
+    );
+  },
+
   // Get current user data
   async getUserData(): Promise<ApiResponse<UserData>> {
     // Use mock data if enabled

@@ -46,7 +46,7 @@ import { HeaderControls } from "@/components/header-controls";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
-import { userApi, type DownloadHistoryEntry } from "@/lib/api";
+import { userApi, authApi, type DownloadHistoryEntry } from "@/lib/api";
 
 // Utility function to get the correct media URL based on environment and type
 const getMediaUrl = (item: DownloadHistoryEntry): string => {
@@ -150,14 +150,29 @@ export default function ProfilePage() {
     setIsPasswordLoading(true);
 
     try {
-      // Password change API implementation would go here
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-    } catch {
-      // Error handling would go here
+      const result = await authApi.changePassword(
+        passwordData.currentPassword,
+        passwordData.newPassword
+      );
+
+      if (result.success) {
+        // Clear form on success
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        
+        // Show success message (you can add toast notification here)
+        console.log("Password changed successfully:", result.data?.message);
+      } else {
+        // Handle API error
+        console.error("Password change failed:", result.error?.message);
+        // You can add toast notification or error state here
+      }
+    } catch (error) {
+      console.error("Password change error:", error);
+      // Handle unexpected errors
     } finally {
       setIsPasswordLoading(false);
     }

@@ -1,0 +1,545 @@
+openapi: 3.0.3
+info:
+  title: Authentication and OTP Management API
+  description: API for user authentication, password management, and OTP operations
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: https://staging-api.example.com
+    description: Staging server
+
+paths:
+  /v1/auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Change user password
+      description: Change the password for an authenticated user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - current_password
+                - new_password
+                - token
+              properties:
+                current_password:
+                  type: string
+                  description: Current encrypted password
+                  example: "encrypted_current_password_string"
+                new_password:
+                  type: string
+                  description: New encrypted password
+                  example: "encrypted_new_password_string"
+                token:
+                  type: string
+                  description: Encrypted timestamp token for validation
+                  example: "encrypted_timestamp_token"
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        format: email
+                        example: "user@example.com"
+                      message:
+                        type: string
+                        example: "Password changed successfully."
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                MissingSession:
+                  $ref: '#/components/examples/MissingSession'
+                InvalidSession:
+                  $ref: '#/components/examples/InvalidSession'
+                MissingCurrentPassword:
+                  $ref: '#/components/examples/MissingCurrentPassword'
+                MissingNewPassword:
+                  $ref: '#/components/examples/MissingNewPassword'
+                MissingToken:
+                  $ref: '#/components/examples/MissingToken'
+                ExpiredToken:
+                  $ref: '#/components/examples/ExpiredToken'
+                CurrentPasswordNotEncrypted:
+                  $ref: '#/components/examples/CurrentPasswordNotEncrypted'
+                NewPasswordNotEncrypted:
+                  $ref: '#/components/examples/NewPasswordNotEncrypted'
+                IncorrectCurrentPassword:
+                  $ref: '#/components/examples/IncorrectCurrentPassword'
+                SamePassword:
+                  $ref: '#/components/examples/SamePassword'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset forgotten password
+      description: Reset user password using OTP verification sent to phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - phoneNum
+                - new_password
+                - token
+                - otp
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: "user@example.com"
+                phoneNum:
+                  type: string
+                  pattern: '^\+[1-9]\d{1,14}$'
+                  description: Phone number with country code (must start with +)
+                  example: "+1234567890"
+                new_password:
+                  type: string
+                  description: New encrypted password
+                  example: "encrypted_new_password_string"
+                token:
+                  type: string
+                  description: Encrypted timestamp token for validation
+                  example: "encrypted_timestamp_token"
+                otp:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+                  description: 6-digit OTP code sent to phone number
+                  example: "123456"
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        format: email
+                        example: "user@example.com"
+                      message:
+                        type: string
+                        example: "Password reset successful."
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                MissingEmailForgot:
+                  $ref: '#/components/examples/MissingEmailForgot'
+                MissingPhoneNumForgot:
+                  $ref: '#/components/examples/MissingPhoneNumForgot'
+                InvalidPhoneFormatForgot:
+                  $ref: '#/components/examples/InvalidPhoneFormatForgot'
+                MissingNewPasswordForgot:
+                  $ref: '#/components/examples/MissingNewPasswordForgot'
+                MissingTokenForgot:
+                  $ref: '#/components/examples/MissingTokenForgot'
+                MissingOTPForgot:
+                  $ref: '#/components/examples/MissingOTPForgot'
+                ExpiredTokenForgot:
+                  $ref: '#/components/examples/ExpiredTokenForgot'
+                PasswordNotEncryptedForgot:
+                  $ref: '#/components/examples/PasswordNotEncryptedForgot'
+                InvalidOTPFormatForgot:
+                  $ref: '#/components/examples/InvalidOTPFormatForgot'
+                EmailNotFoundForgot:
+                  $ref: '#/components/examples/EmailNotFoundForgot'
+                PhoneNumberMismatchForgot:
+                  $ref: '#/components/examples/PhoneNumberMismatchForgot'
+                IncorrectOTPForgot:
+                  $ref: '#/components/examples/IncorrectOTPForgot'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/otp/send:
+    post:
+      tags:
+        - OTP Management
+      summary: Send OTP code
+      description: Send OTP code via WhatsApp for signup or password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phoneNum
+                - token
+              properties:
+                phoneNum:
+                  type: string
+                  pattern: '^\+[1-9]\d{1,14}$'
+                  description: Phone number with country code (must start with +)
+                  example: "+1234567890"
+                token:
+                  type: string
+                  description: Encrypted timestamp token for validation
+                  example: "encrypted_timestamp_token"
+                type:
+                  type: string
+                  enum: ["signup", "forgot_password"]
+                  default: "signup"
+                  description: Type of OTP (signup or forgot_password)
+                  example: "signup"
+                email:
+                  type: string
+                  format: email
+                  description: Required only for forgot_password type
+                  example: "user@example.com"
+                resend:
+                  type: boolean
+                  default: false
+                  description: Whether this is a resend request
+                  example: false
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "OTP sent successfully for signup."
+                      type:
+                        type: string
+                        enum: ["signup", "forgot_password"]
+                        example: "signup"
+              examples:
+                SignupOTP:
+                  summary: OTP sent for signup
+                  value:
+                    success: true
+                    data:
+                      message: "OTP sent successfully for signup."
+                      type: "signup"
+                ForgotPasswordOTP:
+                  summary: OTP sent for password reset
+                  value:
+                    success: true
+                    data:
+                      message: "Password reset OTP sent successfully."
+                      type: "forgot_password"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                MissingPhoneNum:
+                  $ref: '#/components/examples/MissingPhoneNum'
+                InvalidPhoneFormat:
+                  $ref: '#/components/examples/InvalidPhoneFormat'
+                MissingTokenOTP:
+                  $ref: '#/components/examples/MissingTokenOTP'
+                InvalidOTPType:
+                  $ref: '#/components/examples/InvalidOTPType'
+                ExpiredTokenOTP:
+                  $ref: '#/components/examples/ExpiredTokenOTP'
+                RateLimit:
+                  $ref: '#/components/examples/RateLimit'
+                MissingEmailForForgotPassword:
+                  $ref: '#/components/examples/MissingEmailForForgotPassword'
+                EmailNotFoundOTP:
+                  $ref: '#/components/examples/EmailNotFoundOTP'
+                PhoneNumberMismatch:
+                  $ref: '#/components/examples/PhoneNumberMismatch'
+                SendFailed:
+                  $ref: '#/components/examples/SendFailed'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            id:
+              oneOf:
+                - type: integer
+                - type: string
+              example: 1
+            message:
+              type: string
+              example: "Error message description"
+
+  examples:
+    # Change Password Examples
+    MissingSession:
+      value:
+        success: false
+        error:
+          id: 0
+          message: "Session cookie is missing. Please log in to access this resource."
+    InvalidSession:
+      value:
+        success: false
+        error:
+          id: 1
+          message: "Invalid session. Please log in again."
+    MissingCurrentPassword:
+      value:
+        success: false
+        error:
+          id: 2
+          message: "Current password is required."
+    MissingNewPassword:
+      value:
+        success: false
+        error:
+          id: 3
+          message: "New password is required."
+    MissingToken:
+      value:
+        success: false
+        error:
+          id: 4
+          message: "Token is required."
+    ExpiredToken:
+      value:
+        success: false
+        error:
+          id: 5
+          message: "Token is expired."
+    CurrentPasswordNotEncrypted:
+      value:
+        success: false
+        error:
+          id: 6
+          message: "Current password must be encrypted."
+    NewPasswordNotEncrypted:
+      value:
+        success: false
+        error:
+          id: 7
+          message: "New password must be encrypted."
+    IncorrectCurrentPassword:
+      value:
+        success: false
+        error:
+          id: 8
+          message: "Current password is incorrect."
+    SamePassword:
+      value:
+        success: false
+        error:
+          id: 9
+          message: "New password must be different from current password."
+
+    # Forgot Password Examples
+    MissingEmailForgot:
+      value:
+        success: false
+        error:
+          id: 0
+          message: "Email is required."
+    MissingPhoneNumForgot:
+      value:
+        success: false
+        error:
+          id: 1
+          message: "phoneNum is required."
+    InvalidPhoneFormatForgot:
+      value:
+        success: false
+        error:
+          id: 2
+          message: "phoneNum must start with +."
+    MissingNewPasswordForgot:
+      value:
+        success: false
+        error:
+          id: 3
+          message: "New password is required."
+    MissingTokenForgot:
+      value:
+        success: false
+        error:
+          id: 4
+          message: "Token is required."
+    MissingOTPForgot:
+      value:
+        success: false
+        error:
+          id: 5
+          message: "OTP is required."
+    ExpiredTokenForgot:
+      value:
+        success: false
+        error:
+          id: 6
+          message: "Token is expired."
+    PasswordNotEncryptedForgot:
+      value:
+        success: false
+        error:
+          id: 7
+          message: "New password must be encrypted."
+    InvalidOTPFormatForgot:
+      value:
+        success: false
+        error:
+          id: 8
+          message: "OTP must be a number."
+    EmailNotFoundForgot:
+      value:
+        success: false
+        error:
+          id: 9
+          message: "The provided email does not exist in our records."
+    PhoneNumberMismatchForgot:
+      value:
+        success: false
+        error:
+          id: 10
+          message: "Phone number does not match the account."
+    IncorrectOTPForgot:
+      value:
+        success: false
+        error:
+          id: 11
+          message: "Invalid OTP."
+
+    # Send OTP Examples
+    MissingPhoneNum:
+      value:
+        success: false
+        error:
+          id: 1
+          message: "phoneNum is required."
+    InvalidPhoneFormat:
+      value:
+        success: false
+        error:
+          id: 2
+          message: "phoneNum must start with +."
+    MissingTokenOTP:
+      value:
+        success: false
+        error:
+          id: 3
+          message: "token is required."
+    InvalidOTPType:
+      value:
+        success: false
+        error:
+          id: 4
+          message: "Invalid OTP type. Must be 'signup' or 'forgot_password'."
+    ExpiredTokenOTP:
+      value:
+        success: false
+        error:
+          id: 5
+          message: "token is expired."
+    RateLimit:
+      value:
+        success: false
+        error:
+          id: 6
+          message: "you can only send OTP 5 times in 60 seconds."
+    MissingEmailForForgotPassword:
+      value:
+        success: false
+        error:
+          id: 7
+          message: "Email is required for forgot_password type."
+    EmailNotFoundOTP:
+      value:
+        success: false
+        error:
+          id: 8
+          message: "The provided email does not exist in our records."
+    PhoneNumberMismatch:
+      value:
+        success: false
+        error:
+          id: 9
+          message: "Phone number does not match the account."
+    SendFailed:
+      value:
+        success: false
+        error:
+          id: 10
+          message: "failed to send OTP."
+
+tags:
+  - name: Authentication
+    description: User authentication and password management operations
+  - name: OTP Management
+    description: OTP sending and verification operations
