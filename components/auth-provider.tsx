@@ -28,7 +28,8 @@ interface AuthContextType {
   login: (
     email: string,
     password: string,
-    rememberMe?: boolean
+    rememberMe?: boolean,
+    captchaToken?: string
   ) => Promise<{ success: boolean; error?: string }>;
   register: (
     email: string,
@@ -36,7 +37,8 @@ interface AuthContextType {
     firstName: string,
     lastName: string,
     phone: string,
-    otp: string
+    otp: string,
+    captchaToken?: string
   ) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;

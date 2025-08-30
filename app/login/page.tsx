@@ -48,6 +48,19 @@ import { useLanguage } from "@/components/i18n-provider";
 import { HeaderControls } from "@/components/header-controls";
 import Footer from "@/components/footer";
 
+// Extend Window interface for reCAPTCHA
+declare global {
+  interface Window {
+    grecaptcha: {
+      reset: () => void;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
+      render: (element: string | HTMLElement, options: { sitekey: string; callback: string }) => number;
+      ready: (callback: () => void) => void;
+    };
+    handleCaptchaChange: (token: string) => void;
+  }
+}
+
 // Email validation function
 const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -67,6 +80,22 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
+  // Initialize reCAPTCHA
+  useEffect(() => {
+    // Set up global callback function
+    window.handleCaptchaChange = (token: string) => {
+      setCaptchaToken(token);
+      setShowTokenPopup(true);
+    };
+
+    // Cleanup
+    return () => {
+      if (window.handleCaptchaChange) {
+        window.handleCaptchaChange = undefined as unknown as (token: string) => void;
+      }
+    };
+  }, []);
+
   // Form state
   const [formData, setFormData] = useState({
     email: "",
@@ -84,6 +113,8 @@ export default function LoginPage() {
   // UI state
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [showTokenPopup, setShowTokenPopup] = useState(false);
 
   // Handle input changes
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -119,11 +150,20 @@ export default function LoginPage() {
     return Object.values(newErrors).every((error) => error === "");
   };
 
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
+      return;
+    }
+
+    if (!captchaToken) {
+      setErrors((prev) => ({
+        ...prev,
+        general: "Please complete the reCAPTCHA verification.",
+      }));
       return;
     }
 
@@ -136,7 +176,8 @@ export default function LoginPage() {
       const result = await login(
         formData.email,
         formData.password,
-        formData.rememberMe
+        formData.rememberMe,
+        captchaToken
       );
 
       if (result.success) {
@@ -148,6 +189,11 @@ export default function LoginPage() {
           ...prev,
           general: result.error || "Login failed. Please try again.",
         }));
+        // Reset captcha on error
+        setCaptchaToken(null);
+        if (window.grecaptcha) {
+          window.grecaptcha.reset();
+        }
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -155,6 +201,11 @@ export default function LoginPage() {
         ...prev,
         general: "An unexpected error occurred. Please try again.",
       }));
+      // Reset captcha on error
+      setCaptchaToken(null);
+      if (window.grecaptcha) {
+        window.grecaptcha.reset();
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -589,6 +640,20 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
+                {/* reCAPTCHA */}
+                <div className="space-y-2">
+                  <Label className={isRTL ? "text-right" : "text-left"}>
+                    Security Verification
+                  </Label>
+                  <div className="w-full flex justify-center p-4 border border-border rounded-lg bg-muted/30">
+                    <div
+                      className="g-recaptcha"
+                      data-sitekey="6Led0bcrAAAAALt_QDbwlJG4utgOoPeA-eG2hpl9"
+                      data-callback="handleCaptchaChange"
+                    ></div>
+                  </div>
+                </div>
+
                 {/* General Error Message */}
                 {errors.general && (
                   <div
@@ -632,6 +697,24 @@ export default function LoginPage() {
               </form>
             </CardContent>
           </Card>
+
+          {/* Token Popup for Testing */}
+          {showTokenPopup && captchaToken && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-background border rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 className="text-lg font-semibold mb-4">reCAPTCHA Token (Testing)</h3>
+                <div className="bg-muted p-3 rounded text-sm font-mono break-all mb-4">
+                  {captchaToken}
+                </div>
+                <Button
+                  onClick={() => setShowTokenPopup(false)}
+                  className="w-full"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Back to Home Button */}
           <div className="mt-6 text-center">

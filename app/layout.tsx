@@ -30,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `

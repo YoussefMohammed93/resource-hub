@@ -53,6 +53,19 @@ import { HeaderControls } from "@/components/header-controls";
 import { otpApi } from "@/lib/api";
 import Footer from "@/components/footer";
 
+// Extend Window interface for reCAPTCHA
+declare global {
+  interface Window {
+    grecaptcha: {
+      reset: () => void;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
+      render: (element: string | HTMLElement, options: { sitekey: string; callback: string }) => number;
+      ready: (callback: () => void) => void;
+    };
+    handleRegisterCaptchaChange: (token: string) => void;
+  }
+}
+
 // Email validation function
 const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -94,6 +107,22 @@ export default function RegisterPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
+  // Initialize reCAPTCHA
+  useEffect(() => {
+    // Set up global callback function
+    window.handleRegisterCaptchaChange = (token: string) => {
+      setCaptchaToken(token);
+      setShowTokenPopup(true);
+    };
+
+    // Cleanup
+    return () => {
+      if (window.handleRegisterCaptchaChange) {
+        window.handleRegisterCaptchaChange = undefined as unknown as (token: string) => void;
+      }
+    };
+  }, []);
+
   // Form state
   const [formData, setFormData] = useState({
     firstName: "",
@@ -130,6 +159,10 @@ export default function RegisterPage() {
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [otpMessage, setOtpMessage] = useState("");
+
+  // reCAPTCHA state
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [showTokenPopup, setShowTokenPopup] = useState(false);
 
   // Handle input changes
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -335,6 +368,14 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!captchaToken) {
+      setErrors((prev) => ({
+        ...prev,
+        general: "Please complete the reCAPTCHA verification.",
+      }));
+      return;
+    }
+
     setIsSubmitting(true);
 
     // Clear any previous general errors
@@ -357,7 +398,8 @@ export default function RegisterPage() {
         formData.firstName,
         formData.lastName,
         formData.phone,
-        formData.otp
+        formData.otp,
+        captchaToken
       );
 
       if (result.success) {
@@ -369,6 +411,11 @@ export default function RegisterPage() {
           ...prev,
           general: result.error || "Registration failed. Please try again.",
         }));
+        // Reset captcha on error
+        setCaptchaToken(null);
+        if (window.grecaptcha) {
+          window.grecaptcha.reset();
+        }
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -376,6 +423,11 @@ export default function RegisterPage() {
         ...prev,
         general: "An unexpected error occurred. Please try again.",
       }));
+      // Reset captcha on error
+      setCaptchaToken(null);
+      if (window.grecaptcha) {
+        window.grecaptcha.reset();
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -1097,6 +1149,20 @@ export default function RegisterPage() {
                   )}
                 </div>
 
+                {/* reCAPTCHA */}
+                <div className="space-y-2">
+                  <Label className={isRTL ? "text-right" : "text-left"}>
+                    Security Verification
+                  </Label>
+                  <div className="w-full flex justify-center p-4 border border-border rounded-lg bg-muted/30">
+                    <div
+                      className="g-recaptcha"
+                      data-sitekey="6Led0bcrAAAAALt_QDbwlJG4utgOoPeA-eG2hpl9"
+                      data-callback="handleRegisterCaptchaChange"
+                    ></div>
+                  </div>
+                </div>
+
                 {/* General Error Message */}
                 {errors.general && (
                   <div
@@ -1140,6 +1206,24 @@ export default function RegisterPage() {
               </form>
             </CardContent>
           </Card>
+
+          {/* Token Popup for Testing */}
+          {showTokenPopup && captchaToken && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-background border rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 className="text-lg font-semibold mb-4">reCAPTCHA Token (Testing)</h3>
+                <div className="bg-muted p-3 rounded text-sm font-mono break-all mb-4">
+                  {captchaToken}
+                </div>
+                <Button
+                  onClick={() => setShowTokenPopup(false)}
+                  className="w-full"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Back to Home Button */}
           <div className="mt-6 text-center">
