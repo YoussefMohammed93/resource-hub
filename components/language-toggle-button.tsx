@@ -29,7 +29,7 @@ export function LanguageToggleButton() {
       <Button
         variant="ghost"
         size="icon"
-        className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg hover:bg-muted/75 transition-colors"
+        className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg hover:bg-muted/75 transition-colors"
       >
         <div className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </Button>
@@ -43,13 +43,13 @@ export function LanguageToggleButton() {
           variant="ghost"
           size="icon"
           disabled={isLoading}
-          className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg hover:bg-muted/75 transition-all duration-200 relative"
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg hover:bg-muted/75 transition-all duration-200 relative"
           aria-label="Change language"
         >
           {isLoading ? (
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            <Loader2 className="!w-5 !h-5 animate-spin text-muted-foreground" />
           ) : (
-            <Globe className="w-3.5 h-3.5 sm:!w-6 sm:!h-6 text-muted-foreground transition-transform duration-200 hover:scale-110" />
+            <Globe className="!w-3.5 !h-3.5 sm:!w-5 sm:!h-5 text-muted-foreground transition-transform duration-200 hover:scale-110" />
           )}
         </Button>
       </DropdownMenuTrigger>

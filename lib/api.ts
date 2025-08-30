@@ -1687,13 +1687,16 @@ export const searchApi = {
     }
 
     try {
-      // Determine the endpoint based on environment
+      // Determine the endpoint and client based on environment
       const endpoint =
         process.env.NODE_ENV === "production"
-          ? "/v1/download/create" // Direct API call in production
+          ? "/v1/providers/data" // Direct API call in production
           : "/api/providers/data"; // Use proxy in development
 
-      const response = await searchApiClient.post(endpoint, {
+      // Use publicApiClient for production (no auth required) and searchApiClient for development (proxy)
+      const client = process.env.NODE_ENV === "production" ? publicApiClient : searchApiClient;
+
+      const response = await client.post(endpoint, {
         platform,
         file_url,
         file_id,
@@ -2310,10 +2313,14 @@ export const downloadApi = {
 
   // Get download tasks (from download.yaml)
   async getDownloadTasks(
-    taskId?: string
+    taskId?: string,
+    getAllTasks?: boolean
   ): Promise<ApiResponse<DownloadTasksResponse>> {
     try {
-      const params = taskId ? { task_id: taskId } : {};
+      const params: { task_id?: string; get_all?: boolean } = {};
+      if (taskId) params.task_id = taskId;
+      if (getAllTasks) params.get_all = true;
+      
       const response = await apiClient.request({
         url: "/v1/download/tasks",
         method: "GET",

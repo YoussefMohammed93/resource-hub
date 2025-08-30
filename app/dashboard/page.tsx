@@ -324,6 +324,9 @@ export default function DashboardPage() {
   const [sitesDataForFilter, setSitesDataForFilter] = useState<any[]>([]);
   const [selectedPlatformFilter, setSelectedPlatformFilter] =
     useState<string>("all");
+  
+  // Email search state for download history
+  const [emailSearchTerm, setEmailSearchTerm] = useState<string>("");
 
   // Helper function to format timestamp
   const formatTimestamp = (timestamp: string, locale: string) => {
@@ -354,11 +357,21 @@ export default function DashboardPage() {
     setDownloadError("");
 
     try {
-      const response = await downloadApi.getDownloadTasks();
+      // Always get all tasks from all users with emails
+      const response = await downloadApi.getDownloadTasks(undefined, true);
 
       if (response.success && response.data) {
-        // API returns data directly as an array, not nested under data.data
-        const tasks = Array.isArray(response.data) ? response.data : [];
+        // Handle response structure with emails
+        let tasks: DownloadTask[] = [];
+        
+        if (Array.isArray(response.data)) {
+          // Response: array of {email, data} objects
+          tasks = response.data.map((item: any) => ({
+            ...item.data,
+            userEmail: item.email // Add email field to task
+          }));
+        }
+        
         setDownloadTasks(tasks);
 
         // Calculate statistics
@@ -380,7 +393,7 @@ export default function DashboardPage() {
         // Calculate top platforms
         const platformCounts: { [key: string]: number } = {};
         tasks.forEach((task) => {
-          const platform = task.platform || "Unknown";
+          const platform = (task.data as any)?.platform_name || "Unknown";
           platformCounts[platform] = (platformCounts[platform] || 0) + 1;
         });
 
@@ -496,19 +509,40 @@ export default function DashboardPage() {
     });
   }, [enhancedCreditHistory, historySearchTerm, historyTypeFilter]);
 
-  // Filter download tasks by platform
+  // Filter download tasks by platform and email, then sort by date (newest first)
   const filteredDownloadTasks = useMemo(() => {
-    if (selectedPlatformFilter === "all") {
-      return downloadTasks;
+    let filtered = downloadTasks;
+    
+    // Filter by platform
+    if (selectedPlatformFilter !== "all") {
+      filtered = filtered.filter((task) => {
+        const taskData = task.data as any;
+        const platform = taskData.platform_name || "Unknown";
+        return platform
+          .toLowerCase()
+          .includes(selectedPlatformFilter.toLowerCase());
+      });
     }
-    return downloadTasks.filter((task) => {
-      const taskData = task.data as any;
-      const platform = taskData.platform_name || "Unknown";
-      return platform
-        .toLowerCase()
-        .includes(selectedPlatformFilter.toLowerCase());
+    
+    // Filter by email search term
+    if (emailSearchTerm.trim() !== "") {
+      filtered = filtered.filter((task) => {
+        const userEmail = (task as any).userEmail || "";
+        return userEmail
+          .toLowerCase()
+          .includes(emailSearchTerm.toLowerCase().trim());
+      });
+    }
+    
+    // Sort by date (newest first)
+    filtered = filtered.sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return dateB - dateA; // Descending order (newest first)
     });
-  }, [downloadTasks, selectedPlatformFilter]);
+    
+    return filtered;
+  }, [downloadTasks, selectedPlatformFilter, emailSearchTerm]);
 
   // Get the selected platform name for display
   const selectedPlatformName = useMemo(() => {
@@ -2924,13 +2958,34 @@ export default function DashboardPage() {
                       {t("downloadHistory.description")}
                     </p>
                   </div>
-                  {/* Platform Filter */}
-                  <div className="w-full sm:w-auto flex items-center space-x-2">
+                  {/* Filters */}
+                  <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3 sm:gap-2">
+                    {/* Email Search Input */}
+                    <div className="relative w-full sm:w-64">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="Search by email..."
+                        value={emailSearchTerm}
+                        onChange={(e) => setEmailSearchTerm(e.target.value)}
+                        className="pl-10 w-full h-10 border-border bg-background/50 focus:bg-background transition-colors"
+                      />
+                      {emailSearchTerm && (
+                        <button
+                          onClick={() => setEmailSearchTerm("")}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* Platform Filter */}
                     <Select
                       value={selectedPlatformFilter}
                       onValueChange={setSelectedPlatformFilter}
                     >
-                      <SelectTrigger className="w-full sm:w-48">
+                      <SelectTrigger className="w-full sm:w-48 h-10">
                         <Filter className="w-4 h-4 text-muted-foreground" />
                         <SelectValue placeholder="Filter by platform" />
                       </SelectTrigger>
@@ -2968,6 +3023,11 @@ export default function DashboardPage() {
                         <th
                           className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
                         >
+                          User Email
+                        </th>
+                        <th
+                          className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
+                        >
                           {t("downloadHistory.columns.file")}
                         </th>
                         <th
@@ -3000,7 +3060,7 @@ export default function DashboardPage() {
                     <tbody className="divide-y divide-border">
                       {isLoadingDownloads ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center">
+                          <td colSpan={7} className="py-12 text-center">
                             <div className="flex flex-col items-center space-y-3">
                               <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                               <div>
@@ -3013,7 +3073,7 @@ export default function DashboardPage() {
                         </tr>
                       ) : downloadError ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center">
+                          <td colSpan={7} className="py-12 text-center">
                             <div className="flex flex-col items-center space-y-3">
                               <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
                                 <AlertCircle className="w-6 h-6 text-destructive" />
@@ -3031,7 +3091,7 @@ export default function DashboardPage() {
                         </tr>
                       ) : filteredDownloadTasks.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center">
+                          <td colSpan={7} className="py-12 text-center">
                             <div className="flex flex-col items-center space-y-3">
                               <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
                                 <Download className="w-6 h-6 text-muted-foreground" />
@@ -3135,6 +3195,14 @@ export default function DashboardPage() {
                               className="hover:bg-muted/50 transition-colors"
                             >
                               <td className="py-4 px-6">
+                                <div className="flex items-center space-x-2">
+                                  <Mail className="w-4 h-4 text-muted-foreground" />
+                                  <span className="text-sm text-foreground">
+                                    {(task as any).userEmail || "N/A"}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6">
                                 <div className="flex items-center space-x-3">
                                   <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                                     <FileText className="w-4 h-4 text-primary" />
@@ -3145,12 +3213,12 @@ export default function DashboardPage() {
                                         href={originalUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-sm font-medium text-primary hover:text-primary/80 underline truncate max-w-[200px] block"
+                                        className="text-sm font-medium text-primary hover:text-primary/80 underline truncate max-w-[125px] block"
                                       >
                                         {fileName}
                                       </a>
                                     ) : (
-                                      <p className="text-sm font-medium text-foreground truncate max-w-[200px]">
+                                      <p className="text-sm font-medium text-foreground truncate max-w-[125px]">
                                         {fileName}
                                       </p>
                                     )}
@@ -3327,6 +3395,14 @@ export default function DashboardPage() {
                           key={`${taskData.id}-${index}`}
                           className="bg-card border border-border rounded-xl p-4 space-y-4 hover:bg-muted/20 transition-colors"
                         >
+                          {/* User Email Section */}
+                          <div className="flex items-center space-x-2 pb-2 border-b border-border">
+                            <Mail className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">
+                              {(task as any).userEmail || "N/A"}
+                            </span>
+                          </div>
+                          
                           {/* Header with File Info and Status */}
                           <div className="flex items-start justify-between space-x-3">
                             <div className="flex items-center space-x-3 flex-1 min-w-0">

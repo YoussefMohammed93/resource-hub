@@ -284,14 +284,14 @@ export function DownloadStatusIndicator({
           size="sm"
           data-download-indicator
           className={cn(
-            "relative h-11 w-11 p-0 hover:bg-accent hover:text-accent-foreground transition-all duration-300",
+            "relative h-10 w-10 p-0 hover:bg-accent hover:text-accent-foreground transition-all duration-300",
             showAttentionAnimation && "animate-pulse bg-primary/20 scale-110",
             className
           )}
         >
           <FileDown
             className={cn(
-              "!h-6 !w-6 transition-colors text-muted-foreground duration-300",
+              "!h-5 !w-5 transition-colors text-muted-foreground duration-300",
               showAttentionAnimation && "text-primary"
             )}
           />
