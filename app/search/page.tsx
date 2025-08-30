@@ -793,73 +793,21 @@ function SearchContent() {
     window.location.href = `/media/${result.id}`;
   };
 
-  // Handle media download using the new API
-  const handleMediaDownload = async (
-    link: string,
-    id: string,
-    website: string
-  ) => {
-    try {
-      // Validate inputs
-      if (!link || !id || !website) {
-        console.error("Missing required download parameters:", {
-          link,
-          id,
-          website,
-        });
-        return;
-      }
-
-      console.log("Submitting download request:", { link, id, website });
-
-      const response = await searchApi.submitMediaDownload({
+  // Handle media download by opening verification sheet
+  const handleMediaDownload = (link: string, id: string, website: string) => {
+    // Validate inputs
+    if (!link || !id || !website) {
+      console.error("Missing required download parameters:", {
         link,
         id,
         website,
       });
-
-      if (response.success) {
-        // Handle successful download response
-        console.log("Download request submitted successfully:", response.data);
-        // In a real app, you might want to show a success notification
-        // or redirect to a download page
-      } else {
-        console.error("Download failed:", response.error?.message);
-        // Handle specific error cases
-        const errorId = response.error?.id;
-        let errorMessage = response.error?.message || "Download failed";
-
-        switch (errorId) {
-          case "missing_link":
-            errorMessage = "File link is required for download";
-            break;
-          case "missing_id":
-            errorMessage = "File ID is required for download";
-            break;
-          case "missing_website":
-            errorMessage = "Website name is required for download";
-            break;
-          case "rate_limit":
-            errorMessage =
-              "Too many download requests. Please wait before trying again.";
-            break;
-          case "timeout":
-            errorMessage = "Download request timed out. Please try again.";
-            break;
-          default:
-            errorMessage =
-              response.error?.message || "Download failed. Please try again.";
-        }
-
-        console.error("Download error:", errorMessage);
-      }
-    } catch (error) {
-      console.error("Download error:", error);
-      // Handle network or unexpected errors
-      const errorMessage =
-        error instanceof Error ? error.message : "An unexpected error occurred";
-      console.error("Unexpected download error:", errorMessage);
+      return;
     }
+
+    // Set the download URL and open the verification sheet
+    setDownloadUrl(link);
+    setIsDownloadSheetOpen(true);
   };
 
   // Smooth scroll to top of results

@@ -114,6 +114,39 @@ export default function RegisterPage() {
       setCaptchaToken(token);
     };
 
+    // Function to render reCAPTCHA when API is ready
+    const renderRecaptcha = () => {
+      if (window.grecaptcha && window.grecaptcha.render) {
+        const recaptchaElement = document.querySelector('.g-recaptcha') as HTMLElement;
+        if (recaptchaElement && !recaptchaElement.hasChildNodes()) {
+          try {
+            window.grecaptcha.render(recaptchaElement, {
+              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '',
+              callback: 'handleRegisterCaptchaChange'
+            });
+          } catch (error) {
+            console.error('Error rendering reCAPTCHA:', error);
+          }
+        }
+      }
+    };
+
+    // Check if reCAPTCHA is already loaded
+    if (window.grecaptcha && window.grecaptcha.ready) {
+      window.grecaptcha.ready(renderRecaptcha);
+    } else {
+      // Wait for reCAPTCHA to load
+      const checkRecaptcha = setInterval(() => {
+        if (window.grecaptcha && window.grecaptcha.ready) {
+          clearInterval(checkRecaptcha);
+          window.grecaptcha.ready(renderRecaptcha);
+        }
+      }, 100);
+
+      // Cleanup interval after 10 seconds
+      setTimeout(() => clearInterval(checkRecaptcha), 10000);
+    }
+
     // Cleanup
     return () => {
       if (window.handleRegisterCaptchaChange) {
@@ -1024,13 +1057,13 @@ export default function RegisterPage() {
                     className={isRTL ? "text-right" : "text-left"}
                   >
                     <Lock className="w-4 h-4 inline" />
-                    {t("register.form.password.label")}
+                    {t("login.form.password.label")}
                   </Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder={t("register.form.password.placeholder")}
+                      placeholder={t("login.form.password.placeholder")}
                       value={formData.password}
                       onChange={(e) =>
                         handleInputChange("password", e.target.value)
@@ -1152,7 +1185,7 @@ export default function RegisterPage() {
                   <Label className={isRTL ? "text-right" : "text-left"}>
                     Security Verification
                   </Label>
-                  <div className="w-full flex justify-center p-4 border border-border rounded-lg bg-muted/30">
+                  <div className="w-full flex justify-start py-4">
                     <div
                       className="g-recaptcha"
                       data-sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}

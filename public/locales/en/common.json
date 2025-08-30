@@ -1153,21 +1153,7 @@
         "label": "Phone Number",
         "placeholder": "Enter your phone number",
         "otpMessage": "OTP code will be sent to you via WhatsApp",
-        "sendCodeButton": "Send Code",
-        "sendingCode": "Sending Code...",
-        "codeSent": "Code sent to your WhatsApp"
-      },
-      "otp": {
-        "label": "Verification Code",
-        "placeholder": "Enter 6-digit code",
-        "verifyButton": "Verify Code",
-        "verifying": "Verifying...",
-        "resendCode": "Resend Code",
-        "resending": "Resending..."
-      },
-      "password": {
-        "label": "Password",
-        "placeholder": "Create a strong password"
+        "sendCodeButton": "Send Code"
       },
       "confirmPassword": {
         "label": "Confirm Password",
@@ -1204,6 +1190,66 @@
     "footer": {
       "alreadyHaveAccount": "Already have an account?",
       "loginLink": "Login"
+    }
+  },
+  "forgotPassword": {
+    "title": "Reset Your Password",
+    "subtitle": {
+      "email": "Enter your email address to start the password reset process",
+      "phone": "Verify your phone number to continue",
+      "password": "Create your new password"
+    },
+    "form": {
+      "email": {
+        "label": "Email Address",
+        "placeholder": "Enter your email address"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "Enter your phone number",
+        "whatsappNote": "OTP code will be sent to you via WhatsApp",
+        "sendCodeButton": "Send Code",
+        "sendingCode": "Sending Code...",
+        "codeSent": "Code sent to your WhatsApp"
+      },
+      "otp": {
+        "label": "Verification Code",
+        "placeholder": "Enter 6-digit code",
+        "verifyButton": "Verify Code",
+        "verifying": "Verifying...",
+        "didntReceive": "Didn't receive the code?",
+        "resendButton": "Resend Code"
+      },
+      "newPassword": {
+        "label": "New Password",
+        "placeholder": "Create a new password"
+      },
+      "confirmPassword": {
+        "label": "Confirm New Password",
+        "placeholder": "Confirm your new password"
+      },
+      "resetButton": "Reset Password",
+      "submitting": "Resetting Password..."
+    },
+    "validation": {
+      "emailRequired": "Email address is required",
+      "invalidEmail": "Please enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "invalidPhone": "Please enter a valid phone number",
+      "phoneCountryCode": "Phone number must include country code (e.g., +1234567890)",
+      "passwordRequired": "New password is required",
+      "passwordTooShort": "Password must be at least 8 characters long",
+      "passwordWeak": "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+      "confirmPasswordRequired": "Please confirm your new password",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "otpRequired": "Verification code is required",
+      "invalidOtp": "Please enter a valid 6-digit code",
+      "otpIncorrect": "The code is wrong, please try again",
+      "phoneNotVerified": "Please verify your phone number first"
+    },
+    "footer": {
+      "rememberPassword": "Remember your password?",
+      "loginLink": "Back to Login"
     }
   },
   "search": {

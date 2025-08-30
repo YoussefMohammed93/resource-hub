@@ -613,6 +613,34 @@ export const authApi = {
 
     return apiRequest<UserData>("/v1/user/data", "GET");
   },
+
+  // Forgot password
+  async forgotPassword(
+    data: ForgotPasswordRequest
+  ): Promise<ApiResponse<ForgotPasswordResponse>> {
+    // Use mock data if enabled
+    if (shouldUseMockData()) {
+      console.log("[Auth API] Using mock forgot password data");
+      return {
+        success: true,
+        data: {
+          email: data.email,
+          message: "Password reset successful.",
+        },
+      };
+    }
+
+    const encryptedPassword = encryptPassword(data.new_password);
+    const token = generateTimestampToken();
+
+    return apiRequest<ForgotPasswordResponse>("/v1/auth/forgot-password", "POST", {
+      email: data.email,
+      phoneNum: data.phoneNum,
+      new_password: encryptedPassword,
+      token,
+      otp: data.otp,
+    });
+  },
 };
 
 // User Management API functions
@@ -738,6 +766,7 @@ export const creditApi = {
 // OTP API response types
 export interface SendOtpResponse {
   message: string;
+  type?: string;
 }
 
 export interface VerifyOtpResponse {
@@ -747,6 +776,9 @@ export interface VerifyOtpResponse {
 export interface SendOtpRequest {
   phoneNum: string;
   token: string;
+  type?: "signup" | "forgot_password";
+  email?: string;
+  resend?: boolean;
 }
 
 export interface VerifyOtpRequest {
@@ -754,12 +786,28 @@ export interface VerifyOtpRequest {
   otp: string;
 }
 
+// Forgot Password API types
+export interface ForgotPasswordRequest {
+  email: string;
+  phoneNum: string;
+  new_password: string;
+  token: string;
+  otp: string;
+}
+
+export interface ForgotPasswordResponse {
+  email: string;
+  message: string;
+}
+
 // OTP Management API functions
 export const otpApi = {
   // Send OTP to phone number
   async sendOtp(
     phoneNumber: string,
-    isResend: boolean = false
+    isResend: boolean = false,
+    type: "signup" | "forgot_password" = "signup",
+    email?: string
   ): Promise<ApiResponse<SendOtpResponse>> {
     // Validate phone number format (must start with +)
     if (!phoneNumber.startsWith("+")) {
@@ -772,17 +820,36 @@ export const otpApi = {
       };
     }
 
+    // Validate email is provided for forgot_password type
+    if (type === "forgot_password" && !email) {
+      return {
+        success: false,
+        error: {
+          id: "missing_email",
+          message: "Email is required for forgot_password type",
+        },
+      };
+    }
+
     const token = generateTimestampToken();
 
     try {
       const requestBody: {
         phoneNum: string;
         token: string;
+        type: "signup" | "forgot_password";
+        email?: string;
         resend?: boolean;
       } = {
         phoneNum: phoneNumber,
         token,
+        type,
       };
+
+      // Add email for forgot_password type
+      if (type === "forgot_password" && email) {
+        requestBody.email = email;
+      }
 
       // Add resend parameter if this is a resend request
       if (isResend) {
@@ -835,12 +902,12 @@ export const otpApi = {
     }
   },
 
-  // Verify OTP code
+  // Verify OTP
   async verifyOtp(
     phoneNumber: string,
-    otpCode: string
+    otp: string
   ): Promise<ApiResponse<VerifyOtpResponse>> {
-    // Validate inputs
+    // Validate phone number format (must start with +)
     if (!phoneNumber.startsWith("+")) {
       return {
         success: false,
@@ -851,56 +918,26 @@ export const otpApi = {
       };
     }
 
-    if (!otpCode || otpCode.length !== 6 || !/^\d{6}$/.test(otpCode)) {
+    // Validate OTP
+    if (!otp || otp.trim().length === 0) {
       return {
         success: false,
         error: {
-          id: "invalid_otp_format",
-          message: "OTP must be a 6-digit number",
+          id: "missing_otp",
+          message: "OTP is required",
         },
       };
     }
 
     try {
-      // The verify endpoint has been confirmed by backend developer
-      // It only requires phoneNum and otp (no token needed)
       const response = await apiRequest<VerifyOtpResponse>(
         "/v1/otp/verify",
         "POST",
         {
           phoneNum: phoneNumber,
-          otp: otpCode,
+          otp: otp.trim(),
         }
       );
-
-      // If the API returns an error response, handle it appropriately
-      if (!response.success && response.error) {
-        // Map specific error IDs to user-friendly messages for verification
-        const errorMessages: Record<string, string> = {
-          "5": "Invalid OTP code. Please check and try again.",
-          "6": "Service temporarily unavailable. Please try again later.",
-          invalid_otp:
-            "Invalid OTP code. Please enter the correct 6-digit code.",
-          expired_otp: "OTP code has expired. Please request a new code.",
-          rate_limit:
-            "Too many verification attempts. Please wait before trying again.",
-          network_error:
-            "Network connection failed. Please check your internet connection.",
-        };
-
-        const errorMessage =
-          errorMessages[response.error.id.toString()] ||
-          response.error.message ||
-          "Failed to verify OTP. Please try again.";
-
-        return {
-          success: false,
-          error: {
-            id: response.error.id,
-            message: errorMessage,
-          },
-        };
-      }
 
       return response;
     } catch (error) {

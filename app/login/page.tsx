@@ -87,6 +87,39 @@ export default function LoginPage() {
       setCaptchaToken(token);
     };
 
+    // Function to render reCAPTCHA when API is ready
+    const renderRecaptcha = () => {
+      if (window.grecaptcha && window.grecaptcha.render) {
+        const recaptchaElement = document.querySelector('.g-recaptcha') as HTMLElement;
+        if (recaptchaElement && !recaptchaElement.hasChildNodes()) {
+          try {
+            window.grecaptcha.render(recaptchaElement, {
+              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '',
+              callback: 'handleCaptchaChange'
+            });
+          } catch (error) {
+            console.error('Error rendering reCAPTCHA:', error);
+          }
+        }
+      }
+    };
+
+    // Check if reCAPTCHA is already loaded
+    if (window.grecaptcha && window.grecaptcha.ready) {
+      window.grecaptcha.ready(renderRecaptcha);
+    } else {
+      // Wait for reCAPTCHA to load
+      const checkRecaptcha = setInterval(() => {
+        if (window.grecaptcha && window.grecaptcha.ready) {
+          clearInterval(checkRecaptcha);
+          window.grecaptcha.ready(renderRecaptcha);
+        }
+      }, 100);
+
+      // Cleanup interval after 10 seconds
+      setTimeout(() => clearInterval(checkRecaptcha), 10000);
+    }
+
     // Cleanup
     return () => {
       if (window.handleCaptchaChange) {
@@ -643,7 +676,7 @@ export default function LoginPage() {
                   <Label className={isRTL ? "text-right" : "text-left"}>
                     Security Verification
                   </Label>
-                  <div className="w-full flex justify-center p-4 border border-border rounded-lg bg-muted/30">
+                  <div className="w-full flex justify-start py-4">
                     <div
                       className="g-recaptcha"
                       data-sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
