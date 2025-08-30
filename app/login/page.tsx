@@ -701,7 +701,7 @@ export default function LoginPage() {
           {/* Token Popup for Testing */}
           {showTokenPopup && captchaToken && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-background border rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="bg-background border rounded-lg p-6 max-w-md max-h-[500px] overflow-y-auto w-full mx-4">
                 <h3 className="text-lg font-semibold mb-4">reCAPTCHA Token (Testing)</h3>
                 <div className="bg-muted p-3 rounded text-sm font-mono break-all mb-4">
                   {captchaToken}
