@@ -1198,7 +1198,8 @@
       "email": "Enter your email address to start the password reset process",
       "phone": "Verify your phone number to continue",
       "password": "Create your new password",
-      "otp": "Enter the verification code to complete password reset"
+      "otp": "Enter the verification code to complete password reset",
+      "otpPassword": "Enter the verification code sent to your WhatsApp and create a new password"
     },
     "form": {
       "email": {
@@ -1220,7 +1221,8 @@
         "verifying": "Verifying...",
         "didntReceive": "Didn't receive the code?",
         "resendButton": "Resend Code",
-        "summary": "Review your information"
+        "summary": "Review your information",
+        "whatsappSent": "Verification code sent to WhatsApp"
       },
       "newPassword": {
         "label": "New Password",
@@ -1256,6 +1258,11 @@
     "success": {
       "message": "Password Reset Successful!",
       "description": "Your password has been changed successfully. You will be redirected to login."
+    },
+    "error": {
+      "title": "Password Reset Error",
+      "resetFailed": "Failed to reset password. Please try again.",
+      "unexpected": "An unexpected error occurred. Please try again."
     }
   },
   "search": {

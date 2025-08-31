@@ -851,11 +851,11 @@ function SearchContent() {
     const aspectRatio = dimensions.height / dimensions.width;
 
     if (isMobile) {
-      // Mobile: limit height to reasonable values
-      return Math.min(300, Math.max(200, 300 * aspectRatio));
+      // Mobile: limit height to reasonable values with 220px base
+      return Math.min(275, Math.max(220, 220 * aspectRatio));
     } else {
       // Desktop: use calculated height with limits
-      return Math.min(400, Math.max(150, 250 * aspectRatio));
+      return Math.min(400, Math.max(150, 220 * aspectRatio));
     }
   };
 
@@ -1999,7 +1999,7 @@ function SearchContent() {
                     return (
                       <div
                         key={result.id}
-                        className={`group relative bg-card rounded-lg overflow-hidden transition-all duration-300 cursor-pointer ${
+                        className={`group relative bg-card rounded-lg overflow-hidden transition-all duration-300 cursor-pointer xl-1600:!h-[275px] ${
                           result.file_type === "audio"
                             ? "border border-primary/50 shadow-sm hover:border-primary hover:shadow-md"
                             : "border border-border hover:border-primary/50"
@@ -2260,14 +2260,14 @@ function SearchContent() {
                             return (
                               <div
                                 key={result.id}
-                                className={`group relative bg-card rounded-lg overflow-hidden transition-all duration-300 cursor-pointer ${
+                                className={`group relative bg-card rounded-lg overflow-hidden transition-all duration-300 cursor-pointer xl-1600:!h-[275px] ${
                                   result.file_type === "audio"
                                     ? "border border-primary/50 shadow-sm hover:border-primary hover:shadow-md"
                                     : "border border-border hover:border-primary/50"
                                 }`}
                                 style={{
                                   flex: `${flexValue} 1 0`,
-                                  height: "250px",
+                                  height: "220px",
                                   minWidth: "150px",
                                   maxWidth: "400px",
                                 }}

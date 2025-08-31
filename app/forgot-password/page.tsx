@@ -115,7 +115,7 @@ export default function ForgotPasswordPage() {
 
   // Step state
   const [currentStep, setCurrentStep] = useState<
-    "email" | "phone" | "password" | "otp"
+    "email" | "phone" | "otp-password"
   >("email");
 
   // Handle input changes
@@ -206,19 +206,8 @@ export default function ForgotPasswordPage() {
 
   // Handle final OTP verification and password reset
   const handleFinalOtpVerification = async () => {
-    if (!formData.otp.trim()) {
-      setErrors((prev) => ({
-        ...prev,
-        otp: t("forgotPassword.validation.otpRequired"),
-      }));
-      return;
-    }
-
-    if (formData.otp.length !== 6 || !/^\d{6}$/.test(formData.otp)) {
-      setErrors((prev) => ({
-        ...prev,
-        otp: t("forgotPassword.validation.invalidOtp"),
-      }));
+    // Validate all fields for the final step
+    if (!validateForm()) {
       return;
     }
 
@@ -235,6 +224,12 @@ export default function ForgotPasswordPage() {
       });
 
       if (result.success) {
+        // Show success message in the form
+        setErrors((prev) => ({
+          ...prev,
+          general: "",
+        }));
+        
         // Show success toast
         toast.success(t("forgotPassword.success.message"), {
           description: t("forgotPassword.success.description"),
@@ -246,19 +241,33 @@ export default function ForgotPasswordPage() {
           router.push("/login?message=password-reset-success");
         }, 2000);
       } else {
-        // Show error message
+        // Show error message in the form
         setErrors((prev) => ({
           ...prev,
           general:
-            result.error?.message || "Password reset failed. Please try again.",
+            result.error?.message || t("forgotPassword.error.resetFailed"),
         }));
+        
+        // Also show error toast for better UX
+        toast.error(t("forgotPassword.error.title"), {
+          description: result.error?.message || t("forgotPassword.error.resetFailed"),
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error("Password reset error:", error);
+      const errorMessage = t("forgotPassword.error.unexpected");
+      
       setErrors((prev) => ({
         ...prev,
-        general: "An unexpected error occurred. Please try again.",
+        general: errorMessage,
       }));
+      
+      // Show error toast
+      toast.error(t("forgotPassword.error.title"), {
+        description: errorMessage,
+        duration: 4000,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -289,7 +298,16 @@ export default function ForgotPasswordPage() {
       } else if (!validatePhone(formData.phone)) {
         newErrors.phone = t("forgotPassword.validation.invalidPhone");
       }
-    } else if (currentStep === "password") {
+    } else if (currentStep === "otp-password") {
+      // OTP validation
+      if (!formData.otp.trim()) {
+        newErrors.otp = t("forgotPassword.validation.otpRequired");
+      } else if (
+        formData.otp.length !== 6 || !/^\d{6}$/.test(formData.otp)
+      ) {
+        newErrors.otp = t("forgotPassword.validation.invalidOtp");
+      }
+
       // Password validation
       if (!formData.newPassword) {
         newErrors.newPassword = t("forgotPassword.validation.passwordRequired");
@@ -314,15 +332,6 @@ export default function ForgotPasswordPage() {
           "forgotPassword.validation.passwordsDoNotMatch"
         );
       }
-    } else if (currentStep === "otp") {
-      // OTP validation
-      if (!formData.otp.trim()) {
-        newErrors.otp = t("forgotPassword.validation.otpRequired");
-      } else if (
-        formData.otp.length !== 6 || !/^\d{6}$/.test(formData.otp)
-      ) {
-        newErrors.otp = t("forgotPassword.validation.invalidOtp");
-      }
     }
 
     setErrors(newErrors);
@@ -338,15 +347,12 @@ export default function ForgotPasswordPage() {
     if (currentStep === "email") {
       setCurrentStep("phone");
     } else if (currentStep === "phone") {
-      // Just move to password step, don't send OTP yet
-      setCurrentStep("password");
-    } else if (currentStep === "password") {
-      // Send OTP when moving from password to OTP step
+      // Send OTP to WhatsApp when moving from phone to final step
       setIsSendingOtp(true);
       try {
         await handleSendOtp();
-        // Move to OTP step after OTP is sent
-        setCurrentStep("otp");
+        // Move to OTP + Password step after OTP is sent
+        setCurrentStep("otp-password");
       } catch (error) {
         console.error("Failed to send OTP:", error);
       } finally {
@@ -358,10 +364,11 @@ export default function ForgotPasswordPage() {
   const handlePreviousStep = () => {
     if (currentStep === "phone") {
       setCurrentStep("email");
-    } else if (currentStep === "password") {
+    } else if (currentStep === "otp-password") {
       setCurrentStep("phone");
-    } else if (currentStep === "otp") {
-      setCurrentStep("password");
+      // Reset OTP state when going back
+      setOtpSent(false);
+      setFormData(prev => ({ ...prev, otp: "", newPassword: "", confirmPassword: "" }));
     }
   };
 
@@ -369,7 +376,7 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (currentStep === "otp") {
+    if (currentStep === "otp-password") {
       await handleFinalOtpVerification();
       return;
     }
@@ -627,8 +634,7 @@ export default function ForgotPasswordPage() {
               >
                 {currentStep === "email" && t("forgotPassword.subtitle.email")}
                 {currentStep === "phone" && t("forgotPassword.subtitle.phone")}
-                {currentStep === "password" && t("forgotPassword.subtitle.password")}
-                {currentStep === "otp" && t("forgotPassword.subtitle.otp")}
+                {currentStep === "otp-password" && t("forgotPassword.subtitle.otpPassword")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -705,9 +711,50 @@ export default function ForgotPasswordPage() {
                   </>
                 )}
 
-                {/* Step 3: New Password */}
-                {currentStep === "password" && (
+                {/* Step 3: OTP + Password Combined */}
+                {currentStep === "otp-password" && (
                   <>
+                    {/* Summary */}
+                    <div className="p-4 bg-muted/50 rounded-lg border">
+                      <h3 className={`font-medium text-sm mb-2 ${isRTL ? "text-right" : "text-left"}`}>
+                        {t("forgotPassword.form.otp.summary")}
+                      </h3>
+                      <div className={`text-sm text-muted-foreground space-y-1 ${isRTL ? "text-right" : "text-left"}`}>
+                        <p><strong>{t("forgotPassword.form.email.label")}:</strong> {formData.email}</p>
+                        <p><strong>{t("forgotPassword.form.phone.label")}:</strong> {formData.phone}</p>
+                        <p className="text-green-600 dark:text-green-400">
+                          <MessageSquare className="w-4 h-4 inline mr-1" />
+                          {t("forgotPassword.form.otp.whatsappSent")}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* OTP Input */}
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="otp"
+                        className={isRTL ? "text-right" : "text-left"}
+                      >
+                        <MessageSquare className="w-4 h-4 inline" />
+                        {t("forgotPassword.form.otp.label")}
+                      </Label>
+                      <Input
+                        id="otp"
+                        type="text"
+                        placeholder={t("forgotPassword.form.otp.placeholder")}
+                        value={formData.otp}
+                        onChange={(e) => handleInputChange("otp", e.target.value)}
+                        className={`${isRTL ? "text-right" : "text-left"} ${errors.otp ? "border-destructive" : ""}`}
+                        dir={isRTL ? "rtl" : "ltr"}
+                        maxLength={6}
+                      />
+                      {errors.otp && (
+                        <p className={`text-sm text-destructive ${isRTL ? "text-right" : "text-left"}`}>
+                          {errors.otp}
+                        </p>
+                      )}
+                    </div>
+
                     {/* New Password */}
                     <div className="space-y-2">
                       <Label
@@ -797,46 +844,6 @@ export default function ForgotPasswordPage() {
                         </p>
                       )}
                     </div>
-                  </>
-                )}
-
-                {/* Step 4: OTP Verification */}
-                {currentStep === "otp" && (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-muted/50 rounded-lg border">
-                      <h3 className={`font-medium text-sm mb-2 ${isRTL ? "text-right" : "text-left"}`}>
-                        {t("forgotPassword.form.otp.summary")}
-                      </h3>
-                      <div className={`text-sm text-muted-foreground space-y-1 ${isRTL ? "text-right" : "text-left"}`}>
-                        <p><strong>{t("forgotPassword.form.email.label")}:</strong> {formData.email}</p>
-                        <p><strong>{t("forgotPassword.form.phone.label")}:</strong> {formData.phone}</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="otp"
-                        className={isRTL ? "text-right" : "text-left"}
-                      >
-                        <MessageSquare className="w-4 h-4 inline" />
-                        {t("forgotPassword.form.otp.label")}
-                      </Label>
-                      <Input
-                        id="otp"
-                        type="text"
-                        placeholder={t("forgotPassword.form.otp.placeholder")}
-                        value={formData.otp}
-                        onChange={(e) => handleInputChange("otp", e.target.value)}
-                        className={`${isRTL ? "text-right" : "text-left"} ${errors.otp ? "border-destructive" : ""}`}
-                        dir={isRTL ? "rtl" : "ltr"}
-                        maxLength={6}
-                      />
-                      {errors.otp && (
-                        <p className={`text-sm text-destructive ${isRTL ? "text-right" : "text-left"}`}>
-                          {errors.otp}
-                        </p>
-                      )}
-                    </div>
 
                     {/* Resend OTP */}
                     <div className={`text-center ${isRTL ? "text-right" : "text-left"}`}>
@@ -852,8 +859,9 @@ export default function ForgotPasswordPage() {
                         </button>
                       </p>
                     </div>
-                  </div>
+                  </>
                 )}
+
 
                 {/* General Error Message */}
                 {errors.general && (
@@ -887,12 +895,12 @@ export default function ForgotPasswordPage() {
                         <Loader2 className="w-5 h-5 animate-spin" />
                         {t("forgotPassword.form.submitting")}
                       </>
-                    ) : currentStep === "otp" ? (
+                    ) : currentStep === "otp-password" ? (
                       <>
                         <KeyRound className="w-4 h-4" />
                         {t("forgotPassword.form.resetButton")}
                       </>
-                    ) : isSendingOtp && currentStep === "password" ? (
+                    ) : isSendingOtp && currentStep === "phone" ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
                         {t("forgotPassword.form.phone.sendingCode")}
