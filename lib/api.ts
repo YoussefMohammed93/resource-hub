@@ -1,6 +1,6 @@
 // API service utilities for authentication and other endpoints
 import axios from "axios";
-import { encryptPassword, generateTimestampToken } from "./utils";
+import { encryptPassword, generateTimestampToken, generatePasswordResetToken } from "./utils";
 import { shouldUseMockData, mockApiResponses } from "./mock-data";
 
 // Base API URL - use proxy for development, direct API for production
@@ -631,7 +631,7 @@ export const authApi = {
     }
 
     const encryptedPassword = encryptPassword(data.new_password);
-    const token = generateTimestampToken();
+    const token = generatePasswordResetToken();
 
     return apiRequest<ForgotPasswordResponse>("/v1/auth/forgot-password", "POST", {
       email: data.email,

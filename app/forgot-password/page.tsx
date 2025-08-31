@@ -40,6 +40,7 @@ import { useAuth } from "@/components/auth-provider";
 import { useLanguage } from "@/components/i18n-provider";
 import { HeaderControls } from "@/components/header-controls";
 import { otpApi, authApi } from "@/lib/api";
+import { getPasswordResetTokenRemainingTime } from "@/lib/utils";
 import Footer from "@/components/footer";
 
 // Email validation function
@@ -68,6 +69,13 @@ const validatePassword = (password: string) => {
     hasNumbers,
     hasMinLength,
   };
+};
+
+// Format remaining time for display
+const formatRemainingTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
 export default function ForgotPasswordPage() {
@@ -112,11 +120,44 @@ export default function ForgotPasswordPage() {
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [, setOtpVerified] = useState(false);
   const [, setOtpMessage] = useState("");
+  
+  // Token expiration state
+  const [tokenStartTime, setTokenStartTime] = useState<number | null>(null);
+  const [remainingTime, setRemainingTime] = useState<number>(0);
+  const [isTokenExpired, setIsTokenExpired] = useState(false);
 
   // Step state
   const [currentStep, setCurrentStep] = useState<
     "email" | "phone" | "otp-password"
   >("email");
+
+  // Handle token expiration countdown
+  useEffect(() => {
+    if (!tokenStartTime || currentStep !== "otp-password") {
+      return;
+    }
+
+    const updateTimer = () => {
+      const remaining = getPasswordResetTokenRemainingTime(tokenStartTime);
+      setRemainingTime(remaining);
+      
+      if (remaining <= 0) {
+        setIsTokenExpired(true);
+        setErrors(prev => ({
+          ...prev,
+          general: t("forgotPassword.error.tokenExpired")
+        }));
+      }
+    };
+
+    // Update immediately
+    updateTimer();
+    
+    // Update every second
+    const interval = setInterval(updateTimer, 1000);
+    
+    return () => clearInterval(interval);
+  }, [tokenStartTime, currentStep, t]);
 
   // Handle input changes
   const handleInputChange = (field: string, value: string) => {
@@ -177,6 +218,8 @@ export default function ForgotPasswordPage() {
 
       if (response.success) {
         setOtpSent(true);
+        setTokenStartTime(Math.floor(Date.now() / 1000)); // Set token start time
+        setIsTokenExpired(false); // Reset expiration state
         setOtpMessage(
           response.data?.message || t("forgotPassword.form.phone.codeSent")
         );
@@ -206,6 +249,19 @@ export default function ForgotPasswordPage() {
 
   // Handle final OTP verification and password reset
   const handleFinalOtpVerification = async () => {
+    // Check if token has expired
+    if (isTokenExpired || (tokenStartTime && getPasswordResetTokenRemainingTime(tokenStartTime) <= 0)) {
+      setErrors((prev) => ({
+        ...prev,
+        general: t("forgotPassword.error.tokenExpired")
+      }));
+      toast.error(t("forgotPassword.error.title"), {
+        description: t("forgotPassword.error.tokenExpired"),
+        duration: 4000,
+      });
+      return;
+    }
+
     // Validate all fields for the final step
     if (!validateForm()) {
       return;
@@ -368,6 +424,9 @@ export default function ForgotPasswordPage() {
       setCurrentStep("phone");
       // Reset OTP state when going back
       setOtpSent(false);
+      setTokenStartTime(null);
+      setIsTokenExpired(false);
+      setRemainingTime(0);
       setFormData(prev => ({ ...prev, otp: "", newPassword: "", confirmPassword: "" }));
     }
   };
@@ -726,6 +785,18 @@ export default function ForgotPasswordPage() {
                           <MessageSquare className="w-4 h-4 inline mr-1" />
                           {t("forgotPassword.form.otp.whatsappSent")}
                         </p>
+                        {/* Token Expiration Timer */}
+                        {tokenStartTime && (
+                          <div className={`mt-2 p-2 rounded ${isTokenExpired ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400' : remainingTime <= 60 ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400' : 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'}`}>
+                            <p className="text-xs font-medium">
+                              {isTokenExpired ? (
+                                <>⚠️ {t("forgotPassword.timer.expired")}</>
+                              ) : (
+                                <>⏱️ {t("forgotPassword.timer.remaining")}: {formatRemainingTime(remainingTime)}</>
+                              )}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -888,7 +959,7 @@ export default function ForgotPasswordPage() {
                   <Button
                     type="submit"
                     className="flex-1"
-                    disabled={isSubmitting || isSendingOtp}
+                    disabled={isSubmitting || isSendingOtp || (currentStep === "otp-password" && isTokenExpired)}
                   >
                     {isSubmitting ? (
                       <>

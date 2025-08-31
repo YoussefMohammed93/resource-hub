@@ -102,3 +102,52 @@ export function generateTimestampToken(): string {
 
   return _0x5a2e;
 }
+
+/**
+ * Generate obfuscated timestamp token for password reset with 5-minute expiration
+ * This implements the backend's required token generation algorithm with extended validity
+ * @returns Obfuscated token string valid for 5 minutes
+ */
+export function generatePasswordResetToken(): string {
+  const _0x4d8c = Math.floor(Date.now() / 1000) + 300; // 5 minutes = 300 seconds
+  const _0x7b3f = _0x8e9a(_0x4d8c.toString());
+  const _0x1e9d = _0x2a4b(_0x7b3f);
+  const _0x5a2e = _0x6f5d(_0x1e9d);
+
+  // Debug logging if enabled
+  if (process.env.NEXT_PUBLIC_ENABLE_API_LOGGING === "true") {
+    console.log("[Password Reset Token Generation Debug]", {
+      timestamp: _0x4d8c,
+      timestampString: _0x4d8c.toString(),
+      expiresAt: new Date(_0x4d8c * 1000).toISOString(),
+      hexEncoded: _0x7b3f,
+      base64Encoded: _0x1e9d,
+      rot13Encoded: _0x5a2e,
+    });
+  }
+
+  return _0x5a2e;
+}
+
+/**
+ * Check if a password reset token is still valid (client-side validation)
+ * @param tokenTimestamp - The timestamp when the token was generated
+ * @returns boolean indicating if token is still valid
+ */
+export function isPasswordResetTokenValid(tokenTimestamp: number): boolean {
+  const currentTime = Math.floor(Date.now() / 1000);
+  const tokenExpiry = tokenTimestamp + 300; // 5 minutes = 300 seconds
+  return currentTime <= tokenExpiry;
+}
+
+/**
+ * Get remaining time for password reset token in seconds
+ * @param tokenTimestamp - The timestamp when the token was generated
+ * @returns number of seconds remaining, or 0 if expired
+ */
+export function getPasswordResetTokenRemainingTime(tokenTimestamp: number): number {
+  const currentTime = Math.floor(Date.now() / 1000);
+  const tokenExpiry = tokenTimestamp + 300; // 5 minutes = 300 seconds
+  const remaining = tokenExpiry - currentTime;
+  return Math.max(0, remaining);
+}
