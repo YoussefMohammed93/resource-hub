@@ -1197,7 +1197,8 @@
     "subtitle": {
       "email": "Enter your email address to start the password reset process",
       "phone": "Verify your phone number to continue",
-      "password": "Create your new password"
+      "password": "Create your new password",
+      "otp": "Enter the verification code to complete password reset"
     },
     "form": {
       "email": {
@@ -1218,7 +1219,8 @@
         "verifyButton": "Verify Code",
         "verifying": "Verifying...",
         "didntReceive": "Didn't receive the code?",
-        "resendButton": "Resend Code"
+        "resendButton": "Resend Code",
+        "summary": "Review your information"
       },
       "newPassword": {
         "label": "New Password",
@@ -1250,6 +1252,10 @@
     "footer": {
       "rememberPassword": "Remember your password?",
       "loginLink": "Back to Login"
+    },
+    "success": {
+      "message": "Password Reset Successful!",
+      "description": "Your password has been changed successfully. You will be redirected to login."
     }
   },
   "search": {
