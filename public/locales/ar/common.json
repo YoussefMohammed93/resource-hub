@@ -839,18 +839,32 @@
     "downloadHistory": {
       "title": "سجل التحميلات",
       "description": "تحميلاتك الأخيرة واستخدام النقاط",
+      "headerDescriptionAlt": "تحميلاتك الأخيرة تظهر أدناه. يتم تحميل معاينات الوسائط مباشرة من المصدر.",
+      "searchPlaceholder": "ابحث بالمعرّف أو الرابط",
       "filters": {
         "newest": "الأحدث أولاً",
         "oldest": "الأقدم أولاً",
         "creditsHigh": "النقاط: من الأعلى إلى الأقل",
         "creditsLow": "النقاط: من الأقل إلى الأعلى"
       },
+      "emptySearch": {
+        "title": "لا توجد نتائج تطابق بحثك",
+        "description": "جرّب معرّفًا أو رابطًا مختلفًا."
+      },
       "empty": {
         "title": "لا توجد تحميلات",
         "description": "سيظهر سجل التحميلات هنا"
       },
+      "noDownloads": "لا توجد تحميلات بعد.",
       "loadMore": "تحميل المزيد",
       "credits": "نقطة",
+      "labels": {
+        "id": "المعرّف",
+        "date": "التاريخ",
+        "url": "الرابط",
+        "openOn": "افتح على {{website}}",
+        "website": "الموقع"
+      },
       "types": {
         "image": "صورة",
         "video": "فيديو"

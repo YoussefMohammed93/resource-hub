@@ -839,18 +839,32 @@
     "downloadHistory": {
       "title": "Download History",
       "description": "Your recent downloads and credit usage",
+      "headerDescriptionAlt": "Your recent downloads listed below. Media previews load directly from source.",
+      "searchPlaceholder": "Search by ID or URL",
       "filters": {
         "newest": "Newest First",
         "oldest": "Oldest First",
         "creditsHigh": "Credits: High to Low",
         "creditsLow": "Credits: Low to High"
       },
+      "emptySearch": {
+        "title": "No results match your search",
+        "description": "Try a different ID or URL."
+      },
       "empty": {
         "title": "No downloads found",
         "description": "Your download history will appear here"
       },
+      "noDownloads": "No downloads yet.",
       "loadMore": "Load More Downloads",
       "credits": "credits",
+      "labels": {
+        "id": "ID",
+        "date": "Date",
+        "url": "URL",
+        "openOn": "Open on {{website}}",
+        "website": "website"
+      },
       "types": {
         "image": "image",
         "video": "video"

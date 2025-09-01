@@ -4,35 +4,21 @@ import {
   CalendarDays,
   CreditCard,
   Download,
-  Filter,
   TrendingUp,
   Activity,
-  Search,
   Lock,
   Eye,
   EyeOff,
   Loader2,
+  Search,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   ProfilePageSkeleton,
-  DownloadHistoryItemSkeleton,
+  DownloadHistorySkeleton,
 } from "@/components/profile-page-skeletons";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,35 +32,17 @@ import { HeaderControls } from "@/components/header-controls";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
-import { userApi, authApi, type DownloadHistoryEntry } from "@/lib/api";
-
-// Utility function to check if the item is a video
-const isVideoItem = (item: DownloadHistoryEntry): boolean => {
-  return (
-    item.data.downloadUrl.includes("video") ||
-    item.data.downloadUrl.includes(".mp4") ||
-    item.data.downloadUrl.includes(".mov")
-  );
-};
+import { authApi, userApi } from "@/lib/api";
+import { getFileExtension } from "@/lib/download-utils";
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [sortFilter, setSortFilter] = useState("newest");
   const [isProfileLoading, setIsProfileLoading] = useState(true);
-  const [isDownloadHistoryLoading, setIsDownloadHistoryLoading] =
-    useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [downloadHistory, setDownloadHistory] = useState<
-    DownloadHistoryEntry[]
-  >([]);
-  const [downloadHistoryError, setDownloadHistoryError] = useState<
-    string | null
-  >(null);
-  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
-  const [imageLoading, setImageLoading] = useState<Set<number>>(new Set());
   const { isRTL, isLoading } = useLanguage();
   const { t } = useTranslation("common");
+  // Search filter (matches ID or URL)
+  const [historyQuery, setHistoryQuery] = useState<string>("");
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -82,6 +50,13 @@ export default function ProfilePage() {
       router.push("/login");
     }
   }, [authLoading, isAuthenticated, router]);
+
+  // Stop profile loading when auth status has resolved
+  useEffect(() => {
+    if (!authLoading) {
+      setIsProfileLoading(false);
+    }
+  }, [authLoading]);
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -95,6 +70,21 @@ export default function ProfilePage() {
     confirm: false,
   });
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  // Download history state
+  type UserHistoryItem = {
+    id?: string;
+    from: string;
+    type?: string; // photo | video | vector | audio (future)
+    price: number;
+    date?: string;
+    file: string; // direct file/media URL
+  };
+  const [history, setHistory] = useState<UserHistoryItem[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState<boolean>(true);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string | null>>(
+    {}
+  );
 
   // Password change handlers
   const handlePasswordChange = (field: string, value: string) => {
@@ -103,6 +93,147 @@ export default function ProfilePage() {
       [field]: value,
     }));
   };
+
+  // Fetch download history
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await userApi.getDownloadHistory();
+        if (res.success) {
+          // Support both shapes:
+          // 1) swagger: { downloads: [{ from, type, price, date, file }] }
+          // 2) current: { history: [{ type: 'download', data: { id, downloadUrl, from, price } }] }
+          type DownloadsItem = {
+            id?: string;
+            from?: string;
+            type?: string;
+            price?: number;
+            date?: string;
+            file?: string;
+          };
+          type HistoryItem = {
+            type?: string;
+            data?: { id?: string; downloadUrl?: string; from?: string; price?: number };
+          };
+
+          const isDownloadsShape = (v: unknown): v is { downloads: DownloadsItem[] } => {
+            return typeof v === "object" && v !== null && Array.isArray((v as Record<string, unknown>).downloads);
+          };
+          const isHistoryShape = (v: unknown): v is { history: HistoryItem[] } => {
+            return typeof v === "object" && v !== null && Array.isArray((v as Record<string, unknown>).history);
+          };
+
+          const rawDownloads = isDownloadsShape(res) ? res.downloads : [];
+          const rawHistory = isHistoryShape(res) ? res.history : [];
+
+          let mapped: UserHistoryItem[] = [];
+
+          if (rawDownloads.length > 0) {
+            mapped = rawDownloads.map((d: DownloadsItem) => ({
+              id: d.id,
+              from: d.from ?? "",
+              type: d.type,
+              price: d.price ?? 0,
+              date: d.date,
+              file: d.file ?? "",
+            }));
+          } else if (rawHistory.length > 0) {
+            type HistoryItemWithData = { type?: string; data: NonNullable<HistoryItem["data"]> };
+            const hasData = (h: unknown): h is HistoryItemWithData =>
+              typeof h === "object" &&
+              h !== null &&
+              "data" in (h as Record<string, unknown>) &&
+              typeof (h as { data?: unknown }).data === "object" &&
+              (h as { data?: unknown }).data !== null;
+
+            mapped = rawHistory
+              .filter(hasData)
+              .map((h: HistoryItemWithData) => ({
+                id: h.data.id,
+                from: h.data.from ?? "",
+                // top-level `type` here is event type ('download'); media type is unknown
+                type: h.type,
+                price: h.data.price ?? 0,
+                // no explicit date in this shape
+                date: undefined,
+                file: h.data.downloadUrl ?? "",
+              }));
+          }
+          setHistory(mapped);
+        } else {
+          setHistoryError(res.error?.message || "Failed to load history");
+        }
+      } catch (e: unknown) {
+        const message = typeof e === "object" && e && "message" in e ? String((e as { message?: unknown }).message) : undefined;
+        setHistoryError(message || "Failed to load history");
+      } finally {
+        setIsHistoryLoading(false);
+      }
+    };
+    if (isAuthenticated) fetchHistory();
+  }, [isAuthenticated]);
+
+  // Fetch preview images for non-direct URLs using server route
+  useEffect(() => {
+    const controller = new AbortController();
+    const run = async () => {
+      const tasks: Promise<void>[] = [];
+      const nextMap: Record<string, string | null> = {};
+      for (const item of history) {
+        const key = item.id || item.file;
+        const ext = getFileExtension(item.file).toLowerCase();
+        const isDirect = [
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".gif",
+          ".webp",
+          ".svg",
+          ".bmp",
+          ".tiff",
+          ".mp4",
+          ".avi",
+          ".mov",
+          ".wmv",
+          ".flv",
+          ".webm",
+          ".mkv",
+          ".mp3",
+          ".wav",
+          ".flac",
+          ".aac",
+          ".ogg",
+          ".wma",
+        ].includes(ext);
+        if (isDirect) {
+          nextMap[key] = item.file; // direct render ok
+          continue;
+        }
+        if (previewUrls[key] !== undefined) continue; // already fetched
+        tasks.push(
+          fetch(
+            `/api/media-proxy/preview?url=${encodeURIComponent(item.file)}`,
+            {
+              signal: controller.signal,
+            }
+          )
+            .then((r) => (r.ok ? r.json() : { previewUrl: null }))
+            .then((data) => {
+              nextMap[key] = data?.previewUrl || null;
+            })
+            .catch(() => {
+              nextMap[key] = null;
+            })
+        );
+      }
+      if (tasks.length) {
+        await Promise.all(tasks);
+        setPreviewUrls((prev) => ({ ...prev, ...nextMap }));
+      }
+    };
+    if (history.length) run();
+    return () => controller.abort();
+  }, [history, previewUrls]);
 
   const togglePasswordVisibility = (field: "current" | "new" | "confirm") => {
     setShowPasswords((prev) => ({
@@ -137,7 +268,7 @@ export default function ProfilePage() {
           newPassword: "",
           confirmPassword: "",
         });
-        
+
         // Show success message (you can add toast notification here)
         console.log("Password changed successfully:", result.data?.message);
       } else {
@@ -152,88 +283,6 @@ export default function ProfilePage() {
       setIsPasswordLoading(false);
     }
   };
-
-  // Load download history
-  const loadDownloadHistory = useCallback(async () => {
-    if (!isAuthenticated) return;
-
-    setIsDownloadHistoryLoading(true);
-    setDownloadHistoryError(null);
-    try {
-      const response = await userApi.getDownloadHistory();
-      // Diagnostic logging to understand prod shape
-      console.log("[Profile] /v1/user/history raw response:", response);
-
-      if (response.success) {
-        // Try multiple shapes commonly returned by backend
-        const respUnknown = response as unknown;
-        const respObj =
-          respUnknown && typeof respUnknown === "object"
-            ? (respUnknown as Record<string, unknown>)
-            : {};
-        const dataObj =
-          respObj.data && typeof respObj.data === "object"
-            ? (respObj.data as Record<string, unknown>)
-            : {};
-        const nestedDataObj =
-          dataObj.data && typeof dataObj.data === "object"
-            ? (dataObj.data as Record<string, unknown>)
-            : {};
-
-        const candidates: unknown[] = [
-          (response.data as { history?: unknown } | undefined)?.history,
-          respObj.history,
-          dataObj.history,
-          nestedDataObj.history,
-          Array.isArray(respObj.data) ? (respObj.data as unknown[]) : undefined,
-          Array.isArray(respUnknown) ? (respUnknown as unknown[]) : undefined,
-        ];
-
-        const found = candidates.find(
-          (c) => Array.isArray(c) && c.length >= 0
-        ) as DownloadHistoryEntry[] | undefined;
-
-        if (found) {
-          setDownloadHistory(found as DownloadHistoryEntry[]);
-        } else {
-          console.warn("[Profile] No history array found in response");
-          setDownloadHistory([]);
-        }
-      } else {
-        const errorMessage =
-          response.error?.message || "Failed to load download history";
-        console.error("[Profile] History API reported error:", errorMessage);
-        setDownloadHistoryError(errorMessage);
-        setDownloadHistory([]);
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Network error occurred";
-      setDownloadHistoryError(errorMessage);
-      setDownloadHistory([]);
-    } finally {
-      setIsDownloadHistoryLoading(false);
-    }
-  }, [isAuthenticated]);
-
-  // Load data when authenticated
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      setIsProfileLoading(false);
-      loadDownloadHistory();
-    }
-  }, [isAuthenticated, user, loadDownloadHistory]);
-
-  // Reset image states when download history changes
-  useEffect(() => {
-    setImageErrors(new Set());
-    // Set all images as loading initially
-    const loadingSet = new Set<number>();
-    downloadHistory.forEach((_, index) => {
-      loadingSet.add(index);
-    });
-    setImageLoading(loadingSet);
-  }, [downloadHistory]);
 
   // Show loading skeleton while authentication, language data or profile data is loading
   if (authLoading || isLoading || isProfileLoading) {
@@ -251,34 +300,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-
-  // Filter downloads based on search query
-  const filteredDownloads = downloadHistory.filter((item) => {
-    if (!searchQuery.trim()) return true;
-
-    const query = searchQuery.toLowerCase();
-    return (
-      item.data.from.toLowerCase().includes(query) ||
-      item.data.id.toLowerCase().includes(query) ||
-      item.data.downloadUrl.toLowerCase().includes(query)
-    );
-  });
-
-  const sortedDownloads = [...filteredDownloads].sort((a, b) => {
-    switch (sortFilter) {
-      case "newest":
-        // Since we don't have date in new format, sort by ID (newer IDs are typically later)
-        return b.data.id.localeCompare(a.data.id);
-      case "oldest":
-        return a.data.id.localeCompare(b.data.id);
-      case "credits-high":
-        return b.data.price - a.data.price;
-      case "credits-low":
-        return a.data.price - b.data.price;
-      default:
-        return 0;
-    }
-  });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -417,7 +438,7 @@ export default function ProfilePage() {
                       className={`flex items-baseline ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}
                     >
                       <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-primary transition-colors">
-                        {downloadHistory.length}
+                        {history.length}
                       </span>
                     </div>
                   </div>
@@ -555,7 +576,9 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 gap-3 sm:gap-4">
                 {/* Current Plan mini-card */}
                 <div className="rounded-xl border bg-card/60 dark:bg-muted/40 p-4 h-full">
-                  <div className={`flex items-start ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
+                  <div
+                    className={`flex items-start ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
+                  >
                     <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
                       <CreditCard className="w-4 h-4 text-primary" />
                     </div>
@@ -563,8 +586,13 @@ export default function ProfilePage() {
                       <p className="text-base text-muted-foreground">
                         {t("profile.subscription.currentPlan")}
                       </p>
-                      <div className={`mt-1 ${isRTL ? "text-right" : "text-left"}`}>
-                        <Badge variant="outline" className="font-medium text-sm">
+                      <div
+                        className={`mt-1 ${isRTL ? "text-right" : "text-left"}`}
+                      >
+                        <Badge
+                          variant="outline"
+                          className="font-medium text-sm"
+                        >
                           {user?.subscription?.plan || "Free"}
                         </Badge>
                       </div>
@@ -574,7 +602,9 @@ export default function ProfilePage() {
 
                 {/* Status mini-card */}
                 <div className="rounded-xl border bg-card/60 dark:bg-muted/40 p-4 h-full">
-                  <div className={`flex items-start ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
+                  <div
+                    className={`flex items-start ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
+                  >
                     <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
                       <Activity className="w-4 h-4 text-primary" />
                     </div>
@@ -582,10 +612,20 @@ export default function ProfilePage() {
                       <p className="text-base text-muted-foreground">
                         {t("profile.subscription.status")}
                       </p>
-                      <div className={`mt-1 ${isRTL ? "text-right" : "text-left"}`}>
+                      <div
+                        className={`mt-1 ${isRTL ? "text-right" : "text-left"}`}
+                      >
                         <Badge
-                          variant={user?.subscription?.active ? "default" : "destructive"}
-                          className={user?.subscription?.active ? "bg-green-100 text-green-800 border border-green-200" : ""}
+                          variant={
+                            user?.subscription?.active
+                              ? "default"
+                              : "destructive"
+                          }
+                          className={
+                            user?.subscription?.active
+                              ? "bg-green-100 text-green-800 border border-green-200"
+                              : ""
+                          }
                         >
                           {t("profile.userInfo.active")}
                         </Badge>
@@ -596,7 +636,9 @@ export default function ProfilePage() {
 
                 {/* Valid Until mini-card */}
                 <div className="rounded-xl border bg-card/60 dark:bg-muted/40 p-4 h-full">
-                  <div className={`flex items-start ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
+                  <div
+                    className={`flex items-start ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
+                  >
                     <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
                       <CalendarDays className="w-4 h-4 text-primary" />
                     </div>
@@ -604,9 +646,13 @@ export default function ProfilePage() {
                       <p className="text-base text-muted-foreground">
                         {t("profile.subscription.validUntil")}
                       </p>
-                      <div className={`mt-1 flex items-center text-sm text-foreground ${isRTL ? "flex-row-reverse justify-end" : "justify-start"}`}>
+                      <div
+                        className={`mt-1 flex items-center text-sm text-foreground ${isRTL ? "flex-row-reverse justify-end" : "justify-start"}`}
+                      >
                         {user?.subscription?.until ? (
-                          <span className="truncate">{formatDate(user.subscription.until)}</span>
+                          <span className="truncate">
+                            {formatDate(user.subscription.until)}
+                          </span>
                         ) : (
                           <span className="truncate">N/A</span>
                         )}
@@ -841,274 +887,236 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </div>
-        {/* Download History - Full Width */}
-        <Card className="dark:bg-muted/50 h-fit">
-          <CardHeader className="space-y-6">
+        {/* Download History Card */}
+        <Card className="dark:bg-muted/50">
+          <CardHeader>
             <div
-              className={`flex items-center ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
+              className={`flex items-start justify-between ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
             >
-              <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
-                <Download className="w-5 h-5 text-primary" />
+              <div
+                className={`flex items-center ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
+              >
+                <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
+                  <Download className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-foreground">
+                    {t("profile.downloadHistory.title")}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {t("profile.downloadHistory.headerDescriptionAlt")}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <CardTitle className="text-lg font-semibold text-foreground">
-                  {t("profile.downloadHistory.title")}
-                </CardTitle>
-                <CardDescription className="text-sm text-muted-foreground mt-1">
-                  {t("profile.downloadHistory.description")}
-                </CardDescription>
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center gap-5">
-              {/* Search Bar */}
-              <div className="relative flex-1 w-full">
-                <Search
-                  className={`absolute top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground ${isRTL ? "right-3" : "left-3"}`}
-                />
-                <Input
-                  type="text"
-                  placeholder="Source / Source ID / URL / Tag / Debug ID"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`${isRTL ? "pr-10 pl-3" : "pl-10 pr-3"} h-10`}
-                />
-              </div>
-              {/* Filter */}
-              <div className="flex sm:justify-end w-full sm:w-auto">
-                <Select value={sortFilter} onValueChange={setSortFilter}>
-                  <SelectTrigger className="w-full sm:w-48">
-                    <Filter className="w-4 h-4" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">
-                      {t("profile.downloadHistory.filters.newest")}
-                    </SelectItem>
-                    <SelectItem value="oldest">
-                      {t("profile.downloadHistory.filters.oldest")}
-                    </SelectItem>
-                    <SelectItem value="credits-high">
-                      {t("profile.downloadHistory.filters.creditsHigh")}
-                    </SelectItem>
-                    <SelectItem value="credits-low">
-                      {t("profile.downloadHistory.filters.creditsLow")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+              <div
+                className={`w-full sm:w-80 ${isRTL ? "text-right" : "text-left"}`}
+              >
+                <div className="relative">
+                  <Search
+                    className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground ${isRTL ? "right-2" : "left-2"}`}
+                  />
+                  <Input
+                    value={historyQuery}
+                    onChange={(e) => setHistoryQuery(e.target.value)}
+                    placeholder={t("profile.downloadHistory.searchPlaceholder")}
+                    className={`${isRTL ? "pr-8" : "pl-8"} h-9`}
+                  />
+                </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            {isDownloadHistoryLoading ? (
-              // Show loading skeletons while download history is loading
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Array.from({ length: 4 }, (_, i) => (
-                  <DownloadHistoryItemSkeleton key={i} isRTL={isRTL} />
-                ))}
-              </div>
-            ) : downloadHistoryError ? (
-              <div className="py-12 text-center">
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center">
-                    <Download className="w-9 h-9 text-destructive" />
-                  </div>
-                  <div>
-                    <p className="text-lg sm:text-2xl font-medium text-foreground">
-                      Error Loading Download History
-                    </p>
-                    <p className="text-base sm:text-lg pt-2 text-muted-foreground">
-                      {downloadHistoryError}
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={loadDownloadHistory}
-                      className="mt-4"
-                    >
-                      Try Again
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ) : sortedDownloads.length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
-                    <Download className="w-9 h-9 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-lg sm:text-2xl font-medium text-foreground">
-                      {t("profile.downloadHistory.empty.title")}
-                    </p>
-                    <p className="text-base sm:text-lg pt-2 text-muted-foreground">
-                      {t("profile.downloadHistory.empty.description")}
-                    </p>
-                  </div>
-                </div>
+            {isHistoryLoading ? (
+              <DownloadHistorySkeleton isRTL={isRTL} />
+            ) : historyError ? (
+              <div className="text-sm text-red-500">{historyError}</div>
+            ) : history.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                {t("profile.downloadHistory.noDownloads")}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-                {sortedDownloads.map((item, index) => (
-                  <div
-                    key={index}
-                    className="group bg-secondary/50 dark:bg-muted/50 border border-border/50 rounded-xl p-4 space-y-4 hover:bg-card hover:border-border transition-all duration-300"
-                  >
-                    {/* Header with source and ID */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <span className="font-semibold text-foreground text-sm">
-                            {item.data.from}
-                          </span>
-                          <p className="text-xs text-muted-foreground">
-                            ID: {item.data.id.substring(0, 30)}...
-                          </p>
-                        </div>
+              (() => {
+                const q = historyQuery.trim().toLowerCase();
+                const filteredHistory = q
+                  ? history.filter(
+                      (item) =>
+                        (item.id || "").toLowerCase().includes(q) ||
+                        (item.file || "").toLowerCase().includes(q)
+                    )
+                  : history;
+                if (!filteredHistory.length) {
+                  return (
+                    <div className="py-12 flex flex-col items-center justify-center text-center">
+                      <div className="w-20 h-20 bg-muted flex items-center justify-center rounded-full mb-4">
+                        <Search className="w-10 h-10 text-muted-foreground" />
                       </div>
-                      <Badge variant="outline" className="text-xs font-medium">
-                        {item.data.price} credits
-                      </Badge>
-                    </div>
-                    {/* Download URL preview */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs px-2 py-1">
-                          {item.data.downloadUrl.includes("video")
-                            ? "Video"
-                            : "Image"}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground truncate flex-1">
-                          {new URL(item.data.downloadUrl).hostname}
-                        </span>
+                      <div className="text-lg font-medium text-foreground mb-1">
+                        {t("profile.downloadHistory.emptySearch.title")}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {t("profile.downloadHistory.emptySearch.description")}
                       </div>
                     </div>
-                    {/* Main Media Display */}
-                    <div
-                      className="relative aspect-video bg-muted/30 rounded-xl overflow-hidden cursor-pointer group/media border border-border/30 hover:border-border/60 transition-all duration-300"
-                      onClick={() =>
-                        window.open(item.data.downloadUrl, "_blank")
+                  );
+                }
+                return (
+                  <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-h-[70vh] 2xl:max-h-[60vh] overflow-y-auto pr-1">
+                    {filteredHistory.map((item, idx) => {
+                      const ext = getFileExtension(item.file).toLowerCase();
+                      const isImage = [
+                        ".jpg",
+                        ".jpeg",
+                        ".png",
+                        ".gif",
+                        ".webp",
+                        ".svg",
+                        ".bmp",
+                        ".tiff",
+                      ].includes(ext);
+                      const isVideo = [
+                        ".mp4",
+                        ".avi",
+                        ".mov",
+                        ".wmv",
+                        ".flv",
+                        ".webm",
+                        ".mkv",
+                      ].includes(ext);
+                      const isAudio = [
+                        ".mp3",
+                        ".wav",
+                        ".flac",
+                        ".aac",
+                        ".ogg",
+                        ".wma",
+                      ].includes(ext);
+                      let websiteName = item.from;
+                      if (!websiteName) {
+                        try {
+                          const u = new URL(item.file);
+                          const host = u.hostname.replace(/^www\./, "");
+                          websiteName = host.split(".")[0] || host;
+                        } catch {}
                       }
-                    >
-                      {imageErrors.has(index) ? (
-                        // Show error message when image not found
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-muted/30 text-center p-4">
-                          <div className="text-muted-foreground text-sm space-y-2">
-                            <p className="font-medium">Image not available</p>
-                            <p className="text-xs">
-                              The image could not be loaded from{" "}
-                              {item.data.from}
-                            </p>
+
+                      return (
+                        <div
+                          key={item.id ?? idx}
+                          className="relative rounded-xl border bg-card/60 dark:bg-muted/40 p-3 flex flex-col"
+                        >
+                          <div className="aspect-video rounded-lg overflow-hidden bg-secondary/30 flex items-center justify-center">
+                            {isImage ? (
+                              // Show image directly from API link (no proxy)
+                              <img
+                                src={item.file}
+                                alt={item.from}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : isVideo ? (
+                              <video
+                                src={item.file}
+                                controls
+                                className="w-full h-full object-contain bg-black"
+                              />
+                            ) : isAudio ? (
+                              <div className="w-full p-3">
+                                <audio
+                                  src={item.file}
+                                  controls
+                                  className="w-full"
+                                />
+                              </div>
+                            ) : (
+                              (() => {
+                                const key = item.id ?? item.file;
+                                const preview = previewUrls[key];
+                                if (preview) {
+                                  return (
+                                    <img
+                                      src={preview}
+                                      alt={item.from || "Preview"}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  );
+                                }
+                                return (
+                                  <div className="text-xs text-muted-foreground p-4 text-center">
+                                    Generating preview...
+                                  </div>
+                                );
+                              })()
+                            )}
+                          </div>
+
+                          <div className="mt-3 space-y-2">
+                            <div
+                              className={`flex flex-wrap ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}
+                            >
+                              <Badge variant="default">{item.from}</Badge>
+                              <Badge variant="outline">
+                                {item.price}{" "}
+                                {t("profile.downloadHistory.credits")}
+                              </Badge>
+                            </div>
+                            <div className="space-y-3 text-sm text-muted-foreground">
+                              {item.id && (
+                                <div>
+                                  {t("profile.downloadHistory.labels.id")}:{" "}
+                                  {item.id}
+                                </div>
+                              )}
+                              {item.date && (
+                                <div>
+                                  {t("profile.downloadHistory.labels.date")}:{" "}
+                                  {item.date}
+                                </div>
+                              )}
+                              <div className="flex items-center gap-1">
+                                <span className="shrink-0">
+                                  {t("profile.downloadHistory.labels.url")}:
+                                </span>
+                                <a
+                                  href={item.file}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title={item.file}
+                                  className="block w-full max-w-full truncate text-primary hover:underline"
+                                >
+                                  {item.file}
+                                </a>
+                              </div>
+                            </div>
+                            <div
+                              className={`flex ${isRTL ? "flex-row-reverse" : ""} gap-2 pt-1`}
+                            >
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full"
+                                asChild
+                              >
+                                <a
+                                  href={item.file}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {t("profile.downloadHistory.labels.openOn", {
+                                    website:
+                                      websiteName ||
+                                      t(
+                                        "profile.downloadHistory.labels.website"
+                                      ),
+                                  })}
+                                </a>
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      ) : (
-                        <>
-                          {/* Loading skeleton */}
-                          {imageLoading.has(index) && (
-                            <div className="absolute inset-0 bg-gradient-to-br from-muted/50 to-muted/80 animate-pulse flex items-center justify-center">
-                              <div className="flex flex-col items-center gap-2">
-                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                                <p className="text-xs text-muted-foreground">
-                                  Loading...
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                          {isVideoItem(item) ? (
-                            // Video preview with play button overlay
-                            <div className="relative w-full h-full">
-                              <img
-                                src={item.data.downloadUrl}
-                                alt={`Media from ${item.data.from}`}
-                                className="object-cover rounded-lg absolute inset-0 w-full h-full"
-                                referrerPolicy="no-referrer"
-                                onLoad={() => {
-                                  setImageLoading((prev) => {
-                                    const newSet = new Set(prev);
-                                    newSet.delete(index);
-                                    return newSet;
-                                  });
-                                }}
-                                onError={(e) => {
-                                  console.warn("[Profile] Video thumbnail load error", {
-                                    index,
-                                    item,
-                                    src: (e.target as HTMLImageElement).src,
-                                    error: e,
-                                  });
-                                  setImageErrors((prev) => new Set(prev).add(index));
-                                  setImageLoading((prev) => {
-                                    const newSet = new Set(prev);
-                                    newSet.delete(index);
-                                    return newSet;
-                                  });
-                                }}
-                              />
-                              {/* Play button overlay */}
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/media:bg-black/40 transition-all duration-300">
-                                <div className="w-16 h-16 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform duration-300">
-                                  <div className="w-0 h-0 border-l-[14px] border-l-black border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1"></div>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            // Regular image display
-                            <img
-                              src={item.data.downloadUrl}
-                              alt={`Media from ${item.data.from}`}
-                              className="object-cover rounded-lg absolute inset-0 w-full h-full"
-                              referrerPolicy="no-referrer"
-                              onLoad={() => {
-                                setImageLoading((prev) => {
-                                  const newSet = new Set(prev);
-                                  newSet.delete(index);
-                                  return newSet;
-                                });
-                              }}
-                              onError={(e) => {
-                                console.warn("[Profile] Image load error for item:", {
-                                  index,
-                                  item,
-                                  src: (e.target as HTMLImageElement).src,
-                                  error: e,
-                                });
-                                setImageErrors((prev) => new Set(prev).add(index));
-                                setImageLoading((prev) => {
-                                  const newSet = new Set(prev);
-                                  newSet.delete(index);
-                                  return newSet;
-                                });
-                              }}
-                            />
-                          )}
-                        </>
-                      )}
-                      {/* Type Badge Overlay */}
-                      <div className="absolute top-3 right-3 z-10">
-                        <Badge
-                          variant="secondary"
-                          className="text-xs bg-black/80 backdrop-blur-sm text-white border-none px-2 py-1 font-medium"
-                        >
-                          {item.data.downloadUrl.includes("video")
-                            ? "Video"
-                            : "Image"}
-                        </Badge>
-                      </div>
-                    </div>
-                    {/* Footer with download button */}
-                    <div className="pt-2">
-                      <Button
-                        size="sm"
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-200"
-                        onClick={() =>
-                          window.open(item.data.downloadUrl, "_blank")
-                        }
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Open in {item.data.from}
-                      </Button>
-                    </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                );
+              })()
             )}
           </CardContent>
         </Card>

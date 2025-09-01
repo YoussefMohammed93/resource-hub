@@ -25,7 +25,7 @@ export function ProfileHeaderSkeleton({ isRTL }: { isRTL: boolean }) {
 // User Info Card Skeleton
 export function UserInfoCardSkeleton({}: { isRTL: boolean }) {
   return (
-    <Card className="overflow-hidden dark:bg-muted/50 border-none shadow-xs py-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+    <Card className="overflow-hidden dark:bg-muted/50 border-none py-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       <div className="relative p-6 sm:p-8">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-50"></div>
@@ -164,6 +164,66 @@ export function CreditsCardSkeleton({ isRTL }: { isRTL: boolean }) {
   );
 }
 
+// Download History Card Skeleton
+export function DownloadHistorySkeleton({ isRTL }: { isRTL: boolean }) {
+  return (
+    <Card className="dark:bg-muted/50">
+      <CardHeader>
+        <div className={`flex items-start justify-between ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
+          <div className={`flex items-center ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
+            <Skeleton className="w-10 h-10 rounded-lg" />
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-3 w-48" />
+            </div>
+          </div>
+          <div className={`w-full sm:w-80 ${isRTL ? "text-right" : "text-left"}`}>
+            <Skeleton className="h-9 w-full" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-h-[70vh] 2xl:max-h-[60vh] overflow-y-auto pr-1">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div
+              key={i}
+              className="relative rounded-xl border bg-card/60 dark:bg-muted/40 p-3 flex flex-col"
+            >
+              <div className="aspect-video rounded-lg overflow-hidden bg-secondary/30 flex items-center justify-center">
+                <Skeleton className="w-full h-full" />
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {/* Badges row */}
+                <div className={`flex flex-wrap ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}>
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                </div>
+
+                {/* Meta rows */}
+                <div className="space-y-3 text-sm">
+                  <Skeleton className="h-3 w-44" />
+                  <Skeleton className="h-3 w-36" />
+                  {/* URL row with chip-like appearance */}
+                  <div className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
+                    <Skeleton className="h-4 w-14" />
+                    <Skeleton className="h-6 w-40 rounded-full" />
+                  </div>
+                </div>
+
+                {/* Action button */}
+                <div className={`flex ${isRTL ? "flex-row-reverse" : ""} gap-2 pt-1`}>
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Change Password Card Skeleton
 export function ChangePasswordCardSkeleton({ isRTL }: { isRTL: boolean }) {
   return (
@@ -210,83 +270,6 @@ export function ChangePasswordCardSkeleton({ isRTL }: { isRTL: boolean }) {
   );
 }
 
-// Download History Card Skeleton - Full Width
-export function DownloadHistoryCardSkeleton({ isRTL }: { isRTL: boolean }) {
-  return (
-    <Card className="dark:bg-muted/50">
-      <CardHeader className="space-y-6">
-        <div
-          className={`flex items-center ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
-        >
-          <Skeleton className="w-10 h-10 rounded-lg" />
-          <div className="space-y-2">
-            <Skeleton className="h-5 w-48" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-        </div>
-        <div className="flex flex-col sm:flex-row items-center gap-5">
-          {/* Search Bar */}
-          <div className="relative flex-1 w-full">
-            <Skeleton className="h-10 w-full" />
-          </div>
-          {/* Filter */}
-          <div className="flex sm:justify-end w-full sm:w-auto">
-            <Skeleton className="h-10 w-full sm:w-48" />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[450px] overflow-y-auto">
-          {Array.from({ length: 6 }, (_, i) => (
-            <DownloadHistoryItemSkeleton key={i} isRTL={isRTL} />
-          ))}
-        </div>
-        <div className="mt-6 text-center">
-          <Skeleton className="h-10 w-32 mx-auto" />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// Download History Item Skeleton (for individual items)
-export function DownloadHistoryItemSkeleton({}: { isRTL: boolean }) {
-  return (
-    <div className="bg-secondary/50 dark:bg-muted border rounded-lg p-4 space-y-4 hover:bg-muted/50 transition-all duration-200">
-      {/* Header with source and debug ID */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Skeleton className="w-5 h-5 rounded" />
-          <Skeleton className="h-4 w-20" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-3 w-24" />
-        </div>
-      </div>
-
-      {/* File ID and format info */}
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-4 w-24" />
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-5 w-12 rounded-full" />
-          <Skeleton className="h-3 w-8" />
-        </div>
-      </div>
-
-      {/* Preview Image */}
-      <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-        <Skeleton className="w-full h-full" />
-      </div>
-
-      {/* Footer with source URL and download button */}
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-3 w-32" />
-        <Skeleton className="h-8 w-20 rounded" />
-      </div>
-    </div>
-  );
-}
-
 // Empty State Skeleton (for when there's no data)
 export function EmptyStateSkeleton() {
   return (
@@ -321,8 +304,8 @@ export function ProfilePageSkeleton() {
           <ChangePasswordCardSkeleton isRTL={isRTL} />
         </div>
 
-        {/* Download History - Full Width */}
-        <DownloadHistoryCardSkeleton isRTL={isRTL} />
+        {/* Download History Card Skeleton */}
+        <DownloadHistorySkeleton isRTL={isRTL} />
       </main>
     </div>
   );
