@@ -70,6 +70,10 @@ export async function GET(request: NextRequest) {
       try {
         console.log("[Media Proxy] Scraping Freepik page for image URL:", url);
 
+        // Create timeout controller for compatibility
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         const pageResponse = await fetch(url, {
           headers: {
             "User-Agent":
@@ -82,8 +86,10 @@ export async function GET(request: NextRequest) {
             Connection: "keep-alive",
             "Upgrade-Insecure-Requests": "1",
           },
-          signal: AbortSignal.timeout(10000), // 10 second timeout
+          signal: controller.signal,
         });
+
+        clearTimeout(timeoutId);
 
         if (pageResponse.ok) {
           const html = await pageResponse.text();
@@ -158,14 +164,20 @@ export async function GET(request: NextRequest) {
             // Try the best image URL first
             for (const imageUrl of filteredUrls) {
               try {
+                // Create timeout controller for compatibility
+                const imageController = new AbortController();
+                const imageTimeoutId = setTimeout(() => imageController.abort(), 15000);
+
                 const imageResponse = await fetch(imageUrl, {
                   headers: {
                     "User-Agent":
                       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
                     Referer: url,
                   },
-                  signal: AbortSignal.timeout(15000), // 15 second timeout for images
+                  signal: imageController.signal,
                 });
+
+                clearTimeout(imageTimeoutId);
 
                 if (imageResponse.ok) {
                   const mediaBuffer = await imageResponse.arrayBuffer();
@@ -211,14 +223,20 @@ export async function GET(request: NextRequest) {
       console.log(`Attempt ${i + 1}/${urlsToTry.length}: ${tryUrl}`);
 
       try {
+        // Create timeout controller for compatibility
+        const fallbackController = new AbortController();
+        const fallbackTimeoutId = setTimeout(() => fallbackController.abort(), 15000);
+
         const response = await fetch(tryUrl, {
           headers: {
             "User-Agent":
               "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             Referer: urlObj.origin,
           },
-          signal: AbortSignal.timeout(15000), // 15 second timeout
+          signal: fallbackController.signal,
         });
+
+        clearTimeout(fallbackTimeoutId);
 
         console.log(
           `Response for ${tryUrl}: ${response.status} ${response.statusText}`
