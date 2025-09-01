@@ -1,6 +1,10 @@
 // API service utilities for authentication and other endpoints
 import axios from "axios";
-import { encryptPassword, generateTimestampToken, generatePasswordResetToken } from "./utils";
+import {
+  encryptPassword,
+  generateTimestampToken,
+  generatePasswordResetToken,
+} from "./utils";
 import { shouldUseMockData, mockApiResponses } from "./mock-data";
 
 // Base API URL - use proxy for development, direct API for production
@@ -514,7 +518,9 @@ export const authApi = {
       password: encryptedPassword,
       token,
       remember_me: credentials.remember_me || false,
-      ...(credentials.recaptcha_token && { recaptcha_token: credentials.recaptcha_token }),
+      ...(credentials.recaptcha_token && {
+        recaptcha_token: credentials.recaptcha_token,
+      }),
     });
   },
 
@@ -554,7 +560,9 @@ export const authApi = {
       phoneNum: userData.phone,
       otp: userData.otp,
       token,
-      ...(userData.recaptcha_token && { recaptcha_token: userData.recaptcha_token }),
+      ...(userData.recaptcha_token && {
+        recaptcha_token: userData.recaptcha_token,
+      }),
     });
   },
 
@@ -633,13 +641,17 @@ export const authApi = {
     const encryptedPassword = encryptPassword(data.new_password);
     const token = generatePasswordResetToken();
 
-    return apiRequest<ForgotPasswordResponse>("/v1/auth/forgot-password", "POST", {
-      email: data.email,
-      phoneNum: data.phoneNum,
-      new_password: encryptedPassword,
-      token,
-      otp: data.otp,
-    });
+    return apiRequest<ForgotPasswordResponse>(
+      "/v1/auth/forgot-password",
+      "POST",
+      {
+        email: data.email,
+        phoneNum: data.phoneNum,
+        new_password: encryptedPassword,
+        token,
+        otp: data.otp,
+      }
+    );
   },
 };
 
@@ -1393,6 +1405,14 @@ export interface SearchResult {
     width: number | null;
     height: number | null;
   };
+  width?: number;
+  height?: number;
+  thumbnail?: string;
+  title?: string;
+  provider?: string;
+  providerIcon?: string;
+  id?: string;
+  poster?: string;
 }
 
 export interface SearchApiResponse {
@@ -1767,7 +1787,10 @@ export const searchApi = {
           : "/api/providers/data"; // Use proxy in development
 
       // Use publicApiClient for production (no auth required) and searchApiClient for development (proxy)
-      const client = process.env.NODE_ENV === "production" ? publicApiClient : searchApiClient;
+      const client =
+        process.env.NODE_ENV === "production"
+          ? publicApiClient
+          : searchApiClient;
 
       const response = await client.post(endpoint, {
         platform,
@@ -2393,7 +2416,7 @@ export const downloadApi = {
       const params: { task_id?: string; get_all?: boolean } = {};
       if (taskId) params.task_id = taskId;
       if (getAllTasks) params.get_all = true;
-      
+
       const response = await apiClient.request({
         url: "/v1/download/tasks",
         method: "GET",

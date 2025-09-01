@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 
@@ -161,6 +162,8 @@ function normalizeFileType(
   const it = (imageTypeRaw || "").toString().trim().toLowerCase();
   // Videos: exclude video-templates from plain videos
   if (ft === "video" || ft === "stock-video" || it === "video") return "video";
+  // GIFs: handle GIF files as a distinct type
+  if (ft === "gif" || it === "gif") return "gif";
   // Images and photos (raster/illustrations/graphics)
   if (
     ft === "image" ||
@@ -763,6 +766,94 @@ function SearchContent() {
     return "/placeholder.png";
   }, []);
 
+  // Function to detect image dimensions from URL
+  const detectImageDimensions = useCallback(
+    (
+      imageUrl: string
+    ): Promise<{ width: number; height: number }> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+
+        img.onload = () => {
+          const dimensions = {
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+          };
+
+          resolve(dimensions);
+        };
+
+        img.onerror = () => {
+          reject(new Error(`Failed to load image: ${imageUrl}`));
+        };
+
+        // Set crossOrigin to handle CORS issues
+        img.crossOrigin = "anonymous";
+        img.src = imageUrl;
+      });
+    },
+    []
+  );
+
+  // Function to detect all search results dimensions (silent)
+  const logAllResultsDimensions = useCallback(async () => {
+    const dimensionPromises = searchResults.map(async (result, index) => {
+      try {
+        const dimensions = await detectImageDimensions(result.thumbnail);
+        return {
+          index: index + 1,
+          id: result.id,
+          title: result.title,
+          provider: result.provider,
+          fileType: result.file_type,
+          originalWidth: result.width,
+          originalHeight: result.height,
+          detectedWidth: dimensions.width,
+          detectedHeight: dimensions.height,
+          url: result.thumbnail,
+        };
+      } catch (error) {
+        return {
+          index: index + 1,
+          id: result.id,
+          title: result.title,
+          provider: result.provider,
+          fileType: result.file_type,
+          originalWidth: result.width,
+          originalHeight: result.height,
+          detectedWidth: null,
+          detectedHeight: null,
+          url: result.thumbnail,
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    });
+
+    try {
+      const results = await Promise.allSettled(dimensionPromises);
+      const successfulResults = results
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value);
+
+      return successfulResults;
+    } catch (error) {
+      console.error("Failed to detect dimensions:", error);
+      return [];
+    }
+  }, [searchResults, detectImageDimensions]);
+
+  // Auto-detect dimensions when search results change
+  useEffect(() => {
+    if (searchResults.length > 0) {
+      // Add a small delay to ensure images are rendered
+      const timer = setTimeout(() => {
+        logAllResultsDimensions();
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [searchResults, logAllResultsDimensions]);
+
   const toggleProvider = (providerId: string) => {
     setSelectedProviders((prev) =>
       prev.includes(providerId)
@@ -779,10 +870,400 @@ function SearchContent() {
     );
   };
 
-  const getImageFlex = (index: number) => {
-    // Create varied flex values for different widths (flex-grow values)
-    const flexValues = [1.2, 1.6, 1.4, 2.0, 1.1, 1.8, 1.3, 1.5, 1.7, 1.45];
-    return flexValues[index % flexValues.length];
+  // Create dynamic grid rows based on actual image dimensions and aspect ratios
+  const createDynamicGridRows = (results: SearchResult[]) => {
+    const rows: SearchResult[][] = [];
+    let currentIndex = 0;
+
+    while (currentIndex < results.length) {
+      const currentRow: SearchResult[] = [];
+      let totalWidth = 0;
+      const containerWidth = 100; // Percentage-based container width
+      const maxItemsPerRow = 6;
+
+      // Build row by filling available space optimally
+      for (
+        let i = currentIndex;
+        i < results.length && currentRow.length < maxItemsPerRow;
+        i++
+      ) {
+        const result = results[i];
+        const dimensions = getFallbackDimensions(result);
+        let aspectRatio = dimensions.width / dimensions.height;
+
+        // Force PNG files to have 1:1 aspect ratio (except wide PNGs > 420px)
+        const isPNG =
+          result.file_type === "PNG" ||
+          (result.file_type === "image" &&
+            result.thumbnail?.toLowerCase().includes(".png")) ||
+          result.thumbnail?.toLowerCase().endsWith(".png");
+        const apiWidth = parseInt(String(result.width)) || dimensions.width;
+        const isWidePNG = isPNG && apiWidth > 420;
+        if (isPNG && !isWidePNG) {
+          aspectRatio = 1.0;
+        }
+
+        // Calculate relative width based on aspect ratio
+        // Ultra-granular aspect ratio classification for perfect proportional sizing
+        let relativeWidth;
+        if (aspectRatio >= 8.0) {
+          relativeWidth = 60; // Extreme panoramic banners
+        } else if (aspectRatio >= 7.0) {
+          relativeWidth = 58; // Ultra wide banners
+        } else if (aspectRatio >= 6.0) {
+          relativeWidth = 56; // Super wide banners
+        } else if (aspectRatio >= 5.5) {
+          relativeWidth = 54; // Very wide banners
+        } else if (aspectRatio >= 5.0) {
+          relativeWidth = 52; // Wide banners
+        } else if (aspectRatio >= 4.5) {
+          relativeWidth = 51; // Panoramic ultra wide
+        } else if (aspectRatio >= 4.0) {
+          relativeWidth = 50; // Ultra wide panoramic
+        } else if (aspectRatio >= 3.8) {
+          relativeWidth = 49; // Very wide panoramic
+        } else if (aspectRatio >= 3.6) {
+          relativeWidth = 48; // Wide panoramic
+        } else if (aspectRatio >= 3.4) {
+          relativeWidth = 47; // Panoramic landscape
+        } else if (aspectRatio >= 3.2) {
+          relativeWidth = 46; // Extra wide landscape
+        } else if (aspectRatio >= 3.0) {
+          relativeWidth = 45; // Very wide landscape
+        } else if (aspectRatio >= 2.9) {
+          relativeWidth = 44; // Wide landscape plus
+        } else if (aspectRatio >= 2.8) {
+          relativeWidth = 43; // Wide landscape
+        } else if (aspectRatio >= 2.7) {
+          relativeWidth = 42; // Standard wide plus
+        } else if (aspectRatio >= 2.6) {
+          relativeWidth = 41; // Standard wide
+        } else if (aspectRatio >= 2.5) {
+          relativeWidth = 40; // Medium wide plus
+        } else if (aspectRatio >= 2.4) {
+          relativeWidth = 39; // Medium wide
+        } else if (aspectRatio >= 2.3) {
+          relativeWidth = 38; // Landscape wide
+        } else if (aspectRatio >= 2.2) {
+          relativeWidth = 37; // Landscape medium
+        } else if (aspectRatio >= 2.1) {
+          relativeWidth = 36; // Landscape standard
+        } else if (aspectRatio >= 2.0) {
+          relativeWidth = 35; // Classic wide
+        } else if (aspectRatio >= 1.95) {
+          relativeWidth = 34; // Nearly 2:1
+        } else if (aspectRatio >= 1.9) {
+          relativeWidth = 33; // Wide landscape
+        } else if (aspectRatio >= 1.85) {
+          relativeWidth = 32; // Medium landscape plus
+        } else if (aspectRatio >= 1.8) {
+          relativeWidth = 31; // Medium landscape
+        } else if (aspectRatio >= 1.75) {
+          relativeWidth = 30; // Landscape mild plus
+        } else if (aspectRatio >= 1.7) {
+          relativeWidth = 29; // Landscape mild
+        } else if (aspectRatio >= 1.65) {
+          relativeWidth = 28; // Slightly wide plus
+        } else if (aspectRatio >= 1.6) {
+          relativeWidth = 27; // Slightly wide
+        } else if (aspectRatio >= 1.55) {
+          relativeWidth = 26; // Classic landscape plus
+        } else if (aspectRatio >= 1.5) {
+          relativeWidth = 25; // Classic landscape
+        } else if (aspectRatio >= 1.45) {
+          relativeWidth = 24; // Mild landscape plus
+        } else if (aspectRatio >= 1.4) {
+          relativeWidth = 23; // Mild landscape
+        } else if (aspectRatio >= 1.35) {
+          relativeWidth = 22; // Light landscape plus
+        } else if (aspectRatio >= 1.3) {
+          relativeWidth = 21; // Light landscape
+        } else if (aspectRatio >= 1.25) {
+          relativeWidth = 20; // Subtle landscape plus
+        } else if (aspectRatio >= 1.2) {
+          relativeWidth = 19; // Subtle landscape
+        } else if (aspectRatio >= 1.15) {
+          relativeWidth = 18; // Nearly square wide plus
+        } else if (aspectRatio >= 1.1) {
+          relativeWidth = 17; // Nearly square wide
+        } else if (aspectRatio >= 1.05) {
+          relativeWidth = 16; // Almost square wide
+        } else if (aspectRatio >= 1.0) {
+          relativeWidth = 15; // Perfect square
+        } else if (aspectRatio >= 0.95) {
+          relativeWidth = 14; // Almost square tall
+        } else if (aspectRatio >= 0.9) {
+          relativeWidth = 13; // Nearly square tall
+        } else if (aspectRatio >= 0.85) {
+          relativeWidth = 12; // Nearly square tall plus
+        } else if (aspectRatio >= 0.8) {
+          relativeWidth = 11; // Subtle portrait
+        } else if (aspectRatio >= 0.75) {
+          relativeWidth = 10; // Subtle portrait plus
+        } else if (aspectRatio >= 0.7) {
+          relativeWidth = 9; // Light portrait
+        } else if (aspectRatio >= 0.65) {
+          relativeWidth = 8; // Light portrait plus
+        } else if (aspectRatio >= 0.6) {
+          relativeWidth = 7; // Standard portrait
+        } else if (aspectRatio >= 0.55) {
+          relativeWidth = 6; // Standard portrait plus
+        } else if (aspectRatio >= 0.5) {
+          relativeWidth = 5; // Tall portrait
+        } else if (aspectRatio >= 0.45) {
+          relativeWidth = 4; // Tall portrait plus
+        } else if (aspectRatio >= 0.4) {
+          relativeWidth = 3; // Very tall portrait
+        } else if (aspectRatio >= 0.35) {
+          relativeWidth = 2; // Very tall portrait plus
+        } else if (aspectRatio >= 0.3) {
+          relativeWidth = 1; // Extra tall portrait
+        } else if (aspectRatio >= 0.25) {
+          relativeWidth = 0.8; // Ultra tall portrait
+        } else if (aspectRatio >= 0.2) {
+          relativeWidth = 0.6; // Extremely tall portrait
+        } else if (aspectRatio >= 0.15) {
+          relativeWidth = 0.4; // Super narrow vertical
+        } else if (aspectRatio >= 0.1) {
+          relativeWidth = 0.3; // Ultra narrow vertical
+        } else if (aspectRatio >= 0.08) {
+          relativeWidth = 0.25; // Extreme narrow vertical
+        } else if (aspectRatio >= 0.06) {
+          relativeWidth = 0.2; // Hyper narrow vertical
+        } else if (aspectRatio >= 0.05) {
+          relativeWidth = 0.15; // Ultra thin vertical
+        } else if (aspectRatio >= 0.04) {
+          relativeWidth = 0.12; // Super thin vertical
+        } else if (aspectRatio >= 0.03) {
+          relativeWidth = 0.1; // Extremely thin vertical
+        } else if (aspectRatio >= 0.02) {
+          relativeWidth = 0.08; // Hair-thin vertical
+        } else if (aspectRatio >= 0.01) {
+          relativeWidth = 0.06; // Thread-thin vertical
+        } else {
+          relativeWidth = 0.05; // Microscopic vertical
+        }
+
+        // Enforce a minimum share to avoid cards rendering at ~50px widths
+        relativeWidth = Math.max(relativeWidth, 12);
+
+        // Check if adding this item would overflow the row
+        if (
+          totalWidth + relativeWidth > containerWidth &&
+          currentRow.length > 0
+        ) {
+          // If we have space for a narrow image, try to fit one more
+          const remainingSpace = containerWidth - totalWidth;
+          if (remainingSpace >= 12 && aspectRatio < 0.8) {
+            relativeWidth = remainingSpace;
+          } else {
+            break; // Row is full
+          }
+        }
+
+        currentRow.push(result);
+        totalWidth += relativeWidth;
+        currentIndex++;
+
+        // If row is reasonably full (>85%) and we have at least 2 items, consider ending
+        if (totalWidth >= 85 && currentRow.length >= 2) {
+          // Check if next image is very narrow and can fit
+          const nextResult = results[i + 1];
+          if (nextResult && currentRow.length < maxItemsPerRow) {
+            const nextDimensions = getFallbackDimensions(nextResult);
+            const nextAspectRatio =
+              nextDimensions.width / nextDimensions.height;
+            const remainingSpace = containerWidth - totalWidth;
+
+            // If next image is narrow and fits in remaining space, continue
+            if (nextAspectRatio < 0.8 && remainingSpace >= 12) {
+              continue;
+            }
+          }
+          break;
+        }
+      }
+
+      // Ensure we have at least one item in the row
+      if (currentRow.length === 0 && currentIndex < results.length) {
+        currentRow.push(results[currentIndex]);
+        currentIndex++;
+      }
+
+      if (currentRow.length > 0) {
+        rows.push(currentRow);
+      }
+    }
+
+    return rows;
+  };
+
+  // Get grid template columns based on row items and their aspect ratios
+  const getGridTemplateColumns = (rowItems: SearchResult[]) => {
+    return rowItems
+      .map((item) => {
+        const dimensions = getFallbackDimensions(item);
+        let aspectRatio = dimensions.width / dimensions.height;
+
+        // Force PNG files to have 1:1 aspect ratio (except wide PNGs > 420px)
+        const isPNG =
+          item.file_type === "PNG" ||
+          (item.file_type === "image" &&
+            item.thumbnail?.toLowerCase().includes(".png")) ||
+          item.thumbnail?.toLowerCase().endsWith(".png");
+        const apiWidth = parseInt(String(item.width)) || dimensions.width;
+        const isWidePNG = isPNG && apiWidth > 420;
+        if (isPNG && !isWidePNG) {
+          aspectRatio = 1.0;
+        }
+
+        // Calculate relative width based on aspect ratio
+        // Ultra-granular aspect ratio classification for perfect proportional sizing
+        let relativeWidth;
+        if (aspectRatio >= 8.0) {
+          relativeWidth = 60; // Extreme panoramic banners
+        } else if (aspectRatio >= 7.0) {
+          relativeWidth = 58; // Ultra wide banners
+        } else if (aspectRatio >= 6.0) {
+          relativeWidth = 56; // Super wide banners
+        } else if (aspectRatio >= 5.5) {
+          relativeWidth = 54; // Very wide banners
+        } else if (aspectRatio >= 5.0) {
+          relativeWidth = 52; // Wide banners
+        } else if (aspectRatio >= 4.5) {
+          relativeWidth = 51; // Panoramic ultra wide
+        } else if (aspectRatio >= 4.0) {
+          relativeWidth = 50; // Ultra wide panoramic
+        } else if (aspectRatio >= 3.8) {
+          relativeWidth = 49; // Very wide panoramic
+        } else if (aspectRatio >= 3.6) {
+          relativeWidth = 48; // Wide panoramic
+        } else if (aspectRatio >= 3.4) {
+          relativeWidth = 47; // Panoramic landscape
+        } else if (aspectRatio >= 3.2) {
+          relativeWidth = 46; // Extra wide landscape
+        } else if (aspectRatio >= 3.0) {
+          relativeWidth = 45; // Very wide landscape
+        } else if (aspectRatio >= 2.9) {
+          relativeWidth = 44; // Wide landscape plus
+        } else if (aspectRatio >= 2.8) {
+          relativeWidth = 43; // Wide landscape
+        } else if (aspectRatio >= 2.7) {
+          relativeWidth = 42; // Standard wide plus
+        } else if (aspectRatio >= 2.6) {
+          relativeWidth = 41; // Standard wide
+        } else if (aspectRatio >= 2.5) {
+          relativeWidth = 40; // Medium wide plus
+        } else if (aspectRatio >= 2.4) {
+          relativeWidth = 39; // Medium wide
+        } else if (aspectRatio >= 2.3) {
+          relativeWidth = 38; // Landscape wide
+        } else if (aspectRatio >= 2.2) {
+          relativeWidth = 37; // Landscape medium
+        } else if (aspectRatio >= 2.1) {
+          relativeWidth = 36; // Landscape standard
+        } else if (aspectRatio >= 2.0) {
+          relativeWidth = 35; // Classic wide
+        } else if (aspectRatio >= 1.95) {
+          relativeWidth = 34; // Nearly 2:1
+        } else if (aspectRatio >= 1.9) {
+          relativeWidth = 33; // Wide landscape
+        } else if (aspectRatio >= 1.85) {
+          relativeWidth = 32; // Medium landscape plus
+        } else if (aspectRatio >= 1.8) {
+          relativeWidth = 31; // Medium landscape
+        } else if (aspectRatio >= 1.75) {
+          relativeWidth = 30; // Landscape mild plus
+        } else if (aspectRatio >= 1.7) {
+          relativeWidth = 29; // Landscape mild
+        } else if (aspectRatio >= 1.65) {
+          relativeWidth = 28; // Slightly wide plus
+        } else if (aspectRatio >= 1.6) {
+          relativeWidth = 27; // Slightly wide
+        } else if (aspectRatio >= 1.55) {
+          relativeWidth = 26; // Classic landscape plus
+        } else if (aspectRatio >= 1.5) {
+          relativeWidth = 25; // Classic landscape
+        } else if (aspectRatio >= 1.45) {
+          relativeWidth = 24; // Mild landscape plus
+        } else if (aspectRatio >= 1.4) {
+          relativeWidth = 23; // Mild landscape
+        } else if (aspectRatio >= 1.35) {
+          relativeWidth = 22; // Light landscape plus
+        } else if (aspectRatio >= 1.3) {
+          relativeWidth = 21; // Light landscape
+        } else if (aspectRatio >= 1.25) {
+          relativeWidth = 20; // Subtle landscape plus
+        } else if (aspectRatio >= 1.2) {
+          relativeWidth = 19; // Subtle landscape
+        } else if (aspectRatio >= 1.15) {
+          relativeWidth = 18; // Nearly square wide plus
+        } else if (aspectRatio >= 1.1) {
+          relativeWidth = 17; // Nearly square wide
+        } else if (aspectRatio >= 1.05) {
+          relativeWidth = 16; // Almost square wide
+        } else if (aspectRatio >= 1.0) {
+          relativeWidth = 15; // Perfect square
+        } else if (aspectRatio >= 0.95) {
+          relativeWidth = 14; // Almost square tall
+        } else if (aspectRatio >= 0.9) {
+          relativeWidth = 13; // Nearly square tall
+        } else if (aspectRatio >= 0.85) {
+          relativeWidth = 12; // Nearly square tall plus
+        } else if (aspectRatio >= 0.8) {
+          relativeWidth = 11; // Subtle portrait
+        } else if (aspectRatio >= 0.75) {
+          relativeWidth = 10; // Subtle portrait plus
+        } else if (aspectRatio >= 0.7) {
+          relativeWidth = 9; // Light portrait
+        } else if (aspectRatio >= 0.65) {
+          relativeWidth = 8; // Light portrait plus
+        } else if (aspectRatio >= 0.6) {
+          relativeWidth = 7; // Standard portrait
+        } else if (aspectRatio >= 0.55) {
+          relativeWidth = 6; // Standard portrait plus
+        } else if (aspectRatio >= 0.5) {
+          relativeWidth = 5; // Tall portrait
+        } else if (aspectRatio >= 0.45) {
+          relativeWidth = 4; // Tall portrait plus
+        } else if (aspectRatio >= 0.4) {
+          relativeWidth = 3; // Very tall portrait
+        } else if (aspectRatio >= 0.35) {
+          relativeWidth = 2; // Very tall portrait plus
+        } else if (aspectRatio >= 0.3) {
+          relativeWidth = 1; // Extra tall portrait
+        } else if (aspectRatio >= 0.25) {
+          relativeWidth = 0.8; // Ultra tall portrait
+        } else if (aspectRatio >= 0.2) {
+          relativeWidth = 0.6; // Extremely tall portrait
+        } else if (aspectRatio >= 0.15) {
+          relativeWidth = 0.4; // Super narrow vertical
+        } else if (aspectRatio >= 0.1) {
+          relativeWidth = 0.3; // Ultra narrow vertical
+        } else if (aspectRatio >= 0.08) {
+          relativeWidth = 0.25; // Extreme narrow vertical
+        } else if (aspectRatio >= 0.06) {
+          relativeWidth = 0.2; // Hyper narrow vertical
+        } else if (aspectRatio >= 0.05) {
+          relativeWidth = 0.15; // Ultra thin vertical
+        } else if (aspectRatio >= 0.04) {
+          relativeWidth = 0.12; // Super thin vertical
+        } else if (aspectRatio >= 0.03) {
+          relativeWidth = 0.1; // Extremely thin vertical
+        } else if (aspectRatio >= 0.02) {
+          relativeWidth = 0.08; // Hair-thin vertical
+        } else if (aspectRatio >= 0.01) {
+          relativeWidth = 0.06; // Thread-thin vertical
+        } else {
+          relativeWidth = 0.05; // Microscopic vertical
+        }
+
+        // Enforce a minimum column fraction to avoid overly narrow columns
+        relativeWidth = Math.max(relativeWidth, 12);
+
+        return `${relativeWidth}fr`;
+      })
+      .join(" ");
   };
 
   const handleImageClick = (result: SearchResult) => {
@@ -840,6 +1321,134 @@ function SearchContent() {
     } else {
       return { width: 300, height: 200 }; // 3:2 aspect ratio for images
     }
+  };
+
+  // Generate skeleton data with varied aspect ratios for masonry layout
+  const generateSkeletonData = (count: number) => {
+    const aspectRatios = [
+      { width: 300, height: 400 }, // Portrait
+      { width: 400, height: 300 }, // Landscape
+      { width: 350, height: 350 }, // Square
+      { width: 500, height: 300 }, // Wide landscape
+      { width: 280, height: 420 }, // Tall portrait
+      { width: 450, height: 250 }, // Ultra wide
+      { width: 320, height: 380 }, // Mild portrait
+      { width: 380, height: 280 }, // Mild landscape
+      { width: 600, height: 300 }, // Banner
+      { width: 300, height: 500 }, // Very tall
+    ];
+
+    return Array.from({ length: count }, (_, i) => {
+      const ratio = aspectRatios[i % aspectRatios.length];
+      return {
+        id: `skeleton-${i}`,
+        width: ratio.width,
+        height: ratio.height,
+        file_type: i % 4 === 0 ? "video" : i % 8 === 0 ? "audio" : "image",
+      };
+    });
+  };
+
+  // Create skeleton grid rows using the same logic as real results
+  const createSkeletonGridRows = (skeletonData: any[]) => {
+    const rows: any[][] = [];
+    let currentIndex = 0;
+
+    while (currentIndex < skeletonData.length) {
+      const currentRow: any[] = [];
+      let totalWidth = 0;
+      const containerWidth = 100;
+      const maxItemsPerRow = 6;
+
+      for (
+        let i = currentIndex;
+        i < skeletonData.length && currentRow.length < maxItemsPerRow;
+        i++
+      ) {
+        const item = skeletonData[i];
+        const aspectRatio = item.width / item.height;
+
+        // Calculate relative width using the same logic as real results
+        let relativeWidth;
+        if (aspectRatio >= 3.0) {
+          relativeWidth = 45;
+        } else if (aspectRatio >= 2.5) {
+          relativeWidth = 40;
+        } else if (aspectRatio >= 2.0) {
+          relativeWidth = 35;
+        } else if (aspectRatio >= 1.5) {
+          relativeWidth = 25;
+        } else if (aspectRatio >= 1.2) {
+          relativeWidth = 19;
+        } else if (aspectRatio >= 1.0) {
+          relativeWidth = 15;
+        } else if (aspectRatio >= 0.8) {
+          relativeWidth = 11;
+        } else if (aspectRatio >= 0.6) {
+          relativeWidth = 7;
+        } else {
+          relativeWidth = 5;
+        }
+
+        if (
+          totalWidth + relativeWidth > containerWidth &&
+          currentRow.length > 0
+        ) {
+          break;
+        }
+
+        currentRow.push(item);
+        totalWidth += relativeWidth;
+        currentIndex++;
+
+        if (totalWidth >= 85 && currentRow.length >= 2) {
+          break;
+        }
+      }
+
+      if (currentRow.length === 0 && currentIndex < skeletonData.length) {
+        currentRow.push(skeletonData[currentIndex]);
+        currentIndex++;
+      }
+
+      if (currentRow.length > 0) {
+        rows.push(currentRow);
+      }
+    }
+
+    return rows;
+  };
+
+  // Get skeleton grid template columns
+  const getSkeletonGridTemplateColumns = (rowItems: any[]) => {
+    return rowItems
+      .map((item) => {
+        const aspectRatio = item.width / item.height;
+
+        let relativeWidth;
+        if (aspectRatio >= 3.0) {
+          relativeWidth = 45;
+        } else if (aspectRatio >= 2.5) {
+          relativeWidth = 40;
+        } else if (aspectRatio >= 2.0) {
+          relativeWidth = 35;
+        } else if (aspectRatio >= 1.5) {
+          relativeWidth = 25;
+        } else if (aspectRatio >= 1.2) {
+          relativeWidth = 19;
+        } else if (aspectRatio >= 1.0) {
+          relativeWidth = 15;
+        } else if (aspectRatio >= 0.8) {
+          relativeWidth = 11;
+        } else if (aspectRatio >= 0.6) {
+          relativeWidth = 7;
+        } else {
+          relativeWidth = 5;
+        }
+
+        return `${relativeWidth}fr`;
+      })
+      .join(" ");
   };
 
   // Get responsive height for mobile/desktop
@@ -1121,36 +1730,53 @@ function SearchContent() {
                 <Skeleton className="w-80 h-4 mx-auto" />
               </div>
 
-              {/* Results Grid - Mobile: Grid (1 item per row), SM+: Flex with varied widths */}
+              {/* Results Grid - Mobile: Grid (1 item per row), SM+: Masonry Layout */}
               <div className="space-y-4 results-grid-3xl">
                 {/* Mobile Layout - Grid with 1 column */}
                 <div className="grid grid-cols-1 gap-4 sm:hidden">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="w-full h-64 rounded-lg" />
-                  ))}
+                  {generateSkeletonData(6).map((item, i) => {
+                    const aspectRatio = item.height / item.width;
+                    const height = Math.min(
+                      275,
+                      Math.max(220, 220 * aspectRatio)
+                    );
+                    return (
+                      <Skeleton
+                        key={i}
+                        className="w-full rounded-lg"
+                        style={{ height: `${height}px` }}
+                      />
+                    );
+                  })}
                 </div>
 
-                {/* Desktop Layout - Flex with varied widths */}
-                <div className="hidden sm:flex sm:flex-col sm:w-full">
-                  {Array.from({ length: 3 }).map((_, rowIndex) => (
-                    <div
-                      key={rowIndex}
-                      className="flex gap-2 sm:gap-4 justify-center flex-wrap mb-4"
-                    >
-                      {Array.from({ length: 4 }).map((_, i) => (
-                        <Skeleton
-                          key={i}
-                          className="rounded-lg"
-                          style={{
-                            flex: `${1.2 + i * 0.2} 1 0`,
-                            height: "250px",
-                            minWidth: "150px",
-                            maxWidth: "400px",
-                          }}
-                        />
-                      ))}
-                    </div>
-                  ))}
+                {/* Desktop Layout - Masonry Grid matching actual results */}
+                <div className="hidden sm:block w-full">
+                  {createSkeletonGridRows(generateSkeletonData(18)).map(
+                    (row: any[], rowIndex: number) => (
+                      <div
+                        key={rowIndex}
+                        className="grid mb-3 2xl:mb-4"
+                        style={{
+                          gridTemplateColumns:
+                            getSkeletonGridTemplateColumns(row),
+                          gap: "20px",
+                        }}
+                      >
+                        {row.map((item: any) => {
+                          return (
+                            <Skeleton
+                              key={item.id}
+                              className="rounded-lg"
+                              style={{
+                                height: "220px", // Fixed height like actual results
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
 
@@ -1834,12 +2460,6 @@ function SearchContent() {
                           <span>Templates</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="icons">
-                        <div className="flex items-center gap-2">
-                          <Star className="w-4 h-4" />
-                          <span>Icons</span>
-                        </div>
-                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1991,7 +2611,7 @@ function SearchContent() {
 
             {/* Results Grid - Mobile: Grid (1 item per row), SM+: Flex with varied widths */}
             {!isSearchLoading && !searchError && searchResults.length > 0 && (
-              <div className="space-y-4 results-grid-3xl">
+              <>
                 {/* Mobile Layout - Grid with 1 column */}
                 <div className="grid grid-cols-1 gap-4 sm:hidden">
                   {searchResults.map((result) => {
@@ -2057,7 +2677,8 @@ function SearchContent() {
                                 ))}
                               </div>
                             </div>
-                          ) : result.file_type === "video" &&
+                          ) : (result.file_type === "video" ||
+                              result.file_type === "gif") &&
                             isValidVideoUrl(result.thumbnail) ? (
                             <>
                               <video
@@ -2106,60 +2727,55 @@ function SearchContent() {
                                   )
                                 }
                                 onError={(e) => {
-                                  console.warn(
-                                    "Video load error, falling back to image"
-                                  );
                                   const video = e.target as HTMLVideoElement;
                                   video.style.display = "none";
-                                  const fallbackImg =
-                                    video.nextElementSibling as HTMLImageElement;
-                                  if (fallbackImg) {
-                                    fallbackImg.style.display = "block";
-                                  }
+                                  const fallback =
+                                    video.nextElementSibling as HTMLElement;
+                                  if (fallback) fallback.style.display = "flex";
                                 }}
                               />
-                              {/* Fallback for videos - text placeholder if no poster */}
+                              {/* Fallback for videos/gifs - text placeholder if no poster */}
                               {result.poster ? (
                                 <img
                                   src={result.poster}
                                   alt={result.title}
                                   className="w-full h-full object-cover"
                                   style={{ display: "none" }}
-                                  loading="lazy"
-                                  onError={(e) => {
-                                    const img = e.target as HTMLImageElement;
-                                    img.style.display = "none";
-                                    const textPlaceholder =
-                                      img.nextElementSibling as HTMLDivElement;
-                                    if (textPlaceholder) {
-                                      textPlaceholder.style.display = "flex";
-                                    }
-                                  }}
                                 />
-                              ) : null}
-                              {/* Text placeholder for videos without poster */}
-                              <div
-                                className="absolute inset-0 flex items-center justify-center bg-muted/80 text-muted-foreground"
-                                style={{
-                                  display: result.poster ? "none" : "none",
-                                }}
-                              >
-                                <div className="text-center">
-                                  <div className="text-2xl mb-2">🎥</div>
-                                  <div className="text-sm font-medium">
-                                    Video Preview
-                                  </div>
-                                  <div className="text-xs">
+                              ) : (
+                                <div
+                                  className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm"
+                                  style={{ display: "none" }}
+                                >
+                                  <div className="text-center">
+                                    <Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
                                     No thumbnail available
                                   </div>
                                 </div>
-                              </div>
+                              )}
                             </>
                           ) : (
                             <img
                               src={result.thumbnail}
                               alt={result.title}
-                              className="w-full h-full object-cover"
+                              className={`w-full h-full ${(() => {
+                                const isPNG =
+                                  result.file_type === "PNG" ||
+                                  (result.file_type === "image" &&
+                                    result.thumbnail
+                                      ?.toLowerCase()
+                                      .includes(".png")) ||
+                                  result.thumbnail
+                                    ?.toLowerCase()
+                                    .endsWith(".png");
+                                const apiWidth =
+                                  parseInt(String(result.width)) ||
+                                  getFallbackDimensions(result).width;
+                                const isWidePNG = isPNG && apiWidth > 420;
+                                return isPNG && !isWidePNG
+                                  ? "object-contain"
+                                  : "object-cover";
+                              })()}`}
                               loading="lazy"
                               onError={(e) => {
                                 const img = e.target as HTMLImageElement;
@@ -2243,291 +2859,295 @@ function SearchContent() {
                   })}
                 </div>
 
-                {/* Desktop Layout - Flex with varied widths (SM and up) */}
-                <div className="hidden sm:flex sm:flex-col sm:w-full">
-                  {Array.from(
-                    { length: Math.ceil(searchResults.length / 4) },
-                    (_, rowIndex) => (
+                {/* Desktop Layout - Dynamic CSS Grid */}
+                <div className="hidden sm:block w-full">
+                  {createDynamicGridRows(searchResults).map(
+                    (row: SearchResult[], rowIndex: number) => (
                       <div
                         key={rowIndex}
-                        className="flex gap-2 sm:gap-4 justify-center flex-wrap mb-4"
+                        className="grid mb-3 2xl:mb-4"
+                        style={{
+                          gridTemplateColumns: getGridTemplateColumns(row),
+                          gap: "20px",
+                        }}
                       >
-                        {searchResults
-                          .slice(rowIndex * 4, (rowIndex + 1) * 4)
-                          .map((result, index) => {
-                            const actualIndex = rowIndex * 4 + index;
-                            const flexValue = getImageFlex(actualIndex);
-                            return (
-                              <div
-                                key={result.id}
-                                className={`group relative bg-card rounded-lg overflow-hidden transition-all duration-300 cursor-pointer xl-1600:!h-[275px] ${
-                                  result.file_type === "audio"
-                                    ? "border border-primary/50 shadow-sm hover:border-primary hover:shadow-md"
-                                    : "border border-border hover:border-primary/50"
-                                }`}
-                                style={{
-                                  flex: `${flexValue} 1 0`,
-                                  height: "220px",
-                                  minWidth: "150px",
-                                  maxWidth: "400px",
-                                }}
-                                onMouseEnter={() => setHoveredImage(result.id)}
-                                onMouseLeave={() => setHoveredImage(null)}
-                                onClick={() => handleImageClick(result)}
-                              >
-                                {/* Media Content */}
-                                <div className="relative w-full h-full">
-                                  {result.file_type === "audio" ? (
-                                    /* Audio Card Design - Desktop */
-                                    <div className="w-full h-full bg-gradient-to-br from-primary/5 via-accent/10 to-primary/10 dark:from-primary/10 dark:via-accent/20 dark:to-primary/15 flex flex-col items-center justify-center p-4 space-y-3">
-                                      {/* Audio Icon with Animation */}
-                                      <div className="relative">
-                                        <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-sm">
-                                          <AudioLines className="w-6 h-6 text-primary-foreground" />
-                                        </div>
-                                        {/* Animated Sound Waves */}
-                                        <div className="absolute -inset-1 opacity-30">
-                                          <div className="w-14 h-14 border-2 border-primary/40 rounded-full animate-ping"></div>
-                                        </div>
-                                        <div className="absolute -inset-2 opacity-20">
-                                          <div
-                                            className="w-16 h-16 border-2 border-primary/30 rounded-full animate-ping"
-                                            style={{ animationDelay: "0.5s" }}
-                                          ></div>
-                                        </div>
+                        {row.map((result: SearchResult) => {
+                          return (
+                            <div
+                              key={result.id}
+                              className={`group relative bg-card rounded-lg overflow-hidden transition-all duration-300 cursor-pointer h-[220px] search-card-responsive ${
+                                result.file_type === "audio"
+                                  ? "border border-primary/50 shadow-sm hover:border-primary hover:shadow-md"
+                                  : "border border-border hover:border-primary/50"
+                              }`}
+                              onMouseEnter={() => setHoveredImage(result.id)}
+                              onMouseLeave={() => setHoveredImage(null)}
+                              onClick={() => handleImageClick(result)}
+                            >
+                              {/* Media Content */}
+                              <div className="relative w-full h-full">
+                                {result.file_type === "audio" ? (
+                                  /* Audio Card Design - Desktop */
+                                  <div className="w-full h-full bg-gradient-to-br from-primary/5 via-accent/10 to-primary/10 dark:from-primary/10 dark:via-accent/20 dark:to-primary/15 flex flex-col items-center justify-center p-4 space-y-3">
+                                    {/* Audio Icon with Animation */}
+                                    <div className="relative">
+                                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-sm">
+                                        <AudioLines className="w-6 h-6 text-primary-foreground" />
                                       </div>
-
-                                      {/* Audio Title */}
-                                      <div className="text-center space-y-1">
-                                        <h3 className="text-xs font-semibold text-foreground line-clamp-2 leading-tight">
-                                          {result.title}
-                                        </h3>
-                                        <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                                          <Headphones className="w-3 h-3" />
-                                          Audio
-                                        </p>
+                                      {/* Animated Sound Waves */}
+                                      <div className="absolute -inset-1 opacity-30">
+                                        <div className="w-14 h-14 border-2 border-primary/40 rounded-full animate-ping"></div>
                                       </div>
-
-                                      {/* Audio Waveform Visual - Smaller for desktop */}
-                                      <div className="flex items-center justify-center gap-0.5 opacity-60">
-                                        {Array.from({ length: 10 }).map(
-                                          (_, i) => (
-                                            <div
-                                              key={i}
-                                              className="w-0.5 bg-gradient-to-t from-primary/60 to-primary rounded-full animate-pulse"
-                                              style={{
-                                                height: `${Math.random() * 12 + 6}px`,
-                                                animationDelay: `${i * 0.1}s`,
-                                                animationDuration: "1.5s",
-                                              }}
-                                            />
-                                          )
-                                        )}
+                                      <div className="absolute -inset-2 opacity-20">
+                                        <div
+                                          className="w-16 h-16 border-2 border-primary/30 rounded-full animate-ping"
+                                          style={{ animationDelay: "0.5s" }}
+                                        ></div>
                                       </div>
                                     </div>
-                                  ) : result.file_type === "video" &&
-                                    isValidVideoUrl(result.thumbnail) ? (
-                                    <>
-                                      <video
-                                        src={result.thumbnail}
-                                        poster={getVideoPoster(
-                                          result.thumbnail
-                                        )}
-                                        className="w-full h-full object-cover"
-                                        muted
-                                        loop
-                                        playsInline
-                                        preload="metadata"
-                                        onLoadedData={async (e) => {
-                                          // Generate thumbnail when video loads
-                                          const video =
-                                            e.target as HTMLVideoElement;
-                                          try {
-                                            video.currentTime = 1; // Seek to 1 second
-                                            await new Promise((resolve) => {
-                                              video.onseeked = resolve;
-                                            });
-                                            const thumbnailUrl =
-                                              await generateVideoThumbnail(
-                                                video
-                                              );
-                                            video.poster = thumbnailUrl;
 
-                                            // Update fallback image too
-                                            const fallbackImg =
-                                              video.nextElementSibling as HTMLImageElement;
-                                            if (fallbackImg) {
-                                              fallbackImg.src = thumbnailUrl;
-                                            }
-                                          } catch (error) {
-                                            console.warn(
-                                              "Failed to generate video thumbnail:",
-                                              error
-                                            );
-                                          }
-                                        }}
-                                        onMouseEnter={(e) =>
-                                          handleVideoHover(
-                                            e.target as HTMLVideoElement,
-                                            true
-                                          )
-                                        }
-                                        onMouseLeave={(e) =>
-                                          handleVideoHover(
-                                            e.target as HTMLVideoElement,
-                                            false
-                                          )
-                                        }
-                                        onError={(e) => {
-                                          console.warn(
-                                            "Video load error, falling back to image"
-                                          );
-                                          const video =
-                                            e.target as HTMLVideoElement;
-                                          video.style.display = "none";
+                                    {/* Audio Title */}
+                                    <div className="text-center space-y-1">
+                                      <h3 className="text-xs font-semibold text-foreground line-clamp-2 leading-tight">
+                                        {result.title}
+                                      </h3>
+                                      <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                                        <Headphones className="w-3 h-3" />
+                                        Audio
+                                      </p>
+                                    </div>
+
+                                    {/* Audio Waveform Visual - Smaller for desktop */}
+                                    <div className="flex items-center justify-center gap-0.5 opacity-60">
+                                      {Array.from({ length: 10 }).map(
+                                        (_, i) => (
+                                          <div
+                                            key={i}
+                                            className="w-0.5 bg-gradient-to-t from-primary/60 to-primary rounded-full animate-pulse"
+                                            style={{
+                                              height: `${Math.random() * 12 + 6}px`,
+                                              animationDelay: `${i * 0.1}s`,
+                                              animationDuration: "1.5s",
+                                            }}
+                                          />
+                                        )
+                                      )}
+                                    </div>
+                                  </div>
+                                ) : (result.file_type === "video" ||
+                                    result.file_type === "gif") &&
+                                  isValidVideoUrl(result.thumbnail) ? (
+                                  <>
+                                    <video
+                                      src={result.thumbnail}
+                                      poster={getVideoPoster(result.thumbnail)}
+                                      className="w-full h-full object-cover"
+                                      muted
+                                      loop
+                                      playsInline
+                                      preload="metadata"
+                                      onLoadedData={async (e) => {
+                                        // Generate thumbnail when video loads
+                                        const video =
+                                          e.target as HTMLVideoElement;
+                                        try {
+                                          video.currentTime = 1; // Seek to 1 second
+                                          await new Promise((resolve) => {
+                                            video.onseeked = resolve;
+                                          });
+                                          const thumbnailUrl =
+                                            await generateVideoThumbnail(video);
+                                          video.poster = thumbnailUrl;
+
+                                          // Update fallback image too
                                           const fallbackImg =
                                             video.nextElementSibling as HTMLImageElement;
                                           if (fallbackImg) {
-                                            fallbackImg.style.display = "block";
+                                            fallbackImg.src = thumbnailUrl;
                                           }
-                                        }}
-                                      />
-                                      {/* Fallback for videos - text placeholder if no poster */}
-                                      {result.poster ? (
-                                        <img
-                                          src={result.poster}
-                                          alt={result.title}
-                                          className="w-full h-full object-cover"
-                                          style={{ display: "none" }}
-                                          loading="lazy"
-                                          onError={(e) => {
-                                            const img =
-                                              e.target as HTMLImageElement;
-                                            img.style.display = "none";
-                                            const textPlaceholder =
-                                              img.nextElementSibling as HTMLDivElement;
-                                            if (textPlaceholder) {
-                                              textPlaceholder.style.display =
-                                                "flex";
-                                            }
-                                          }}
-                                        />
-                                      ) : null}
-                                      {/* Text placeholder for videos without poster */}
-                                      <div
-                                        className="absolute inset-0 flex items-center justify-center bg-muted/80 text-muted-foreground"
-                                        style={{
-                                          display: result.poster
-                                            ? "none"
-                                            : "none",
-                                        }}
-                                      >
-                                        <div className="text-center">
-                                          <div className="text-2xl mb-2">
-                                            🎥
-                                          </div>
-                                          <div className="text-sm font-medium">
-                                            Video Preview
-                                          </div>
-                                          <div className="text-xs">
-                                            No thumbnail available
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <img
-                                      src={result.thumbnail}
-                                      alt={result.title}
-                                      className="w-full h-full object-cover"
-                                      loading="lazy"
+                                        } catch (error) {
+                                          console.warn(
+                                            "Failed to generate video thumbnail:",
+                                            error
+                                          );
+                                        }
+                                      }}
+                                      onMouseEnter={(e) =>
+                                        handleVideoHover(
+                                          e.target as HTMLVideoElement,
+                                          true
+                                        )
+                                      }
+                                      onMouseLeave={(e) =>
+                                        handleVideoHover(
+                                          e.target as HTMLVideoElement,
+                                          false
+                                        )
+                                      }
                                       onError={(e) => {
-                                        const img =
-                                          e.target as HTMLImageElement;
-                                        img.src = "/placeholder.png"; // Fallback image
                                         console.warn(
-                                          "Image load error for:",
-                                          result.thumbnail
+                                          "Video load error, falling back to image"
                                         );
-                                      }}
-                                      style={{
-                                        maxWidth: "100%",
-                                        maxHeight: "100%",
-                                      }}
-                                    />
-                                  )}
-
-                                  {/* Provider Icon */}
-                                  <div
-                                    className={`absolute top-2 ${isRTL ? "right-2" : "left-2"} p-1 bg-black/90 backdrop-blur-sm rounded-md shadow-sm`}
-                                  >
-                                    <img
-                                      src={result.providerIcon}
-                                      alt={result.provider}
-                                      width={40}
-                                      height={40}
-                                      className="w-10 h-10 object-contain rounded"
-                                      onError={(e) => {
-                                        // Fallback to text badge if icon fails to load
-                                        const target =
-                                          e.target as HTMLImageElement;
-                                        const parent = target.parentElement;
-                                        if (parent) {
-                                          parent.innerHTML = `<span class="px-2 py-1 bg-black/70 text-white text-xs rounded-md">${result.provider}</span>`;
+                                        const video =
+                                          e.target as HTMLVideoElement;
+                                        video.style.display = "none";
+                                        const fallbackImg =
+                                          video.nextElementSibling as HTMLImageElement;
+                                        if (fallbackImg) {
+                                          fallbackImg.style.display = "block";
                                         }
                                       }}
                                     />
-                                  </div>
-
-                                  {/* File Type Badge */}
-                                  <div
-                                    className={`absolute top-2 ${isRTL ? "left-2" : "right-2"} px-2 py-1 ${
-                                      result.file_type === "video"
-                                        ? "bg-destructive/90"
-                                        : result.file_type === "audio"
-                                          ? "bg-primary/90"
-                                          : "bg-primary/80"
-                                    } text-white text-xs rounded-md flex items-center gap-1 shadow-sm`}
-                                  >
-                                    {result.file_type === "video" && (
-                                      <Camera className="w-3 h-3" />
-                                    )}
-                                    {result.file_type === "audio" && (
-                                      <Volume2 className="w-3 h-3" />
-                                    )}
-                                    {formatFileType(result.file_type)}
-                                  </div>
-
-                                  {/* Hover Overlay */}
-                                  <div
-                                    className={`absolute inset-0 bg-black/20 transition-all duration-300 ${hoveredImage === result.id ? "opacity-100" : "opacity-0"}`}
-                                  >
-                                    {/* Download Button - Bottom Center - Appears on hover */}
-                                    <Button
-                                      size="sm"
-                                      className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-primary hover:bg-primary/90 transition-all duration-300 ${hoveredImage === result.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation(); // Prevent opening modal
-                                        handleMediaDownload(
-                                          result.url,
-                                          result.file_id,
-                                          result.provider
-                                        );
+                                    {/* Fallback for videos - text placeholder if no poster */}
+                                    {result.poster ? (
+                                      <img
+                                        src={result.poster}
+                                        alt={result.title}
+                                        className="w-full h-full object-cover"
+                                        style={{ display: "none" }}
+                                        loading="lazy"
+                                        onError={(e) => {
+                                          const img =
+                                            e.target as HTMLImageElement;
+                                          img.style.display = "none";
+                                          const textPlaceholder =
+                                            img.nextElementSibling as HTMLDivElement;
+                                          if (textPlaceholder) {
+                                            textPlaceholder.style.display =
+                                              "flex";
+                                          }
+                                        }}
+                                      />
+                                    ) : null}
+                                    {/* Text placeholder for videos without poster */}
+                                    <div
+                                      className="absolute inset-0 flex items-center justify-center bg-muted/80 text-muted-foreground"
+                                      style={{
+                                        display: result.poster
+                                          ? "none"
+                                          : "none",
                                       }}
                                     >
-                                      <Download className="w-4 h-4" />
-                                      {t("search.actions.download")}
-                                    </Button>
-                                  </div>
+                                      <div className="text-center">
+                                        <div className="text-2xl mb-2">🎥</div>
+                                        <div className="text-sm font-medium">
+                                          Video Preview
+                                        </div>
+                                        <div className="text-xs">
+                                          No thumbnail available
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <img
+                                    src={result.thumbnail}
+                                    alt={result.title}
+                                    className={`w-full h-full ${(() => {
+                                      const isPNG =
+                                        result.file_type === "PNG" ||
+                                        (result.file_type === "image" &&
+                                          result.thumbnail
+                                            ?.toLowerCase()
+                                            .includes(".png")) ||
+                                        result.thumbnail
+                                          ?.toLowerCase()
+                                          .endsWith(".png");
+                                      const apiWidth =
+                                        parseInt(String(result.width)) ||
+                                        getFallbackDimensions(result).width;
+                                      const isWidePNG = isPNG && apiWidth > 420;
+                                      return isPNG && !isWidePNG
+                                        ? "object-contain"
+                                        : "object-cover";
+                                    })()}`}
+                                    loading="lazy"
+                                    onError={(e) => {
+                                      const img = e.target as HTMLImageElement;
+                                      img.src = "/placeholder.png"; // Fallback image
+                                      console.warn(
+                                        "Image load error for:",
+                                        result.thumbnail
+                                      );
+                                    }}
+                                    style={{
+                                      maxWidth: "100%",
+                                      maxHeight: "100%",
+                                    }}
+                                  />
+                                )}
+
+                                {/* Provider Icon */}
+                                <div
+                                  className={`absolute top-2 ${isRTL ? "right-2" : "left-2"} p-1 bg-black/90 backdrop-blur-sm rounded-md shadow-sm`}
+                                >
+                                  <img
+                                    src={result.providerIcon}
+                                    alt={result.provider}
+                                    width={40}
+                                    height={40}
+                                    className="w-10 h-10 object-contain rounded"
+                                    onError={(e) => {
+                                      // Fallback to text badge if icon fails to load
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      const parent = target.parentElement;
+                                      if (parent) {
+                                        parent.innerHTML = `<span class="px-2 py-1 bg-black/70 text-white text-xs rounded-md">${result.provider}</span>`;
+                                      }
+                                    }}
+                                  />
+                                </div>
+
+                                {/* File Type Badge */}
+                                <div
+                                  className={`absolute top-2 ${isRTL ? "left-2" : "right-2"} px-2 py-1 ${
+                                    result.file_type === "video"
+                                      ? "bg-destructive/90"
+                                      : result.file_type === "audio"
+                                        ? "bg-primary/90"
+                                        : "bg-primary/80"
+                                  } text-white text-xs rounded-md flex items-center gap-1 shadow-sm`}
+                                >
+                                  {result.file_type === "video" && (
+                                    <Camera className="w-3 h-3" />
+                                  )}
+                                  {result.file_type === "audio" && (
+                                    <Volume2 className="w-3 h-3" />
+                                  )}
+                                  {formatFileType(result.file_type)}
+                                </div>
+
+                                {/* Hover Overlay */}
+                                <div
+                                  className={`absolute inset-0 bg-black/20 transition-all duration-300 ${hoveredImage === result.id ? "opacity-100" : "opacity-0"}`}
+                                >
+                                  {/* Download Button - Bottom Center - Appears on hover */}
+                                  <Button
+                                    size="sm"
+                                    className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-primary hover:bg-primary/90 transition-all duration-300 ${hoveredImage === result.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Prevent opening modal
+                                      handleMediaDownload(
+                                        result.url,
+                                        result.file_id,
+                                        result.provider
+                                      );
+                                    }}
+                                  >
+                                    <Download className="w-4 h-4" />
+                                    {t("search.actions.download")}
+                                  </Button>
                                 </div>
                               </div>
-                            );
-                          })}
+                            </div>
+                          );
+                        })}
                       </div>
                     )
                   )}
                 </div>
-              </div>
+              </>
             )}
 
             {/* Bottom Pagination with Page Numbers */}
@@ -2622,6 +3242,134 @@ function SearchContent() {
 // Loading component for Suspense fallback
 function SearchPageLoading() {
   const { isRTL } = useLanguage();
+
+  // Generate skeleton data with varied aspect ratios for masonry layout
+  const generateSkeletonData = (count: number) => {
+    const aspectRatios = [
+      { width: 300, height: 400 }, // Portrait
+      { width: 400, height: 300 }, // Landscape
+      { width: 350, height: 350 }, // Square
+      { width: 500, height: 300 }, // Wide landscape
+      { width: 280, height: 420 }, // Tall portrait
+      { width: 450, height: 250 }, // Ultra wide
+      { width: 320, height: 380 }, // Mild portrait
+      { width: 380, height: 280 }, // Mild landscape
+      { width: 600, height: 300 }, // Banner
+      { width: 300, height: 500 }, // Very tall
+    ];
+
+    return Array.from({ length: count }, (_, i) => {
+      const ratio = aspectRatios[i % aspectRatios.length];
+      return {
+        id: `skeleton-${i}`,
+        width: ratio.width,
+        height: ratio.height,
+        file_type: i % 4 === 0 ? "video" : i % 8 === 0 ? "audio" : "image",
+      };
+    });
+  };
+
+  // Create skeleton grid rows using the same logic as real results
+  const createSkeletonGridRows = (skeletonData: any[]) => {
+    const rows: any[][] = [];
+    let currentIndex = 0;
+
+    while (currentIndex < skeletonData.length) {
+      const currentRow: any[] = [];
+      let totalWidth = 0;
+      const containerWidth = 100;
+      const maxItemsPerRow = 6;
+
+      for (
+        let i = currentIndex;
+        i < skeletonData.length && currentRow.length < maxItemsPerRow;
+        i++
+      ) {
+        const item = skeletonData[i];
+        const aspectRatio = item.width / item.height;
+
+        // Calculate relative width using the same logic as real results
+        let relativeWidth;
+        if (aspectRatio >= 3.0) {
+          relativeWidth = 45;
+        } else if (aspectRatio >= 2.5) {
+          relativeWidth = 40;
+        } else if (aspectRatio >= 2.0) {
+          relativeWidth = 35;
+        } else if (aspectRatio >= 1.5) {
+          relativeWidth = 25;
+        } else if (aspectRatio >= 1.2) {
+          relativeWidth = 19;
+        } else if (aspectRatio >= 1.0) {
+          relativeWidth = 15;
+        } else if (aspectRatio >= 0.8) {
+          relativeWidth = 11;
+        } else if (aspectRatio >= 0.6) {
+          relativeWidth = 7;
+        } else {
+          relativeWidth = 5;
+        }
+
+        if (
+          totalWidth + relativeWidth > containerWidth &&
+          currentRow.length > 0
+        ) {
+          break;
+        }
+
+        currentRow.push(item);
+        totalWidth += relativeWidth;
+        currentIndex++;
+
+        if (totalWidth >= 85 && currentRow.length >= 2) {
+          break;
+        }
+      }
+
+      if (currentRow.length === 0 && currentIndex < skeletonData.length) {
+        currentRow.push(skeletonData[currentIndex]);
+        currentIndex++;
+      }
+
+      if (currentRow.length > 0) {
+        rows.push(currentRow);
+      }
+    }
+
+    return rows;
+  };
+
+  // Get skeleton grid template columns
+  const getSkeletonGridTemplateColumns = (rowItems: any[]) => {
+    return rowItems
+      .map((item) => {
+        const aspectRatio = item.width / item.height;
+
+        let relativeWidth;
+        if (aspectRatio >= 3.0) {
+          relativeWidth = 45;
+        } else if (aspectRatio >= 2.5) {
+          relativeWidth = 40;
+        } else if (aspectRatio >= 2.0) {
+          relativeWidth = 35;
+        } else if (aspectRatio >= 1.5) {
+          relativeWidth = 25;
+        } else if (aspectRatio >= 1.2) {
+          relativeWidth = 19;
+        } else if (aspectRatio >= 1.0) {
+          relativeWidth = 15;
+        } else if (aspectRatio >= 0.8) {
+          relativeWidth = 11;
+        } else if (aspectRatio >= 0.6) {
+          relativeWidth = 7;
+        } else {
+          relativeWidth = 5;
+        }
+
+        return `${relativeWidth}fr`;
+      })
+      .join(" ");
+  };
 
   return (
     <div className="min-h-screen bg-background font-sans">
@@ -2729,45 +3477,69 @@ function SearchPageLoading() {
               <Skeleton className="w-80 h-4 mx-auto" />
             </div>
 
-            {/* Results Grid - Mobile: Single column, Desktop: Varied widths */}
+            {/* Results Grid - Mobile: Single column, Desktop: Masonry Layout */}
             <div className="space-y-4">
-              {/* Mobile Layout - Single column */}
+              {/* Mobile Layout - Single column with varied heights */}
               <div className="grid grid-cols-1 gap-4 sm:hidden">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="w-full h-64 rounded-lg" />
-                ))}
+                {generateSkeletonData(6).map((item, i) => {
+                  const aspectRatio = item.height / item.width;
+                  const height = Math.min(
+                    275,
+                    Math.max(220, 220 * aspectRatio)
+                  );
+                  return (
+                    <Skeleton
+                      key={i}
+                      className="w-full rounded-lg"
+                      style={{ height: `${height}px` }}
+                    />
+                  );
+                })}
               </div>
 
-              {/* Desktop Layout - Flex with varied widths */}
-              <div className="hidden sm:flex sm:flex-col sm:w-full">
-                {Array.from({ length: 3 }).map((_, rowIndex) => (
-                  <div
-                    key={rowIndex}
-                    className="flex gap-2 sm:gap-4 justify-center flex-wrap mb-4"
-                  >
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <Skeleton
-                        key={i}
-                        className="rounded-lg"
-                        style={{
-                          flex: `${1.2 + i * 0.2} 1 0`,
-                          height: "250px",
-                          minWidth: "150px",
-                          maxWidth: "400px",
-                        }}
-                      />
-                    ))}
-                  </div>
-                ))}
+              {/* Desktop Layout - Masonry Grid matching actual results */}
+              <div className="hidden sm:block w-full">
+                {createSkeletonGridRows(generateSkeletonData(18)).map(
+                  (row: any[], rowIndex: number) => (
+                    <div
+                      key={rowIndex}
+                      className="grid mb-3 2xl:mb-4"
+                      style={{
+                        gridTemplateColumns:
+                          getSkeletonGridTemplateColumns(row),
+                        gap: "20px",
+                      }}
+                    >
+                      {row.map((item: any) => {
+                        return (
+                          <Skeleton
+                            key={item.id}
+                            className="rounded-lg"
+                            style={{
+                              height: "220px", // Fixed height like actual results
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  )
+                )}
               </div>
             </div>
 
             {/* Bottom Pagination */}
             <div className="flex justify-center pt-8">
-              <div className="flex items-center gap-2">
-                <Skeleton className="w-20 h-8 rounded" />
-                <Skeleton className="w-16 h-4" />
-                <Skeleton className="w-16 h-8 rounded" />
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl" />
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton
+                      key={i}
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl"
+                    />
+                  ))}
+                </div>
+                <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl" />
               </div>
             </div>
           </div>

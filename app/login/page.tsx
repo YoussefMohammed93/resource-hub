@@ -53,8 +53,14 @@ declare global {
   interface Window {
     grecaptcha: {
       reset: () => void;
-      execute: (siteKey: string, options: { action: string }) => Promise<string>;
-      render: (element: string | HTMLElement, options: { sitekey: string; callback: string }) => number;
+      execute: (
+        siteKey: string,
+        options: { action: string }
+      ) => Promise<string>;
+      render: (
+        element: string | HTMLElement,
+        options: { sitekey: string; callback: string }
+      ) => number;
       ready: (callback: () => void) => void;
     };
     handleCaptchaChange: (token: string) => void;
@@ -90,15 +96,17 @@ export default function LoginPage() {
     // Function to render reCAPTCHA when API is ready
     const renderRecaptcha = () => {
       if (window.grecaptcha && window.grecaptcha.render) {
-        const recaptchaElement = document.querySelector('.g-recaptcha') as HTMLElement;
+        const recaptchaElement = document.querySelector(
+          ".g-recaptcha"
+        ) as HTMLElement;
         if (recaptchaElement && !recaptchaElement.hasChildNodes()) {
           try {
             window.grecaptcha.render(recaptchaElement, {
-              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '',
-              callback: 'handleCaptchaChange'
+              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "",
+              callback: "handleCaptchaChange",
             });
           } catch (error) {
-            console.error('Error rendering reCAPTCHA:', error);
+            console.error("Error rendering reCAPTCHA:", error);
           }
         }
       }
@@ -123,7 +131,9 @@ export default function LoginPage() {
     // Cleanup
     return () => {
       if (window.handleCaptchaChange) {
-        window.handleCaptchaChange = undefined as unknown as (token: string) => void;
+        window.handleCaptchaChange = undefined as unknown as (
+          token: string
+        ) => void;
       }
     };
   }, []);
@@ -180,7 +190,6 @@ export default function LoginPage() {
     setErrors(newErrors);
     return Object.values(newErrors).every((error) => error === "");
   };
-
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -729,7 +738,6 @@ export default function LoginPage() {
               </form>
             </CardContent>
           </Card>
-
 
           {/* Back to Home Button */}
           <div className="mt-6 text-center">

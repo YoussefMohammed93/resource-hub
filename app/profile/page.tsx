@@ -47,6 +47,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
 import { userApi, authApi, type DownloadHistoryEntry } from "@/lib/api";
+import Image from "next/image";
 
 // Utility function to get the correct media URL based on environment and type
 const getMediaUrl = (item: DownloadHistoryEntry): string => {
@@ -186,19 +187,48 @@ export default function ProfilePage() {
     setDownloadHistoryError(null);
     try {
       const response = await userApi.getDownloadHistory();
+      // Diagnostic logging to understand prod shape
+      console.log("[Profile] /v1/user/history raw response:", response);
 
       if (response.success) {
-        // Handle new response structure: response.data.history or direct response.history
-        if (response.data && response.data.history) {
-          setDownloadHistory(response.data.history);
-        } else if ("history" in response && Array.isArray(response.history)) {
-          setDownloadHistory(response.history as DownloadHistoryEntry[]);
+        // Try multiple shapes commonly returned by backend
+        const respUnknown = response as unknown;
+        const respObj =
+          respUnknown && typeof respUnknown === "object"
+            ? (respUnknown as Record<string, unknown>)
+            : {};
+        const dataObj =
+          respObj.data && typeof respObj.data === "object"
+            ? (respObj.data as Record<string, unknown>)
+            : {};
+        const nestedDataObj =
+          dataObj.data && typeof dataObj.data === "object"
+            ? (dataObj.data as Record<string, unknown>)
+            : {};
+
+        const candidates: unknown[] = [
+          (response.data as { history?: unknown } | undefined)?.history,
+          respObj.history,
+          dataObj.history,
+          nestedDataObj.history,
+          Array.isArray(respObj.data) ? (respObj.data as unknown[]) : undefined,
+          Array.isArray(respUnknown) ? (respUnknown as unknown[]) : undefined,
+        ];
+
+        const found = candidates.find(
+          (c) => Array.isArray(c) && c.length >= 0
+        ) as DownloadHistoryEntry[] | undefined;
+
+        if (found) {
+          setDownloadHistory(found as DownloadHistoryEntry[]);
         } else {
+          console.warn("[Profile] No history array found in response");
           setDownloadHistory([]);
         }
       } else {
         const errorMessage =
           response.error?.message || "Failed to load download history";
+        console.error("[Profile] History API reported error:", errorMessage);
         setDownloadHistoryError(errorMessage);
         setDownloadHistory([]);
       }
@@ -548,47 +578,69 @@ export default function ProfilePage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">
-                    {t("profile.subscription.currentPlan")}
-                  </span>
-                  <Badge variant="outline" className="font-medium">
-                    {user?.subscription?.plan || "Free"}
-                  </Badge>
+              <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                {/* Current Plan mini-card */}
+                <div className="rounded-xl border bg-card/60 dark:bg-muted/40 p-4 h-full">
+                  <div className={`flex items-start ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
+                    <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                      <CreditCard className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-base text-muted-foreground">
+                        {t("profile.subscription.currentPlan")}
+                      </p>
+                      <div className={`mt-1 ${isRTL ? "text-right" : "text-left"}`}>
+                        <Badge variant="outline" className="font-medium text-sm">
+                          {user?.subscription?.plan || "Free"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">
-                    {t("profile.subscription.status")}
-                  </span>
-                  <Badge
-                    variant={
-                      user?.subscription?.active ? "default" : "destructive"
-                    }
-                    className={
-                      user?.subscription?.active
-                        ? "bg-green-100 text-green-800 border border-green-200"
-                        : ""
-                    }
-                  >
-                    {t("profile.userInfo.active")}
-                  </Badge>
+
+                {/* Status mini-card */}
+                <div className="rounded-xl border bg-card/60 dark:bg-muted/40 p-4 h-full">
+                  <div className={`flex items-start ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
+                    <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                      <Activity className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-base text-muted-foreground">
+                        {t("profile.subscription.status")}
+                      </p>
+                      <div className={`mt-1 ${isRTL ? "text-right" : "text-left"}`}>
+                        <Badge
+                          variant={user?.subscription?.active ? "default" : "destructive"}
+                          className={user?.subscription?.active ? "bg-green-100 text-green-800 border border-green-200" : ""}
+                        >
+                          {t("profile.userInfo.active")}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">
-                    {t("profile.subscription.validUntil")}
-                  </span>
-                  <div
-                    className={`flex items-center gap-1 text-sm text-foreground ${isRTL ? "flex-row-reverse" : ""}`}
-                  >
-                    <CalendarDays className="h-4 w-4" />
-                    {user?.subscription?.until
-                      ? formatDate(user.subscription.until)
-                      : "N/A"}
+
+                {/* Valid Until mini-card */}
+                <div className="rounded-xl border bg-card/60 dark:bg-muted/40 p-4 h-full">
+                  <div className={`flex items-start ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
+                    <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                      <CalendarDays className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-base text-muted-foreground">
+                        {t("profile.subscription.validUntil")}
+                      </p>
+                      <div className={`mt-1 flex items-center text-sm text-foreground ${isRTL ? "flex-row-reverse justify-end" : "justify-start"}`}>
+                        {user?.subscription?.until ? (
+                          <span className="truncate">{formatDate(user.subscription.until)}</span>
+                        ) : (
+                          <span className="truncate">N/A</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <Separator />
             </CardContent>
           </Card>
 
@@ -989,8 +1041,9 @@ export default function ProfilePage() {
                           {isVideoItem(item) ? (
                             // Video preview with play button overlay
                             <div className="relative w-full h-full">
-                              <img
+                              <Image
                                 src={getMediaUrl(item)}
+                                fill
                                 alt={`Media from ${item.data.from}`}
                                 className="w-full h-full object-cover transition-transform duration-500"
                                 onLoad={() => {
@@ -1029,7 +1082,8 @@ export default function ProfilePage() {
                             </div>
                           ) : (
                             // Regular image display
-                            <img
+                            <Image
+                            fill
                               src={getMediaUrl(item)}
                               alt={`Media from ${item.data.from}`}
                               className="w-full h-full object-cover transition-transform duration-500"
@@ -1090,13 +1144,6 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-            {!isDownloadHistoryLoading && sortedDownloads.length > 4 && (
-              <div className="mt-6 text-center">
-                <Button variant="outline">
-                  {t("profile.downloadHistory.loadMore")}
-                </Button>
               </div>
             )}
           </CardContent>

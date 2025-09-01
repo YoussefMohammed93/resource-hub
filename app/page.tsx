@@ -1577,12 +1577,6 @@ export default function HomePage() {
                           <span>{t("hero.searchType.templates")}</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="icons">
-                        <div className="flex items-center gap-2">
-                          <Star className="w-4 h-4" />
-                          <span>{t("hero.searchType.icons")}</span>
-                        </div>
-                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1706,14 +1700,6 @@ export default function HomePage() {
                           >
                             <File className="w-4 h-4" />
                             <span>{t("hero.searchType.templates")}</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="icons">
-                          <div
-                            className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
-                          >
-                            <Star className="w-4 h-4" />
-                            <span>{t("hero.searchType.icons")}</span>
                           </div>
                         </SelectItem>
                       </SelectContent>
