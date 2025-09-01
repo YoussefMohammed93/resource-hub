@@ -7,26 +7,15 @@ import {
 } from "./utils";
 import { shouldUseMockData, mockApiResponses } from "./mock-data";
 
-// Base API URL - use proxy for development, direct API for production
+// Base API URL - use proxy for both development and production
 const getApiBaseUrl = () => {
   // Always use proxy when running in browser (client-side)
   if (typeof window !== "undefined") {
-    // In production (Vercel), use direct API URL to avoid proxy issues
-    if (process.env.NODE_ENV === "production") {
-      const directApiUrl =
-        process.env.NEXT_PUBLIC_PRODUCTION_API_URL ||
-        "https://stockaty.virs.tech";
-
-      return directApiUrl;
-    }
-
-    // In development, use the configured proxy URL
-    if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-      return process.env.NEXT_PUBLIC_API_BASE_URL;
-    }
+    // Use proxy route for both development and production
+    return "/api/proxy";
   }
 
-  // Fallback for server-side requests (shouldn't happen for auth)
+  // Fallback for server-side requests - use direct API URL
   const fallbackUrl =
     process.env.NEXT_PUBLIC_PRODUCTION_API_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
@@ -56,16 +45,13 @@ const apiClient = axios.create({
 
 // Create a separate axios instance for search with shorter timeout
 const getSearchApiBaseUrl = () => {
-  // In production, use direct API URL to avoid proxy
-  if (process.env.NODE_ENV === "production") {
-    const directApiUrl =
-      process.env.NEXT_PUBLIC_PRODUCTION_API_URL ||
-      "https://stockaty.virs.tech";
-    return directApiUrl;
+  // Use proxy for both development and production when in browser
+  if (typeof window !== "undefined") {
+    return "/api/proxy";
   }
 
-  // In development, use proxy (empty baseURL means current domain)
-  return typeof window !== "undefined" ? "" : API_BASE_URL;
+  // Fallback for server-side requests - use direct API URL
+  return API_BASE_URL;
 };
 
 const searchApiClient = axios.create({
