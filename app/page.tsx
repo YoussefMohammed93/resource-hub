@@ -1524,13 +1524,13 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center min-h-[85vh] sm:min-h-[80vh] text-center space-y-6 sm:space-y-8 lg:space-y-12 py-8 sm:py-0">
             {/* Centered Content */}
             <div className="space-y-4 sm:space-y-6 max-w-4xl px-2 sm:px-0">
-              <h1 className="text-4xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-foreground font-sans leading-tight sm:leading-tight">
+              <h1 className="text-4xl md:text-4xl lg:text-5xl 2xl:text-6xl font-bold tracking-tight text-foreground font-sans leading-tight sm:leading-tight">
                 {t("hero.title")}{" "}
                 <span className="text-primary block sm:inline">
                   {t("hero.titleHighlight")}
                 </span>
               </h1>
-              <p className="text-base md:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-4xl mx-auto px-2 sm:px-0">
+              <p className="text-base 2xl:text-xl text-muted-foreground leading-relaxed max-w-4xl mx-auto px-2 sm:px-0">
                 {t("hero.description")}
               </p>
             </div>
@@ -1601,7 +1601,7 @@ export default function HomePage() {
                       }
                     }}
                     disabled={isSearching}
-                    className={`${isRTL ? "pr-12 pl-4" : "pl-12 pr-4"} py-8 h-16 text-lg border-2 ${
+                    className={`${isRTL ? "pr-12 pl-4" : "pl-12 pr-4"} py-8 h-12 2xl:h-16 text-lg border-2 ${
                       searchError
                         ? "border-red-500 focus:border-red-500"
                         : "border-border focus:border-primary"
@@ -1656,7 +1656,7 @@ export default function HomePage() {
                     className={`absolute ${isRTL ? "right-2" : "left-2"} top-1/2 transform -translate-y-1/2 z-10`}
                   >
                     <Select value={searchType} onValueChange={setSearchType}>
-                      <SelectTrigger className="w-44 !h-16 border-0 bg-secondary hover:bg-secondary/70 dark:hover:bg-muted/50 focus:ring-0 focus:ring-offset-0">
+                      <SelectTrigger className="w-44 !h-12 2xl:!h-16 border-0 bg-secondary hover:bg-secondary/70 dark:hover:bg-muted/50 focus:ring-0 focus:ring-offset-0">
                         <SelectValue
                           placeholder={t("hero.searchType.placeholder")}
                         />
@@ -1722,18 +1722,18 @@ export default function HomePage() {
                       }
                     }}
                     disabled={isSearching}
-                    className={`${isRTL ? "pr-48 pl-32" : "pl-48 pr-32"} py-8 h-20 text-xl border-2 ${
+                    className={`${isRTL ? "pr-48 pl-32" : "pl-48 pr-32"} py-8 h-12 2xl:h-20 text-xl border-2 ${
                       searchError
                         ? "border-red-500 focus:border-red-500"
                         : "border-border focus:border-primary"
-                    } rounded-xl bg-background/80 backdrop-blur-sm placeholder:text-xl ${isRTL && "placeholder:text-lg"} ${isSearching ? "opacity-50" : ""} placeholder:text-muted-foreground/70`}
+                    } rounded-xl bg-background/80 backdrop-blur-sm placeholder:text-base 2xl:placeholder:text-xl ${isRTL && "placeholder:text-base 2xl:placeholder:text-lg"} ${isSearching ? "opacity-50" : ""} placeholder:text-muted-foreground/70`}
                   />
 
                   {/* Search Button */}
                   <Button
                     onClick={handleSearch}
                     disabled={isSearching || !searchQuery.trim()}
-                    className={`absolute ${isRTL ? "left-2" : "right-2"} top-1/2 transform -translate-y-1/2 !px-6 !h-16 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed ${isRTL && "text-base"}`}
+                    className={`absolute ${isRTL ? "left-2" : "right-2"} top-1/2 transform -translate-y-1/2 !px-6 h-12 2xl:!h-16 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed ${isRTL && "text-base"}`}
                   >
                     {isSearching ? (
                       <>
@@ -1753,7 +1753,7 @@ export default function HomePage() {
                   onClick={() => setIsImageSearchOpen(true)}
                   variant="outline"
                   disabled={isSearching}
-                  className="!px-5 border-2 border-border hover:border-primary/50 flex flex-col gap-2 h-auto min-h-20 disabled:opacity-50"
+                  className="!px-5 border-2 border-border hover:border-primary/50 flex flex-col gap-2 h-auto min-h-12 2xl:min-h-20 disabled:opacity-50"
                 >
                   <ImageIcon className="!w-6 !h-6" />
                   <span className="text-xs font-medium">
@@ -1778,7 +1778,7 @@ export default function HomePage() {
             <div className="pt-24 sm:pt-16 md:pt-0 flex flex-col sm:flex-row gap-4 justify-center px-4 sm:px-0 w-full max-w-md sm:max-w-none">
               <Button
                 size="lg"
-                className="!px-8 py-6 sm:py-7 text-base sm:text-lg font-semibold border-2 border-primary min-h-[3.5rem] touch-manipulation w-full sm:w-auto"
+                className="!px-5 2xl:px-8 py-5 2xl:py-7 text-base 2xl:text-lg font-semibold border-2 border-primary min-h-[3.5rem] touch-manipulation w-full sm:w-auto"
                 onClick={() => handleSmoothScroll("pricing")}
               >
                 <Eye className="size-5" />
@@ -1787,7 +1787,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="!px-8 py-6 sm:py-7 text-base sm:text-lg font-semibold border-2 border-border hover:border-primary/50 min-h-[3.5rem] touch-manipulation w-full sm:w-auto"
+                className="!px-5 2xl:px-8 py-5 2xl:py-7 text-base 2xl:text-lg font-semibold border-2 border-border hover:border-primary/50 min-h-[3.5rem] touch-manipulation w-full sm:w-auto"
                 onClick={() => handleSmoothScroll("faq")}
               >
                 <PhoneCall className="size-5" />

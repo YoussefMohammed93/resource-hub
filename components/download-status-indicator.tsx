@@ -75,38 +75,39 @@ export function DownloadStatusIndicator({
 
       // Sort tasks to show latest at the top
       const sortedTasks = tasks.sort((a, b) => {
-        // First, prioritize recently downloaded files (those that user just downloaded)
-        const aRecentlyDownloaded = recentlyDownloadedTasks.has(
-          a.data?.id || ""
-        );
-        const bRecentlyDownloaded = recentlyDownloadedTasks.has(
-          b.data?.id || ""
-        );
+        // 1) Active statuses first (top): downloading, in_progress, preparing, queued, pending
+        const isActive = (s?: string) =>
+          s === "downloading" ||
+          s === "in_progress" ||
+          s === "preparing" ||
+          s === "queued" ||
+          s === "pending";
 
+        const aActive = isActive(a.progress?.status);
+        const bActive = isActive(b.progress?.status);
+        if (aActive && !bActive) return -1;
+        if (!aActive && bActive) return 1;
+
+        // 2) Recently downloaded (but only after active tasks)
+        const aRecentlyDownloaded = recentlyDownloadedTasks.has(a.data?.id || "");
+        const bRecentlyDownloaded = recentlyDownloadedTasks.has(b.data?.id || "");
         if (aRecentlyDownloaded && !bRecentlyDownloaded) return -1;
         if (!aRecentlyDownloaded && bRecentlyDownloaded) return 1;
 
-        // Then prioritize by status - completed tasks at top, then active, then others
+        // 3) Status priority among remaining
         const statusPriority = {
-          completed: 1,
-          downloading: 2,
-          in_progress: 2,
-          preparing: 3,
-          queued: 4,
-          pending: 5,
+          downloading: 1,
+          in_progress: 1,
+          preparing: 2,
+          queued: 3,
+          pending: 4,
+          completed: 5,
           failed: 6,
-        };
+        } as const;
 
-        const aPriority =
-          statusPriority[a.progress?.status as keyof typeof statusPriority] ||
-          7;
-        const bPriority =
-          statusPriority[b.progress?.status as keyof typeof statusPriority] ||
-          7;
-
-        if (aPriority !== bPriority) {
-          return aPriority - bPriority;
-        }
+        const aPriority = statusPriority[a.progress?.status as keyof typeof statusPriority] ?? 7;
+        const bPriority = statusPriority[b.progress?.status as keyof typeof statusPriority] ?? 7;
+        if (aPriority !== bPriority) return aPriority - bPriority;
 
         // Then sort by creation time (newest first)
         const aTime = new Date(a.created_at || 0).getTime();

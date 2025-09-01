@@ -308,10 +308,13 @@ export default function ImageDetailsPage() {
     return (
       imageData.file_type === "video" ||
       imageData.type === "video" ||
-      imageData.image_type?.toLowerCase().includes("video") ||
-      isValidVideoUrl(imageData.thumbnail)
+      (imageData.image_type?.toLowerCase().includes("video") ?? false) ||
+      isValidVideoUrl(imageData.thumbnail) ||
+      (fileData?.high_resolution?.src
+        ? isValidVideoUrl(fileData.high_resolution.src)
+        : false)
     );
-  }, [imageData, isValidVideoUrl]);
+  }, [imageData, fileData, isValidVideoUrl]);
 
   // Check if URL is a valid audio URL
   const isValidAudioUrl = useCallback((url: string): boolean => {
@@ -1354,12 +1357,10 @@ export default function ImageDetailsPage() {
                       >
                         <source
                           src={getProxyAudioUrl(
-                            fileData?.high_resolution?.src ||
-                              imageData.thumbnail
+                            fileData?.high_resolution?.src || imageData.thumbnail
                           )}
                           type={getAudioMimeType(
-                            fileData?.high_resolution?.src ||
-                              imageData.thumbnail
+                            fileData?.high_resolution?.src || imageData.thumbnail
                           )}
                         />
                         {/* Fallback message for browsers that don't support audio */}
@@ -1379,8 +1380,12 @@ export default function ImageDetailsPage() {
                         </p>
                       </audio>
                     </div>
-                  ) : isVideoItem() && isValidVideoUrl(imageData.thumbnail) ? (
+                  ) : isVideoItem() &&
+                    isValidVideoUrl(
+                      fileData?.high_resolution?.src || imageData.thumbnail
+                    ) ? (
                     <video
+                      key={fileData?.high_resolution?.src || imageData.thumbnail}
                       className="w-full h-full object-contain"
                       poster={imageData.poster || "/placeholder.png"}
                       controls
@@ -1445,14 +1450,16 @@ export default function ImageDetailsPage() {
                     >
                       {/* Multiple source elements for better browser compatibility */}
                       <source
-                        src={imageData.thumbnail}
-                        type={getVideoMimeType(imageData.thumbnail)}
+                        src={fileData?.high_resolution?.src || imageData.thumbnail}
+                        type={getVideoMimeType(
+                          fileData?.high_resolution?.src || imageData.thumbnail
+                        )}
                       />
                       {/* Fallback message for browsers that don't support video */}
                       <p className="text-muted-foreground text-center p-4">
                         {t("mediaDetail.videoPlayer.browserNotSupported")}
                         <a
-                          href={imageData.thumbnail}
+                          href={fileData?.high_resolution?.src || imageData.thumbnail}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary hover:underline ml-1"
@@ -1463,7 +1470,8 @@ export default function ImageDetailsPage() {
                     </video>
                   ) : (
                     <img
-                      src={imageData.thumbnail}
+                      key={fileData?.high_resolution?.src || imageData.thumbnail}
+                      src={fileData?.high_resolution?.src || imageData.thumbnail}
                       alt={imageData.title}
                       className="w-full h-full object-contain cursor-pointer hover:scale-[1.02] transition-transform duration-300"
                       style={{
@@ -2014,9 +2022,13 @@ export default function ImageDetailsPage() {
                           </p>
                         </audio>
                       </div>
-                    ) : isVideoItem() &&
-                      isValidVideoUrl(imageData.thumbnail) ? (
+                    ) :
+                      isVideoItem() &&
+                      isValidVideoUrl(
+                        fileData?.high_resolution?.src || imageData.thumbnail
+                      ) ? (
                       <video
+                        key={fileData?.high_resolution?.src || imageData.thumbnail}
                         className="w-full h-full object-contain rounded-lg"
                         poster={imageData.poster || "/placeholder.png"}
                         controls
@@ -2081,14 +2093,16 @@ export default function ImageDetailsPage() {
                       >
                         {/* Multiple source elements for better browser compatibility */}
                         <source
-                          src={imageData.thumbnail}
-                          type={getVideoMimeType(imageData.thumbnail)}
+                          src={fileData?.high_resolution?.src || imageData.thumbnail}
+                          type={getVideoMimeType(
+                            fileData?.high_resolution?.src || imageData.thumbnail
+                          )}
                         />
                         {/* Fallback message for browsers that don't support video */}
                         <p className="text-muted-foreground text-center p-4">
                           Your browser does not support the video tag.
                           <a
-                            href={imageData.thumbnail}
+                            href={fileData?.high_resolution?.src || imageData.thumbnail}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline ml-1"
@@ -2099,7 +2113,8 @@ export default function ImageDetailsPage() {
                       </video>
                     ) : (
                       <img
-                        src={imageData.thumbnail}
+                        key={fileData?.high_resolution?.src || imageData.thumbnail}
+                        src={fileData?.high_resolution?.src || imageData.thumbnail}
                         alt={imageData.title}
                         className="w-full h-full object-contain cursor-pointer hover:scale-[1.02] transition-transform duration-300"
                         style={{

@@ -324,7 +324,7 @@ export default function DashboardPage() {
   const [sitesDataForFilter, setSitesDataForFilter] = useState<any[]>([]);
   const [selectedPlatformFilter, setSelectedPlatformFilter] =
     useState<string>("all");
-  
+
   // Email search state for download history
   const [emailSearchTerm, setEmailSearchTerm] = useState<string>("");
 
@@ -363,15 +363,15 @@ export default function DashboardPage() {
       if (response.success && response.data) {
         // Handle response structure with emails
         let tasks: DownloadTask[] = [];
-        
+
         if (Array.isArray(response.data)) {
           // Response: array of {email, data} objects
           tasks = response.data.map((item: any) => ({
             ...item.data,
-            userEmail: item.email // Add email field to task
+            userEmail: item.email, // Add email field to task
           }));
         }
-        
+
         setDownloadTasks(tasks);
 
         // Calculate statistics
@@ -512,7 +512,7 @@ export default function DashboardPage() {
   // Filter download tasks by platform and email, then sort by date (newest first)
   const filteredDownloadTasks = useMemo(() => {
     let filtered = downloadTasks;
-    
+
     // Filter by platform
     if (selectedPlatformFilter !== "all") {
       filtered = filtered.filter((task) => {
@@ -523,7 +523,7 @@ export default function DashboardPage() {
           .includes(selectedPlatformFilter.toLowerCase());
       });
     }
-    
+
     // Filter by email search term
     if (emailSearchTerm.trim() !== "") {
       filtered = filtered.filter((task) => {
@@ -533,14 +533,14 @@ export default function DashboardPage() {
           .includes(emailSearchTerm.toLowerCase().trim());
       });
     }
-    
+
     // Sort by date (newest first)
     filtered = filtered.sort((a, b) => {
       const dateA = new Date(a.created_at || 0).getTime();
       const dateB = new Date(b.created_at || 0).getTime();
       return dateB - dateA; // Descending order (newest first)
     });
-    
+
     return filtered;
   }, [downloadTasks, selectedPlatformFilter, emailSearchTerm]);
 
@@ -2979,7 +2979,7 @@ export default function DashboardPage() {
                         </button>
                       )}
                     </div>
-                    
+
                     {/* Platform Filter */}
                     <Select
                       value={selectedPlatformFilter}
@@ -3023,12 +3023,17 @@ export default function DashboardPage() {
                         <th
                           className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
                         >
-                          User Email
+                          {`${isRTL ? "الايميل" : "User Email"}`}
                         </th>
                         <th
                           className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
                         >
-                          {t("downloadHistory.columns.file")}
+                          {`${isRTL ? "معرّف المهمة" : "Task ID"}`}
+                        </th>
+                        <th
+                          className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
+                        >
+                          {`${isRTL ? "رابط الملف" : "File URL"}`}
                         </th>
                         <th
                           className={`${isRTL ? "text-right" : "text-left"} py-4 px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider`}
@@ -3060,7 +3065,7 @@ export default function DashboardPage() {
                     <tbody className="divide-y divide-border">
                       {isLoadingDownloads ? (
                         <tr>
-                          <td colSpan={7} className="py-12 text-center">
+                          <td colSpan={8} className="py-12 text-center">
                             <div className="flex flex-col items-center space-y-3">
                               <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                               <div>
@@ -3073,7 +3078,7 @@ export default function DashboardPage() {
                         </tr>
                       ) : downloadError ? (
                         <tr>
-                          <td colSpan={7} className="py-12 text-center">
+                          <td colSpan={8} className="py-12 text-center">
                             <div className="flex flex-col items-center space-y-3">
                               <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
                                 <AlertCircle className="w-6 h-6 text-destructive" />
@@ -3091,7 +3096,7 @@ export default function DashboardPage() {
                         </tr>
                       ) : filteredDownloadTasks.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="py-12 text-center">
+                          <td colSpan={8} className="py-12 text-center">
                             <div className="flex flex-col items-center space-y-3">
                               <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
                                 <Download className="w-6 h-6 text-muted-foreground" />
@@ -3183,8 +3188,6 @@ export default function DashboardPage() {
                           };
 
                           const taskData = task.data as any;
-                          const fileName =
-                            task.download?.filename || "Unknown File";
                           const platform = taskData.platform_name || "Unknown";
                           const timestamp = task.created_at;
                           const originalUrl = taskData.downloadUrl;
@@ -3203,32 +3206,31 @@ export default function DashboardPage() {
                                 </div>
                               </td>
                               <td className="py-4 px-6">
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                                    <FileText className="w-4 h-4 text-primary" />
-                                  </div>
-                                  <div>
-                                    {originalUrl ? (
-                                      <a
-                                        href={originalUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-sm font-medium text-primary hover:text-primary/80 underline truncate max-w-[125px] block"
-                                      >
-                                        {fileName}
-                                      </a>
-                                    ) : (
-                                      <p className="text-sm font-medium text-foreground truncate max-w-[125px]">
-                                        {fileName}
-                                      </p>
-                                    )}
-                                    {taskData.fileSize && (
-                                      <p className="text-xs text-muted-foreground">
-                                        {taskData.fileSize}
-                                      </p>
-                                    )}
-                                  </div>
+                                <div className="max-w-[80px]">
+                                  <span
+                                    className="text-sm font-mono text-foreground truncate block"
+                                    title={taskData.id}
+                                  >
+                                    {taskData.id || "-"}
+                                  </span>
                                 </div>
+                              </td>
+                              <td className="py-4 px-6">
+                                {originalUrl ? (
+                                  <a
+                                    href={originalUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-primary hover:text-primary/80 underline truncate block max-w-[180px]"
+                                    title={originalUrl}
+                                  >
+                                    {originalUrl}
+                                  </a>
+                                ) : (
+                                  <span className="text-sm text-muted-foreground">
+                                    -
+                                  </span>
+                                )}
                               </td>
                               <td className="py-4 px-6">
                                 <span className="text-sm text-foreground">
@@ -3402,7 +3404,40 @@ export default function DashboardPage() {
                               {(task as any).userEmail || "N/A"}
                             </span>
                           </div>
-                          
+
+                          {/* Task ID and File URL */}
+                          <div className="space-y-1">
+                            <div className="flex items-center text-xs text-muted-foreground">
+                              <span className="uppercase tracking-wide mr-2">
+                                {`${isRTL ? "معرّف المهمة" : "Task ID"}`}:
+                              </span>
+                              <span
+                                className="font-mono text-foreground truncate"
+                                title={taskData.id}
+                              >
+                                {taskData.id || "-"}
+                              </span>
+                            </div>
+                            <div className="flex items-center text-xs text-muted-foreground">
+                              <span className="uppercase tracking-wide mr-2">
+                                {`${isRTL ? "رابط الملف" : "File URL"}`}:
+                              </span>
+                              {originalUrl ? (
+                                <a
+                                  href={originalUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-foreground underline truncate max-w-[220px]"
+                                  title={originalUrl}
+                                >
+                                  {originalUrl}
+                                </a>
+                              ) : (
+                                <span className="text-foreground">-</span>
+                              )}
+                            </div>
+                          </div>
+
                           {/* Header with File Info and Status */}
                           <div className="flex items-start justify-between space-x-3">
                             <div className="flex items-center space-x-3 flex-1 min-w-0">

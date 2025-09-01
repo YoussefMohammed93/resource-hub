@@ -625,7 +625,16 @@ function CookiesPageContent() {
   };
 
   const handleSubmitCookie = async () => {
-    if (!selectedWebsite || !cookiesJson.trim()) return;
+    // Basic field validations with explicit messages
+    if (!selectedWebsite) {
+      setFormError("Please select a website platform.");
+      return;
+    }
+
+    if (!cookiesJson.trim()) {
+      setFormError("Please paste cookies in JSON format.");
+      return;
+    }
 
     // Validate JSON before submitting
     if (!validateJson(cookiesJson)) {
@@ -946,7 +955,8 @@ function CookiesPageContent() {
               </Button>
             </DialogTrigger>
             <DialogContent
-              className={`sm:max-w-[1000px] ${isRTL ? "[&>[data-slot=dialog-close]]:left-4 [&>[data-slot=dialog-close]]:right-auto" : ""}`}
+              showCloseButton={false}
+              className={`sm:max-w-[1000px] max-h-[85vh] overflow-y-auto ${isRTL ? "[&>[data-slot=dialog-close]]:left-4 [&>[data-slot=dialog-close]]:right-auto" : ""}`}
             >
               <DialogHeader className={`${isRTL && "sm:text-right"}`}>
                 <DialogTitle className={isRTL ? "font-tajawal" : "font-sans"}>
@@ -1073,7 +1083,7 @@ function CookiesPageContent() {
                     value={cookiesJson}
                     onChange={(e) => handleJsonChange(e.target.value)}
                     placeholder={t("cookies.addCookie.dialog.json.placeholder")}
-                    className={`min-h-32 font-mono text-sm ${isRTL ? "text-right" : "text-left"} ${jsonError ? "border-destructive" : ""}`}
+                    className={`min-h-32 font-mono text-sm whitespace-pre-wrap break-words ${isRTL ? "text-right" : "text-left"} ${jsonError ? "border-destructive" : ""}`}
                     dir="ltr" // Always LTR for JSON
                   />
                   {jsonError && (
@@ -1119,12 +1129,7 @@ function CookiesPageContent() {
                 <Button
                   type="button"
                   onClick={handleSubmitCookie}
-                  disabled={
-                    !selectedWebsite ||
-                    !cookiesJson.trim() ||
-                    isSubmitting ||
-                    !!jsonError
-                  }
+                  disabled={isSubmitting}
                   className={`bg-primary hover:bg-primary/90 text-primary-foreground ${isRTL ? "font-tajawal" : "font-sans"}`}
                 >
                   {isSubmitting ? (
