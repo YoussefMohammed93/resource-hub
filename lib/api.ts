@@ -687,7 +687,13 @@ export const userApi = {
       return mockApiResponses.getDownloadHistory();
     }
 
-    return apiRequest<DownloadHistoryResponse>("/v1/user/history", "GET");
+    // Bypass local proxy: call direct backend with absolute URL so axios ignores baseURL
+    const DIRECT_API_URL =
+      process.env.NEXT_PUBLIC_PRODUCTION_API_URL || "https://stockaty.virs.tech";
+    return apiRequest<DownloadHistoryResponse>(
+      `${DIRECT_API_URL}/v1/user/history`,
+      "GET"
+    );
   },
 };
 

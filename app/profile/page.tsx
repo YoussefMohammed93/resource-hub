@@ -47,32 +47,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
 import { userApi, authApi, type DownloadHistoryEntry } from "@/lib/api";
-import Image from "next/image";
-
-// Utility function to get the correct media URL based on environment and type
-const getMediaUrl = (item: DownloadHistoryEntry): string => {
-  console.log("[Profile] Processing media URL for item:", {
-    from: item.data.from,
-    downloadUrl: item.data.downloadUrl,
-  });
-
-  // For local files (mock data), use them directly
-  if (item.data.downloadUrl.startsWith("/")) {
-    console.log("[Profile] Using local file:", item.data.downloadUrl);
-    return item.data.downloadUrl;
-  }
-
-  // For external URLs (Freepik page URLs), use the media proxy to extract actual images
-  if (item.data.downloadUrl.startsWith("http")) {
-    const proxyUrl = `/api/media-proxy?url=${encodeURIComponent(item.data.downloadUrl)}`;
-    console.log("[Profile] Using media proxy for Freepik page URL:", proxyUrl);
-    return proxyUrl;
-  }
-
-  // Fallback to the original file URL
-  console.log("[Profile] Using fallback URL:", item.data.downloadUrl);
-  return item.data.downloadUrl;
-};
 
 // Utility function to check if the item is a video
 const isVideoItem = (item: DownloadHistoryEntry): boolean => {
@@ -1041,11 +1015,11 @@ export default function ProfilePage() {
                           {isVideoItem(item) ? (
                             // Video preview with play button overlay
                             <div className="relative w-full h-full">
-                              <Image
-                                src={getMediaUrl(item)}
-                                fill
+                              <img
+                                src={item.data.downloadUrl}
                                 alt={`Media from ${item.data.from}`}
-                                className="w-full h-full object-cover transition-transform duration-500"
+                                className="object-cover rounded-lg absolute inset-0 w-full h-full"
+                                referrerPolicy="no-referrer"
                                 onLoad={() => {
                                   setImageLoading((prev) => {
                                     const newSet = new Set(prev);
@@ -1054,18 +1028,13 @@ export default function ProfilePage() {
                                   });
                                 }}
                                 onError={(e) => {
-                                  console.log(
-                                    "[Profile] Image load error for item:",
-                                    {
-                                      index,
-                                      item,
-                                      src: getMediaUrl(item),
-                                      error: e,
-                                    }
-                                  );
-                                  setImageErrors((prev) =>
-                                    new Set(prev).add(index)
-                                  );
+                                  console.warn("[Profile] Video thumbnail load error", {
+                                    index,
+                                    item,
+                                    src: (e.target as HTMLImageElement).src,
+                                    error: e,
+                                  });
+                                  setImageErrors((prev) => new Set(prev).add(index));
                                   setImageLoading((prev) => {
                                     const newSet = new Set(prev);
                                     newSet.delete(index);
@@ -1073,7 +1042,7 @@ export default function ProfilePage() {
                                   });
                                 }}
                               />
-                              {/* Video play button overlay */}
+                              {/* Play button overlay */}
                               <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/media:bg-black/40 transition-all duration-300">
                                 <div className="w-16 h-16 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform duration-300">
                                   <div className="w-0 h-0 border-l-[14px] border-l-black border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1"></div>
@@ -1082,11 +1051,11 @@ export default function ProfilePage() {
                             </div>
                           ) : (
                             // Regular image display
-                            <Image
-                            fill
-                              src={getMediaUrl(item)}
+                            <img
+                              src={item.data.downloadUrl}
                               alt={`Media from ${item.data.from}`}
-                              className="w-full h-full object-cover transition-transform duration-500"
+                              className="object-cover rounded-lg absolute inset-0 w-full h-full"
+                              referrerPolicy="no-referrer"
                               onLoad={() => {
                                 setImageLoading((prev) => {
                                   const newSet = new Set(prev);
@@ -1095,18 +1064,13 @@ export default function ProfilePage() {
                                 });
                               }}
                               onError={(e) => {
-                                console.log(
-                                  "[Profile] Image load error for item:",
-                                  {
-                                    index,
-                                    item,
-                                    src: getMediaUrl(item),
-                                    error: e,
-                                  }
-                                );
-                                setImageErrors((prev) =>
-                                  new Set(prev).add(index)
-                                );
+                                console.warn("[Profile] Image load error for item:", {
+                                  index,
+                                  item,
+                                  src: (e.target as HTMLImageElement).src,
+                                  error: e,
+                                });
+                                setImageErrors((prev) => new Set(prev).add(index));
                                 setImageLoading((prev) => {
                                   const newSet = new Set(prev);
                                   newSet.delete(index);
