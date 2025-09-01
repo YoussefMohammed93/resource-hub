@@ -12,10 +12,9 @@ export function HeaderSkeleton() {
             <div className="cursor-pointer md:hidden p-2 hover:bg-muted rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center">
               <Skeleton className="w-5 h-5" />
             </div>
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+            <div className="relative w-44 sm:w-48 h-12">
+              <Skeleton className="w-full h-full rounded" />
             </div>
-            <Skeleton className="h-6 w-32" />
           </div>
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-1">

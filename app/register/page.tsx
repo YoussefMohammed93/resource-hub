@@ -52,14 +52,22 @@ import { useLanguage } from "@/components/i18n-provider";
 import { HeaderControls } from "@/components/header-controls";
 import { otpApi } from "@/lib/api";
 import Footer from "@/components/footer";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Extend Window interface for reCAPTCHA
 declare global {
   interface Window {
     grecaptcha: {
       reset: () => void;
-      execute: (siteKey: string, options: { action: string }) => Promise<string>;
-      render: (element: string | HTMLElement, options: { sitekey: string; callback: string }) => number;
+      execute: (
+        siteKey: string,
+        options: { action: string }
+      ) => Promise<string>;
+      render: (
+        element: string | HTMLElement,
+        options: { sitekey: string; callback: string }
+      ) => number;
       ready: (callback: () => void) => void;
     };
     handleRegisterCaptchaChange: (token: string) => void;
@@ -117,15 +125,17 @@ export default function RegisterPage() {
     // Function to render reCAPTCHA when API is ready
     const renderRecaptcha = () => {
       if (window.grecaptcha && window.grecaptcha.render) {
-        const recaptchaElement = document.querySelector('.g-recaptcha') as HTMLElement;
+        const recaptchaElement = document.querySelector(
+          ".g-recaptcha"
+        ) as HTMLElement;
         if (recaptchaElement && !recaptchaElement.hasChildNodes()) {
           try {
             window.grecaptcha.render(recaptchaElement, {
-              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '',
-              callback: 'handleRegisterCaptchaChange'
+              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "",
+              callback: "handleRegisterCaptchaChange",
             });
           } catch (error) {
-            console.error('Error rendering reCAPTCHA:', error);
+            console.error("Error rendering reCAPTCHA:", error);
           }
         }
       }
@@ -150,7 +160,9 @@ export default function RegisterPage() {
     // Cleanup
     return () => {
       if (window.handleRegisterCaptchaChange) {
-        window.handleRegisterCaptchaChange = undefined as unknown as (token: string) => void;
+        window.handleRegisterCaptchaChange = undefined as unknown as (
+          token: string
+        ) => void;
       }
     };
   }, []);
@@ -466,8 +478,25 @@ export default function RegisterPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-secondary/50 flex items-center justify-center">
-        <Loader2 className="w-5 h-5 animate-spin" />
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        <header className="bg-background/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
+          <div className="px-4 sm:px-5 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="relative w-44 sm:w-48 h-12">
+                  <Skeleton className="absolute inset-0 w-full h-full rounded-md" />
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </header>
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        </div>
       </div>
     );
   }
@@ -763,14 +792,25 @@ export default function RegisterPage() {
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className={`flex items-center ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}
+              aria-label={t("header.logo")}
+              className="flex items-center"
             >
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+              <div className="relative w-44 sm:w-48 h-12">
+                <Image
+                  src="/logo-black.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="block dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/logo-white.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="hidden dark:block"
+                  priority
+                />
               </div>
-              <span className="text-base sm:text-xl font-semibold text-foreground">
-                {t("header.logo")}
-              </span>
             </Link>
             <HeaderControls />
           </div>
@@ -1238,7 +1278,6 @@ export default function RegisterPage() {
               </form>
             </CardContent>
           </Card>
-
 
           {/* Back to Home Button */}
           <div className="mt-6 text-center">

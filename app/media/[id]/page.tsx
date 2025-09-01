@@ -48,6 +48,7 @@ import { searchApi, type ProviderDataRequest, type FileData } from "@/lib/api";
 import { RelatedFilesSection } from "@/components/media/related-files-section";
 import { useAuth } from "@/components/auth-provider";
 import { DownloadVerificationSheet } from "@/components/download-verification-sheet";
+import Image from "next/image";
 
 // Type definitions for search result (matching the search page)
 interface SearchResult {
@@ -491,19 +492,16 @@ export default function ImageDetailsPage() {
           <div className="media-header mx-auto max-w-7xl px-4 sm:px-5">
             <div className="flex items-center justify-between h-16">
               <div
-                className={`flex items-center gap-1 sm:gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+                className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
               >
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+                <div className="relative w-44 sm:w-48 h-12">
+                  <Skeleton className="absolute inset-0 w-full h-full rounded-md" />
                 </div>
-                <Link
-                  href="/"
-                  className="text-base sm:text-xl font-semibold text-foreground"
-                >
-                  {t("header.logo")}
-                </Link>
               </div>
-              <HeaderControls />
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+              </div>
             </div>
           </div>
         </header>
@@ -980,14 +978,27 @@ export default function ImageDetailsPage() {
               <div
                 className={`flex items-center gap-1 sm:gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
               >
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
-                </div>
                 <Link
                   href="/"
-                  className="text-base sm:text-xl font-semibold text-foreground"
+                  aria-label={t("header.logo")}
+                  className="flex items-center"
                 >
-                  {t("header.logo")}
+                  <div className="relative w-44 sm:w-48 h-12">
+                    <Image
+                      src="/logo-black.png"
+                      alt={t("header.logo")}
+                      fill
+                      className="block dark:hidden"
+                      priority
+                    />
+                    <Image
+                      src="/logo-white.png"
+                      alt={t("header.logo")}
+                      fill
+                      className="hidden dark:block"
+                      priority
+                    />
+                  </div>
                 </Link>
               </div>
               <HeaderControls />
@@ -1025,14 +1036,27 @@ export default function ImageDetailsPage() {
             <div
               className={`flex items-center gap-1 sm:gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
             >
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
-              </div>
               <Link
                 href="/"
-                className="text-base sm:text-xl font-semibold text-foreground"
+                aria-label={t("header.logo")}
+                className="flex items-center"
               >
-                {t("header.logo")}
+                <div className="relative w-44 sm:w-48 h-12">
+                  <Image
+                    src="/logo-black.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="block dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/logo-white.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="hidden dark:block"
+                    priority
+                  />
+                </div>
               </Link>
             </div>
             <HeaderControls />
@@ -1357,10 +1381,12 @@ export default function ImageDetailsPage() {
                       >
                         <source
                           src={getProxyAudioUrl(
-                            fileData?.high_resolution?.src || imageData.thumbnail
+                            fileData?.high_resolution?.src ||
+                              imageData.thumbnail
                           )}
                           type={getAudioMimeType(
-                            fileData?.high_resolution?.src || imageData.thumbnail
+                            fileData?.high_resolution?.src ||
+                              imageData.thumbnail
                           )}
                         />
                         {/* Fallback message for browsers that don't support audio */}
@@ -1385,7 +1411,9 @@ export default function ImageDetailsPage() {
                       fileData?.high_resolution?.src || imageData.thumbnail
                     ) ? (
                     <video
-                      key={fileData?.high_resolution?.src || imageData.thumbnail}
+                      key={
+                        fileData?.high_resolution?.src || imageData.thumbnail
+                      }
                       className="w-full h-full object-contain"
                       poster={imageData.poster || "/placeholder.png"}
                       controls
@@ -1450,7 +1478,9 @@ export default function ImageDetailsPage() {
                     >
                       {/* Multiple source elements for better browser compatibility */}
                       <source
-                        src={fileData?.high_resolution?.src || imageData.thumbnail}
+                        src={
+                          fileData?.high_resolution?.src || imageData.thumbnail
+                        }
                         type={getVideoMimeType(
                           fileData?.high_resolution?.src || imageData.thumbnail
                         )}
@@ -1459,7 +1489,10 @@ export default function ImageDetailsPage() {
                       <p className="text-muted-foreground text-center p-4">
                         {t("mediaDetail.videoPlayer.browserNotSupported")}
                         <a
-                          href={fileData?.high_resolution?.src || imageData.thumbnail}
+                          href={
+                            fileData?.high_resolution?.src ||
+                            imageData.thumbnail
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary hover:underline ml-1"
@@ -1470,8 +1503,12 @@ export default function ImageDetailsPage() {
                     </video>
                   ) : (
                     <img
-                      key={fileData?.high_resolution?.src || imageData.thumbnail}
-                      src={fileData?.high_resolution?.src || imageData.thumbnail}
+                      key={
+                        fileData?.high_resolution?.src || imageData.thumbnail
+                      }
+                      src={
+                        fileData?.high_resolution?.src || imageData.thumbnail
+                      }
                       alt={imageData.title}
                       className="w-full h-full object-contain cursor-pointer hover:scale-[1.02] transition-transform duration-300"
                       style={{
@@ -2022,13 +2059,14 @@ export default function ImageDetailsPage() {
                           </p>
                         </audio>
                       </div>
-                    ) :
-                      isVideoItem() &&
+                    ) : isVideoItem() &&
                       isValidVideoUrl(
                         fileData?.high_resolution?.src || imageData.thumbnail
                       ) ? (
                       <video
-                        key={fileData?.high_resolution?.src || imageData.thumbnail}
+                        key={
+                          fileData?.high_resolution?.src || imageData.thumbnail
+                        }
                         className="w-full h-full object-contain rounded-lg"
                         poster={imageData.poster || "/placeholder.png"}
                         controls
@@ -2093,16 +2131,23 @@ export default function ImageDetailsPage() {
                       >
                         {/* Multiple source elements for better browser compatibility */}
                         <source
-                          src={fileData?.high_resolution?.src || imageData.thumbnail}
+                          src={
+                            fileData?.high_resolution?.src ||
+                            imageData.thumbnail
+                          }
                           type={getVideoMimeType(
-                            fileData?.high_resolution?.src || imageData.thumbnail
+                            fileData?.high_resolution?.src ||
+                              imageData.thumbnail
                           )}
                         />
                         {/* Fallback message for browsers that don't support video */}
                         <p className="text-muted-foreground text-center p-4">
                           Your browser does not support the video tag.
                           <a
-                            href={fileData?.high_resolution?.src || imageData.thumbnail}
+                            href={
+                              fileData?.high_resolution?.src ||
+                              imageData.thumbnail
+                            }
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline ml-1"
@@ -2113,8 +2158,12 @@ export default function ImageDetailsPage() {
                       </video>
                     ) : (
                       <img
-                        key={fileData?.high_resolution?.src || imageData.thumbnail}
-                        src={fileData?.high_resolution?.src || imageData.thumbnail}
+                        key={
+                          fileData?.high_resolution?.src || imageData.thumbnail
+                        }
+                        src={
+                          fileData?.high_resolution?.src || imageData.thumbnail
+                        }
                         alt={imageData.title}
                         className="w-full h-full object-contain cursor-pointer hover:scale-[1.02] transition-transform duration-300"
                         style={{

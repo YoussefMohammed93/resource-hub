@@ -34,6 +34,7 @@ import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
 import { authApi, userApi } from "@/lib/api";
 import { getFileExtension } from "@/lib/download-utils";
+import Footer from "@/components/footer";
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -113,14 +114,31 @@ export default function ProfilePage() {
           };
           type HistoryItem = {
             type?: string;
-            data?: { id?: string; downloadUrl?: string; from?: string; price?: number };
+            data?: {
+              id?: string;
+              downloadUrl?: string;
+              from?: string;
+              price?: number;
+            };
           };
 
-          const isDownloadsShape = (v: unknown): v is { downloads: DownloadsItem[] } => {
-            return typeof v === "object" && v !== null && Array.isArray((v as Record<string, unknown>).downloads);
+          const isDownloadsShape = (
+            v: unknown
+          ): v is { downloads: DownloadsItem[] } => {
+            return (
+              typeof v === "object" &&
+              v !== null &&
+              Array.isArray((v as Record<string, unknown>).downloads)
+            );
           };
-          const isHistoryShape = (v: unknown): v is { history: HistoryItem[] } => {
-            return typeof v === "object" && v !== null && Array.isArray((v as Record<string, unknown>).history);
+          const isHistoryShape = (
+            v: unknown
+          ): v is { history: HistoryItem[] } => {
+            return (
+              typeof v === "object" &&
+              v !== null &&
+              Array.isArray((v as Record<string, unknown>).history)
+            );
           };
 
           const rawDownloads = isDownloadsShape(res) ? res.downloads : [];
@@ -138,7 +156,10 @@ export default function ProfilePage() {
               file: d.file ?? "",
             }));
           } else if (rawHistory.length > 0) {
-            type HistoryItemWithData = { type?: string; data: NonNullable<HistoryItem["data"]> };
+            type HistoryItemWithData = {
+              type?: string;
+              data: NonNullable<HistoryItem["data"]>;
+            };
             const hasData = (h: unknown): h is HistoryItemWithData =>
               typeof h === "object" &&
               h !== null &&
@@ -164,7 +185,10 @@ export default function ProfilePage() {
           setHistoryError(res.error?.message || "Failed to load history");
         }
       } catch (e: unknown) {
-        const message = typeof e === "object" && e && "message" in e ? String((e as { message?: unknown }).message) : undefined;
+        const message =
+          typeof e === "object" && e && "message" in e
+            ? String((e as { message?: unknown }).message)
+            : undefined;
         setHistoryError(message || "Failed to load history");
       } finally {
         setIsHistoryLoading(false);
@@ -356,7 +380,7 @@ export default function ProfilePage() {
         </header>
       </header>
       {/* Main Content */}
-      <main className="px-5 py-6 sm:py-8 space-y-4 sm:space-y-5">
+      <main className="px-5 py-6 sm:py-8 space-y-4 sm:space-y-5 mb-5">
         {/* User Info Section */}
         <Card className="overflow-hidden dark:bg-muted/50 border-none shadow-xs py-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
           <div className="relative p-6 sm:p-8">
@@ -1121,6 +1145,7 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </main>
+      <Footer />
     </div>
   );
 }

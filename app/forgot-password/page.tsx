@@ -42,6 +42,8 @@ import { HeaderControls } from "@/components/header-controls";
 import { otpApi, authApi } from "@/lib/api";
 import { getPasswordResetTokenRemainingTime } from "@/lib/utils";
 import Footer from "@/components/footer";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Email validation function
 const validateEmail = (email: string) => {
@@ -75,7 +77,7 @@ const validatePassword = (password: string) => {
 const formatRemainingTime = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 
 export default function ForgotPasswordPage() {
@@ -120,7 +122,7 @@ export default function ForgotPasswordPage() {
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [, setOtpVerified] = useState(false);
   const [, setOtpMessage] = useState("");
-  
+
   // Token expiration state
   const [tokenStartTime, setTokenStartTime] = useState<number | null>(null);
   const [remainingTime, setRemainingTime] = useState<number>(0);
@@ -140,22 +142,22 @@ export default function ForgotPasswordPage() {
     const updateTimer = () => {
       const remaining = getPasswordResetTokenRemainingTime(tokenStartTime);
       setRemainingTime(remaining);
-      
+
       if (remaining <= 0) {
         setIsTokenExpired(true);
-        setErrors(prev => ({
+        setErrors((prev) => ({
           ...prev,
-          general: t("forgotPassword.error.tokenExpired")
+          general: t("forgotPassword.error.tokenExpired"),
         }));
       }
     };
 
     // Update immediately
     updateTimer();
-    
+
     // Update every second
     const interval = setInterval(updateTimer, 1000);
-    
+
     return () => clearInterval(interval);
   }, [tokenStartTime, currentStep, t]);
 
@@ -250,10 +252,14 @@ export default function ForgotPasswordPage() {
   // Handle final OTP verification and password reset
   const handleFinalOtpVerification = async () => {
     // Check if token has expired
-    if (isTokenExpired || (tokenStartTime && getPasswordResetTokenRemainingTime(tokenStartTime) <= 0)) {
+    if (
+      isTokenExpired ||
+      (tokenStartTime &&
+        getPasswordResetTokenRemainingTime(tokenStartTime) <= 0)
+    ) {
       setErrors((prev) => ({
         ...prev,
-        general: t("forgotPassword.error.tokenExpired")
+        general: t("forgotPassword.error.tokenExpired"),
       }));
       toast.error(t("forgotPassword.error.title"), {
         description: t("forgotPassword.error.tokenExpired"),
@@ -285,13 +291,13 @@ export default function ForgotPasswordPage() {
           ...prev,
           general: "",
         }));
-        
+
         // Show success toast
         toast.success(t("forgotPassword.success.message"), {
           description: t("forgotPassword.success.description"),
           duration: 4000,
         });
-        
+
         // Redirect to login page after a short delay
         setTimeout(() => {
           router.push("/login?message=password-reset-success");
@@ -303,22 +309,23 @@ export default function ForgotPasswordPage() {
           general:
             result.error?.message || t("forgotPassword.error.resetFailed"),
         }));
-        
+
         // Also show error toast for better UX
         toast.error(t("forgotPassword.error.title"), {
-          description: result.error?.message || t("forgotPassword.error.resetFailed"),
+          description:
+            result.error?.message || t("forgotPassword.error.resetFailed"),
           duration: 4000,
         });
       }
     } catch (error) {
       console.error("Password reset error:", error);
       const errorMessage = t("forgotPassword.error.unexpected");
-      
+
       setErrors((prev) => ({
         ...prev,
         general: errorMessage,
       }));
-      
+
       // Show error toast
       toast.error(t("forgotPassword.error.title"), {
         description: errorMessage,
@@ -358,9 +365,7 @@ export default function ForgotPasswordPage() {
       // OTP validation
       if (!formData.otp.trim()) {
         newErrors.otp = t("forgotPassword.validation.otpRequired");
-      } else if (
-        formData.otp.length !== 6 || !/^\d{6}$/.test(formData.otp)
-      ) {
+      } else if (formData.otp.length !== 6 || !/^\d{6}$/.test(formData.otp)) {
         newErrors.otp = t("forgotPassword.validation.invalidOtp");
       }
 
@@ -427,7 +432,12 @@ export default function ForgotPasswordPage() {
       setTokenStartTime(null);
       setIsTokenExpired(false);
       setRemainingTime(0);
-      setFormData(prev => ({ ...prev, otp: "", newPassword: "", confirmPassword: "" }));
+      setFormData((prev) => ({
+        ...prev,
+        otp: "",
+        newPassword: "",
+        confirmPassword: "",
+      }));
     }
   };
 
@@ -449,8 +459,28 @@ export default function ForgotPasswordPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-secondary/50 flex items-center justify-center">
-        <Loader2 className="w-5 h-5 animate-spin" />
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        {/* Header Skeleton */}
+        <header className="bg-background/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
+          <div className="px-4 sm:px-5 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="relative w-44 sm:w-48 h-12">
+                  <Skeleton className="absolute inset-0 w-full h-full rounded-md" />
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Body Loader */}
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        </div>
       </div>
     );
   }
@@ -664,14 +694,25 @@ export default function ForgotPasswordPage() {
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className={`flex items-center ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}
+              aria-label={t("header.logo")}
+              className="flex items-center"
             >
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+              <div className="relative w-44 sm:w-48 h-12">
+                <Image
+                  src="/logo-black.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="block dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/logo-white.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="hidden dark:block"
+                  priority
+                />
               </div>
-              <span className="text-base sm:text-xl font-semibold text-foreground">
-                {t("header.logo")}
-              </span>
             </Link>
             <HeaderControls />
           </div>
@@ -693,7 +734,8 @@ export default function ForgotPasswordPage() {
               >
                 {currentStep === "email" && t("forgotPassword.subtitle.email")}
                 {currentStep === "phone" && t("forgotPassword.subtitle.phone")}
-                {currentStep === "otp-password" && t("forgotPassword.subtitle.otpPassword")}
+                {currentStep === "otp-password" &&
+                  t("forgotPassword.subtitle.otpPassword")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -756,7 +798,6 @@ export default function ForgotPasswordPage() {
                           dir={isRTL ? "rtl" : "ltr"}
                         />
 
-
                         {errors.phone && (
                           <p
                             className={`text-sm text-destructive ${isRTL ? "text-right" : "text-left"}`}
@@ -766,7 +807,6 @@ export default function ForgotPasswordPage() {
                         )}
                       </div>
                     </div>
-
                   </>
                 )}
 
@@ -775,24 +815,43 @@ export default function ForgotPasswordPage() {
                   <>
                     {/* Summary */}
                     <div className="p-4 bg-muted/50 rounded-lg border">
-                      <h3 className={`font-medium text-sm mb-2 ${isRTL ? "text-right" : "text-left"}`}>
+                      <h3
+                        className={`font-medium text-sm mb-2 ${isRTL ? "text-right" : "text-left"}`}
+                      >
                         {t("forgotPassword.form.otp.summary")}
                       </h3>
-                      <div className={`text-sm text-muted-foreground space-y-1 ${isRTL ? "text-right" : "text-left"}`}>
-                        <p><strong>{t("forgotPassword.form.email.label")}:</strong> {formData.email}</p>
-                        <p><strong>{t("forgotPassword.form.phone.label")}:</strong> {formData.phone}</p>
+                      <div
+                        className={`text-sm text-muted-foreground space-y-1 ${isRTL ? "text-right" : "text-left"}`}
+                      >
+                        <p>
+                          <strong>
+                            {t("forgotPassword.form.email.label")}:
+                          </strong>{" "}
+                          {formData.email}
+                        </p>
+                        <p>
+                          <strong>
+                            {t("forgotPassword.form.phone.label")}:
+                          </strong>{" "}
+                          {formData.phone}
+                        </p>
                         <p className="text-green-600 dark:text-green-400">
                           <MessageSquare className="w-4 h-4 inline mr-1" />
                           {t("forgotPassword.form.otp.whatsappSent")}
                         </p>
                         {/* Token Expiration Timer */}
                         {tokenStartTime && (
-                          <div className={`mt-2 p-2 rounded ${isTokenExpired ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400' : remainingTime <= 60 ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400' : 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'}`}>
+                          <div
+                            className={`mt-2 p-2 rounded ${isTokenExpired ? "bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400" : remainingTime <= 60 ? "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400" : "bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400"}`}
+                          >
                             <p className="text-xs font-medium">
                               {isTokenExpired ? (
                                 <>⚠️ {t("forgotPassword.timer.expired")}</>
                               ) : (
-                                <>⏱️ {t("forgotPassword.timer.remaining")}: {formatRemainingTime(remainingTime)}</>
+                                <>
+                                  ⏱️ {t("forgotPassword.timer.remaining")}:{" "}
+                                  {formatRemainingTime(remainingTime)}
+                                </>
                               )}
                             </p>
                           </div>
@@ -814,13 +873,17 @@ export default function ForgotPasswordPage() {
                         type="text"
                         placeholder={t("forgotPassword.form.otp.placeholder")}
                         value={formData.otp}
-                        onChange={(e) => handleInputChange("otp", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("otp", e.target.value)
+                        }
                         className={`${isRTL ? "text-right" : "text-left"} ${errors.otp ? "border-destructive" : ""}`}
                         dir={isRTL ? "rtl" : "ltr"}
                         maxLength={6}
                       />
                       {errors.otp && (
-                        <p className={`text-sm text-destructive ${isRTL ? "text-right" : "text-left"}`}>
+                        <p
+                          className={`text-sm text-destructive ${isRTL ? "text-right" : "text-left"}`}
+                        >
                           {errors.otp}
                         </p>
                       )}
@@ -917,7 +980,9 @@ export default function ForgotPasswordPage() {
                     </div>
 
                     {/* Resend OTP */}
-                    <div className={`text-center ${isRTL ? "text-right" : "text-left"}`}>
+                    <div
+                      className={`text-center ${isRTL ? "text-right" : "text-left"}`}
+                    >
                       <p className="text-sm text-muted-foreground">
                         {t("forgotPassword.form.otp.didntReceive")}{" "}
                         <button
@@ -932,7 +997,6 @@ export default function ForgotPasswordPage() {
                     </div>
                   </>
                 )}
-
 
                 {/* General Error Message */}
                 {errors.general && (
@@ -959,7 +1023,11 @@ export default function ForgotPasswordPage() {
                   <Button
                     type="submit"
                     className="flex-1"
-                    disabled={isSubmitting || isSendingOtp || (currentStep === "otp-password" && isTokenExpired)}
+                    disabled={
+                      isSubmitting ||
+                      isSendingOtp ||
+                      (currentStep === "otp-password" && isTokenExpired)
+                    }
                   >
                     {isSubmitting ? (
                       <>

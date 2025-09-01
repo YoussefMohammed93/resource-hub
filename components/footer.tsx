@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/components/i18n-provider";
+import Image from "next/image";
 
 export default function Footer() {
   const { t } = useTranslation("common");
@@ -25,14 +26,28 @@ export default function Footer() {
           <div className="lg:col-span-1 space-y-6">
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                  <div className="w-5 h-5 bg-primary-foreground rounded-sm"></div>
-                </div>
-                <span
-                  className={`text-xl font-bold text-background dark:text-foreground ${isRTL ? "font-tajawal" : "font-sans"}`}
+                <Link
+                  href="/"
+                  aria-label={t("header.logo")}
+                  className="flex items-center"
                 >
-                  {t("header.logo")}
-                </span>
+                  <div className="relative w-44 sm:w-48 h-12">
+                    <Image
+                      src="/logo-black.png"
+                      alt={t("header.logo")}
+                      fill
+                      className="block dark:hidden"
+                      priority
+                    />
+                    <Image
+                      src="/logo-white.png"
+                      alt={t("header.logo")}
+                      fill
+                      className="hidden dark:block"
+                      priority
+                    />
+                  </div>
+                </Link>
               </div>
               <p
                 className={`text-background/80 dark:text-muted-foreground leading-relaxed text-sm lg:text-base ${isRTL ? "font-tajawal font-medium" : "font-sans"}`}
@@ -69,11 +84,10 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3">
               {[
-                { name: t("footer.links.home"), href: "/" },
-                { name: t("footer.links.categories"), href: "/categories" },
-                { name: t("footer.links.pricing"), href: "/pricing" },
-                { name: t("footer.links.about"), href: "/about" },
-                { name: t("footer.links.contactSupport"), href: "/contact" },
+                { name: t("footer.links.home"), href: "/#home" },
+                { name: t("footer.links.categories"), href: "/#platforms" },
+                { name: t("footer.links.pricing"), href: "/#pricing" },
+                { name: t("footer.links.about"), href: "/#features" },
               ].map((link) => (
                 <li key={link.name}>
                   <Link
@@ -100,10 +114,6 @@ export default function Footer() {
                   href: "/search?q=photos",
                 },
                 { name: t("footer.links.vectors"), href: "/search?q=vectors" },
-                {
-                  name: t("footer.links.illustrations"),
-                  href: "/search?q=illustrations",
-                },
                 { name: t("footer.links.videos"), href: "/search?q=videos" },
                 {
                   name: t("footer.links.templates"),
@@ -133,7 +143,10 @@ export default function Footer() {
                 { name: t("footer.links.helpCenter"), href: "/help" },
                 { name: t("footer.links.termsOfService"), href: "/terms" },
                 { name: t("footer.links.privacyPolicy"), href: "/privacy" },
-                { name: t("footer.links.cookiePolicy"), href: "/cookie-policy" },
+                {
+                  name: t("footer.links.cookiePolicy"),
+                  href: "/cookie-policy",
+                },
                 { name: t("footer.links.faq"), href: "/faq" },
               ].map((link) => (
                 <li key={link.name}>

@@ -24,31 +24,21 @@ import { Card, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Services Page Skeleton Components
-function ServicesHeaderSkeleton({ }: { isRTL: boolean }) {
+function ServicesHeaderSkeleton({}: { isRTL: boolean }) {
   return (
-    <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="container mx-auto max-w-7xl px-4 sm:px-5">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo and Mobile Menu Button */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            {/* Mobile Menu Button */}
-            <Skeleton className="w-8 h-8 rounded-lg md:hidden" />
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
-            </div>
-            <Skeleton className="w-32 h-6" />
-          </div>
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1">
-            <Skeleton className="h-9 w-20" />
-            <Skeleton className="h-9 w-24" />
-            <Skeleton className="h-9 w-28" />
-          </nav>
-          {/* Header Controls */}
+    <header className="bg-background/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-5 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo container skeleton */}
           <div className="flex items-center gap-2">
-            <Skeleton className="w-8 h-8 rounded-lg" />
-            <Skeleton className="w-8 h-8 rounded-lg" />
-            <Skeleton className="w-8 h-8 rounded-lg" />
+            <div className="relative w-44 sm:w-48 h-12">
+              <Skeleton className="absolute inset-0 w-full h-full rounded-md" />
+            </div>
+          </div>
+          {/* Right-side controls skeletons */}
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-10 rounded-full" />
           </div>
         </div>
       </div>
@@ -197,14 +187,27 @@ export default function ServicesPage() {
           <div className="flex items-center justify-between h-16">
             {/* Logo and Mobile Menu Button */}
             <div className="flex items-center gap-1 sm:gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
-              </div>
               <Link
                 href="/"
-                className="text-base sm:text-xl font-semibold text-foreground"
+                aria-label={t("header.logo")}
+                className="flex items-center"
               >
-                {t("header.logo")}
+                <div className="relative w-44 sm:w-48 h-12">
+                  <Image
+                    src="/logo-black.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="block dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/logo-white.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="hidden dark:block"
+                    priority
+                  />
+                </div>
               </Link>
             </div>
             {/* Header Controls */}

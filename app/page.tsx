@@ -733,11 +733,11 @@ export default function HomePage() {
     /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/ \w \.-]*)*\/?$/i;
   const domainRegex =
     /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
-  
+
   // Enhanced URL detection for supported platforms
   const detectSupportedUrl = (query: string): boolean => {
     const trimmedQuery = query.trim();
-    
+
     // Check for common URL patterns
     const urlPatterns = [
       /^https?:\/\//i, // Starts with http:// or https://
@@ -763,12 +763,14 @@ export default function HomePage() {
       /flaticon\.com/i,
       /icons8\.com/i,
       /thenounproject\.com/i,
-      /storyset\.com/i
+      /storyset\.com/i,
     ];
-    
-    return urlPatterns.some(pattern => pattern.test(trimmedQuery)) || 
-           urlRegex.test(trimmedQuery) || 
-           domainRegex.test(trimmedQuery);
+
+    return (
+      urlPatterns.some((pattern) => pattern.test(trimmedQuery)) ||
+      urlRegex.test(trimmedQuery) ||
+      domainRegex.test(trimmedQuery)
+    );
   };
 
   // Validate and clean search query
@@ -821,7 +823,7 @@ export default function HomePage() {
 
   const handleSearch = async () => {
     const trimmedQuery = searchQuery.trim();
-    
+
     if (!trimmedQuery) {
       setSearchError(t("search.errors.emptyQuery"));
       return;
@@ -831,12 +833,12 @@ export default function HomePage() {
     if (detectSupportedUrl(trimmedQuery)) {
       // Open download verification sheet for URLs
       let processedUrl = trimmedQuery;
-      
+
       // Add https:// if no protocol is specified
       if (!processedUrl.match(/^https?:\/\//i)) {
         processedUrl = `https://${processedUrl}`;
       }
-      
+
       setDownloadUrl(processedUrl);
       setIsDownloadSheetOpen(true);
       setSearchError(null);
@@ -1124,14 +1126,23 @@ export default function HomePage() {
               >
                 <Menu className="w-5 h-5 text-muted-foreground" />
               </button>
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+              <Link href="/" aria-label={t("header.logo")} className="flex items-center">
+              <div className="relative w-44 sm:w-48 h-12">
+              <Image
+                  src="/logo-black.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="block dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/logo-white.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="hidden dark:block"
+                  priority
+                />
               </div>
-              <Link
-                href="/"
-                className="text-base sm:text-xl font-semibold text-foreground"
-              >
-                {t("header.logo")}
               </Link>
             </div>
             {/* Desktop Navigation Links */}
@@ -2041,8 +2052,10 @@ export default function HomePage() {
                       {/* Plan Header */}
                       <div className="space-y-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                            <PlanIcon className="w-6 h-6 text-primary" />
+                          <div className="w-14">
+                            <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                              <PlanIcon className="w-6 h-6 text-primary" />
+                            </div>
                           </div>
                           <div>
                             <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
@@ -2344,17 +2357,17 @@ export default function HomePage() {
                           className={`flex items-center justify-between mb-4`}
                         >
                           <div className="flex items-center gap-2">
-                                                      <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-foreground text-sm">
-                              {testimonial.name}
-                            </h4>
-                            <p className="text-xs text-muted-foreground">
-                              {testimonial.role}
-                            </p>
-                          </div>
+                            <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center">
+                              <User className="w-6 h-6 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-foreground text-sm">
+                                {testimonial.name}
+                              </h4>
+                              <p className="text-xs text-muted-foreground">
+                                {testimonial.role}
+                              </p>
+                            </div>
                           </div>
                           {/* Rating Stars */}
                           <div className="flex items-center">

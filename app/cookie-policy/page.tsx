@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 
 // Cookie Policy Page Skeleton Component
 function CookiePolicyPageSkeleton({ isRTL }: { isRTL: boolean }) {
@@ -35,8 +36,9 @@ function CookiePolicyPageSkeleton({ isRTL }: { isRTL: boolean }) {
         <div className="container mx-auto max-w-7xl px-4 sm:px-5">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-1 sm:gap-2">
-              <Skeleton className="w-8 h-8 rounded-lg" />
-              <Skeleton className="h-6 w-32" />
+              <div className="relative w-44 sm:w-48 h-12">
+                <Skeleton className="w-full h-full rounded" />
+              </div>
             </div>
             <Skeleton className="h-8 w-8 rounded-full" />
           </div>
@@ -98,14 +100,25 @@ export default function CookiePolicyPage() {
             <div className="flex items-center gap-1 sm:gap-2">
               <Link
                 href="/"
-                className="flex items-center gap-1 sm:gap-2 cursor-pointer"
+                aria-label={t("header.logo")}
+                className="flex items-center"
               >
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+                <div className="relative w-44 sm:w-48 h-12">
+                  <Image
+                    src="/logo-black.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="block dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/logo-white.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="hidden dark:block"
+                    priority
+                  />
                 </div>
-                <span className="text-base sm:text-xl font-semibold text-foreground">
-                  {t("header.logo")}
-                </span>
               </Link>
             </div>
             <HeaderControls />
@@ -186,7 +199,6 @@ export default function CookiePolicyPage() {
 
         {/* Timeline-based Cookie Sections */}
         <div className="relative">
-
           {/* Essential Cookies Section */}
           <div
             className={`relative flex items-start gap-3 sm:gap-5 md:gap-8 mb-16`}
@@ -215,7 +227,9 @@ export default function CookiePolicyPage() {
                   >
                     {t("cookiePolicy.sections.essential.content")}
                   </p>
-                  <div className={`bg-muted/50 rounded-lg p-4 border-primary ${isRTL ? "border-r-4" : "border-l-4"}`}>
+                  <div
+                    className={`bg-muted/50 rounded-lg p-4 border-primary ${isRTL ? "border-r-4" : "border-l-4"}`}
+                  >
                     <div className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
@@ -282,7 +296,9 @@ export default function CookiePolicyPage() {
                   >
                     {t("cookiePolicy.sections.analytics.content")}
                   </p>
-                  <div className={`bg-blue-50 rounded-lg p-4 border-blue-500 dark:bg-blue-950/20 ${isRTL ? "border-r-4" : "border-l-4"}`}>
+                  <div
+                    className={`bg-blue-50 rounded-lg p-4 border-blue-500 dark:bg-blue-950/20 ${isRTL ? "border-r-4" : "border-l-4"}`}
+                  >
                     <div className="flex items-start gap-3">
                       <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                       <div>
@@ -349,7 +365,9 @@ export default function CookiePolicyPage() {
                   >
                     {t("cookiePolicy.sections.marketing.content")}
                   </p>
-                  <div className={`bg-orange-50 dark:bg-orange-950/20 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-orange-500`}>
+                  <div
+                    className={`bg-orange-50 dark:bg-orange-950/20 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-orange-500`}
+                  >
                     <div className="flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                       <div>
@@ -416,7 +434,9 @@ export default function CookiePolicyPage() {
                   >
                     {t("cookiePolicy.sections.thirdParty.content")}
                   </p>
-                  <div className={`bg-purple-50 dark:bg-purple-950/20 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-purple-500`}>
+                  <div
+                    className={`bg-purple-50 dark:bg-purple-950/20 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-purple-500`}
+                  >
                     <div className="flex items-start gap-3">
                       <Globe className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
                       <div>
@@ -483,7 +503,9 @@ export default function CookiePolicyPage() {
                   >
                     {t("cookiePolicy.sections.management.content")}
                   </p>
-                  <div className={`bg-green-50 dark:bg-green-950/20 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-green-500`}>
+                  <div
+                    className={`bg-green-50 dark:bg-green-950/20 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-green-500`}
+                  >
                     <div className="flex items-start gap-3">
                       <Settings className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
@@ -550,7 +572,9 @@ export default function CookiePolicyPage() {
                   >
                     {t("cookiePolicy.sections.userRights.content")}
                   </p>
-                  <div className={`bg-indigo-50 dark:bg-indigo-950/20 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-indigo-500`}>
+                  <div
+                    className={`bg-indigo-50 dark:bg-indigo-950/20 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-indigo-500`}
+                  >
                     <div className="flex items-start gap-3">
                       <UserCheck className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                       <div>
@@ -614,7 +638,9 @@ export default function CookiePolicyPage() {
                   >
                     {t("cookiePolicy.sections.contact.content")}
                   </p>
-                  <div className={`bg-muted/50 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-primary}`}>
+                  <div
+                    className={`bg-muted/50 rounded-lg p-4 ${isRTL ? "border-r-4" : "border-l-4"} border-primary}`}
+                  >
                     <div className="flex items-start gap-3">
                       <Mail className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <div>

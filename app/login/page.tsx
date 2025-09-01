@@ -47,6 +47,8 @@ import { useAuth } from "@/components/auth-provider";
 import { useLanguage } from "@/components/i18n-provider";
 import { HeaderControls } from "@/components/header-controls";
 import Footer from "@/components/footer";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Extend Window interface for reCAPTCHA
 declare global {
@@ -253,8 +255,25 @@ export default function LoginPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-secondary/50 flex items-center justify-center">
-        <Loader2 className="w-5 h-5 animate-spin" />
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        <header className="bg-background/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
+          <div className="px-4 sm:px-5 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="relative w-44 sm:w-48 h-12">
+                  <Skeleton className="absolute inset-0 w-full h-full rounded-md" />
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </header>
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        </div>
       </div>
     );
   }
@@ -548,17 +567,24 @@ export default function LoginPage() {
       <header className="relative z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="px-4 sm:px-5 py-4">
           <div className="flex items-center justify-between">
-            <Link
-              href="/"
-              className={`flex items-center ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}
-            >
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+          <Link href="/" aria-label={t("header.logo")} className="flex items-center">
+              <div className="relative w-44 sm:w-48 h-12">
+              <Image
+                  src="/logo-black.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="block dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/logo-white.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="hidden dark:block"
+                  priority
+                />
               </div>
-              <span className="text-base sm:text-xl font-semibold text-foreground">
-                {t("header.logo")}
-              </span>
-            </Link>
+              </Link>
             <HeaderControls />
           </div>
         </div>

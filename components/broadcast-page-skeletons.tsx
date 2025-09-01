@@ -248,12 +248,9 @@ export function BroadcastPageSkeleton({ isRTL = false }: { isRTL?: boolean }) {
             <div className="cursor-pointer lg:hidden p-2 hover:bg-muted rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center">
               <Skeleton className="w-5 h-5" />
             </div>
-            <div
-              className={`${isRTL && "ml-2"} w-8 h-8 bg-primary rounded-lg flex items-center justify-center`}
-            >
-              <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+            <div className={`${isRTL && "ml-2"} relative w-44 sm:w-48 h-12`}>
+              <Skeleton className="w-full h-full rounded" />
             </div>
-            <Skeleton className="h-6 w-32" />
           </div>
           <Skeleton className="h-8 w-8 rounded-full" />
         </div>
@@ -268,12 +265,9 @@ export function BroadcastPageSkeleton({ isRTL = false }: { isRTL?: boolean }) {
             <div
               className={`flex items-center ${isRTL ? "space-x-reverse space-x-2" : "space-x-2"}`}
             >
-              <div
-                className={`${isRTL && "ml-2"} w-8 h-8 bg-primary rounded-lg flex items-center justify-center`}
-              >
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+              <div className={`${isRTL && "ml-2"} relative w-44 sm:w-48 h-12`}>
+                <Skeleton className="w-full h-full rounded" />
               </div>
-              <Skeleton className="h-6 w-32" />
             </div>
             <div className="space-y-2">
               {Array.from({ length: 6 }, (_, i) => (

@@ -809,7 +809,9 @@ function GeneratedImageDisplay({
             </Button>
           </div>
           <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
-            <p className="text-sm text-muted-foreground italic">&quot;{prompt}&quot;</p>
+            <p className="text-sm text-muted-foreground italic">
+              &quot;{prompt}&quot;
+            </p>
           </div>
         </div>
 
@@ -1587,14 +1589,27 @@ export default function AIImageGeneratorPage() {
             <div
               className={`flex items-center gap-1 sm:gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
             >
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
-              </div>
               <Link
                 href="/"
-                className="text-base sm:text-xl font-semibold text-foreground"
+                aria-label={t("header.logo")}
+                className="flex items-center"
               >
-                {t("header.logo")}
+                <div className="relative w-44 sm:w-48 h-12">
+                  <Image
+                    src="/logo-black.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="block dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/logo-white.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="hidden dark:block"
+                    priority
+                  />
+                </div>
               </Link>
             </div>
             <HeaderControls />

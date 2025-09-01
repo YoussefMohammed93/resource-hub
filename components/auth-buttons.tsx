@@ -15,7 +15,7 @@ export function AuthButtons() {
       className={`flex items-center gap-1 sm:gap-2 ${isRTL ? "flex-row-reverse font-tajawal" : ""}`}
     >
       {/* Login Button */}
-      <Link href="/login">
+      <Link href="/login" className="hidden sm:block">
         <Button
           variant="outline"
           size="sm"

@@ -62,6 +62,7 @@ import { AdminRouteGuard } from "@/components/admin-route-guard";
 import { cookieApi, siteApi, type CookieData, type Site } from "@/lib/api";
 import { useAuth } from "@/components/auth-provider";
 import { toast } from "sonner";
+import Image from "next/image";
 
 // Website option interface for the select dropdown
 interface WebsiteOption {
@@ -131,7 +132,9 @@ function CookiesPageSkeleton({ isRTL }: { isRTL: boolean }) {
         className={`fixed ${isRTL ? "right-0 border-l" : "left-0 border-r"} top-0 w-72 h-screen bg-background border-border z-50 hidden lg:block`}
       >
         <div className="p-6 space-y-4">
-          <Skeleton className="h-8 w-32" />
+          <div className="relative w-44 sm:w-48 h-12">
+            <Skeleton className="w-full h-full rounded" />
+          </div>
           <div className="space-y-2">
             {Array.from({ length: 6 }, (_, i) => (
               <Skeleton key={i} className="h-10 w-full rounded-lg" />
@@ -145,12 +148,14 @@ function CookiesPageSkeleton({ isRTL }: { isRTL: boolean }) {
         className={`${isRTL ? "lg:mr-72" : "lg:ml-72"} border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40`}
       >
         <div className="flex items-center justify-between px-4 sm:px-5 h-16">
-          <div
-            className={`flex items-center ${isRTL ? "space-x-reverse space-x-2" : "space-x-2"}`}
-          >
-            <Skeleton className="h-8 w-8 rounded-lg lg:hidden" />
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center lg:hidden">
-              <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+          <div className={`flex items-center ${isRTL ? "space-x-reverse space-x-2" : "space-x-2"}`}>
+            {/* Mobile Hamburger */}
+            <div className="cursor-pointer lg:hidden p-2 hover:bg-muted rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center">
+              <Skeleton className="w-5 h-5" />
+            </div>
+            {/* Logo placeholder */}
+            <div className="relative w-44 sm:w-48 h-12">
+              <Skeleton className="w-full h-full rounded" />
             </div>
           </div>
           <Skeleton className="h-8 w-8 rounded-full" />
@@ -742,10 +747,26 @@ function CookiesPageContent() {
             <Menu className="w-5 h-5 text-muted-foreground" />
           </button>
 
-          {/* Logo for mobile */}
-          <Link href="/" className="lg:hidden">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+          <Link
+            href="/"
+            aria-label={t("header.logo")}
+            className="flex items-center"
+          >
+            <div className="relative w-44 sm:w-48 h-12">
+              <Image
+                src="/logo-black.png"
+                alt={t("header.logo")}
+                fill
+                className="block dark:hidden"
+                priority
+              />
+              <Image
+                src="/logo-white.png"
+                alt={t("header.logo")}
+                fill
+                className="hidden dark:block"
+                priority
+              />
             </div>
           </Link>
 

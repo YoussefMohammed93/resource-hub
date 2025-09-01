@@ -19,16 +19,13 @@ export function DashboardHeaderSkeleton({
           <div className="cursor-pointer lg:hidden p-2 hover:bg-muted rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center">
             <Skeleton className="w-5 h-5" />
           </div>
-          <div
-            className={`${isRTL && "ml-2"} w-8 h-8 bg-primary rounded-lg flex items-center justify-center`}
-          >
-            <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+          <div className="relative w-44 sm:w-48 h-12">
+            <Skeleton className="absolute inset-0 w-full h-full rounded-md" />
           </div>
-          <Skeleton className="h-6 w-32" />
         </div>
         <div className="flex items-center space-x-3">
-          <Skeleton className="h-8 w-20" />
-          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-10 rounded-full" />
         </div>
       </div>
     </header>

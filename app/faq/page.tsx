@@ -31,6 +31,7 @@ import {
 import Link from "next/link";
 import { HeaderControls } from "@/components/header-controls";
 import Footer from "@/components/footer";
+import Image from "next/image";
 
 // FAQ Skeleton Component
 function FAQSkeleton() {
@@ -40,8 +41,9 @@ function FAQSkeleton() {
         <div className="container mx-auto max-w-7xl px-4 sm:px-5 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Skeleton className="w-8 h-8 rounded-lg" />
-              <Skeleton className="h-6 w-32" />
+              <div className="relative w-44 sm:w-48 h-12">
+                <Skeleton className="absolute inset-0 w-full h-full rounded-md" />
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <Skeleton className="h-10 w-24" />
@@ -236,18 +238,25 @@ export default function FAQPage() {
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className="flex items-center gap-1 sm:gap-2 cursor-pointer"
+              aria-label={t("header.logo")}
+              className="flex items-center"
             >
-              <div
-                className={`${isRTL && "ml-2"} w-8 h-8 bg-primary rounded-lg flex items-center justify-center`}
-              >
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+              <div className="relative w-44 sm:w-48 h-12">
+                <Image
+                  src="/logo-black.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="block dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/logo-white.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="hidden dark:block"
+                  priority
+                />
               </div>
-              <span
-                className={`text-base sm:text-xl font-semibold text-foreground ${isRTL ? "font-tajawal" : "font-sans"}`}
-              >
-                {t("header.logo")}
-              </span>
             </Link>
             <HeaderControls />
           </div>
