@@ -45,6 +45,70 @@ export default function ProfilePage() {
   // Search filter (matches ID or URL)
   const [historyQuery, setHistoryQuery] = useState<string>("");
 
+  // Sites provider metadata (for dynamic provider icons)
+  type ProviderSite = {
+    name: string;
+    url: string; // domain like example.com
+    icon?: string; // absolute or relative URL
+    external?: boolean;
+    price?: number;
+    last_reset?: string;
+  };
+  const [sites, setSites] = useState<ProviderSite[]>([]);
+  const [, setSitesError] = useState<string | null>(null);
+
+  // Fetch provider sites list once
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchSites = async () => {
+      try {
+        const res = await fetch("https://stockaty.virs.tech/v1/sites/get", {
+          signal: controller.signal,
+          headers: {
+            Accept: "application/json",
+          },
+        });
+        if (!res.ok) throw new Error(`Failed to load sites (${res.status})`);
+        const data = await res.json();
+        const list = (data?.data?.sites || []) as ProviderSite[];
+        setSites(Array.isArray(list) ? list : []);
+        setSitesError(null);
+      } catch (e: unknown) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((e as any)?.name === "AbortError") return;
+        const msg =
+          typeof e === "object" && e && "message" in e
+            ? String((e as { message?: unknown }).message)
+            : "Failed to load sites";
+        setSitesError(msg);
+      }
+    };
+    fetchSites();
+    return () => controller.abort();
+  }, []);
+
+  // Helpers to resolve icon by provider name or host
+  const normalize = (s?: string) => (s || "").trim().toLowerCase();
+  const resolveIconUrl = (icon?: string): string | undefined => {
+    if (!icon) return undefined;
+    if (/^https?:\/\//i.test(icon)) return icon;
+    // Prefix relative icons with API origin
+    return `https://stockaty.virs.tech/${icon.replace(/^\/?/, "")}`;
+  };
+  const getIconForProvider = (nameOrHost?: string): string | undefined => {
+    const key = normalize(nameOrHost);
+    if (!key) return undefined;
+    // Try exact name match
+    let site = sites.find((s) => normalize(s.name) === key);
+    if (!site) {
+      // Try host/domain match (includes for subdomains)
+      site = sites.find(
+        (s) => key.includes(normalize(s.url)) || normalize(s.url).includes(key)
+      );
+    }
+    return resolveIconUrl(site?.icon);
+  };
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -935,9 +999,9 @@ export default function ProfilePage() {
                       <thead>
                         <tr className="border-b">
                           <th
-                            className={`py-2 px-3 text-left ${isRTL ? "text-right" : "text-left"}`}
+                            className={`py-2 px-3 w-10 ${isRTL ? "text-right" : "text-left"}`}
                           >
-                            {t("profile.downloadHistory.labels.id")}
+                            {`${isRTL ? "أيقون المعرّف" : "Provider Icon"}`}
                           </th>
                           <th
                             className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
@@ -948,6 +1012,11 @@ export default function ProfilePage() {
                             className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
                           >
                             {t("profile.downloadHistory.credits")}
+                          </th>
+                          <th
+                            className={`py-2 px-3 text-left ${isRTL ? "text-right" : "text-left"}`}
+                          >
+                            {t("profile.downloadHistory.labels.id")}
                           </th>
                           <th
                             className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
@@ -968,11 +1037,24 @@ export default function ProfilePage() {
                           }
                           return (
                             <tr key={item.id ?? idx} className="border-b">
-                              <td
-                                className="py-2 px-3 font-mono text-xs max-w-[10rem] truncate"
-                                title={item.id || ""}
-                              >
-                                {item.id || "-"}
+                              <td className="py-2 px-3 min-w-[150px]">
+                                {(() => {
+                                  const iconSrc = getIconForProvider(
+                                    websiteName || item.from
+                                  );
+                                  if (!iconSrc) return null;
+                                  return (
+                                    <div className="relative w-6 h-6 sm:w-9 sm:h-9">
+                                      <Image
+                                        src={iconSrc}
+                                        alt={`${websiteName || item.from || ""} icon`}
+                                        fill
+                                        sizes="36"
+                                        className="object-contain rounded"
+                                      />
+                                    </div>
+                                  );
+                                })()}
                               </td>
                               <td className="py-2 px-3">
                                 <Badge variant="secondary">
@@ -984,6 +1066,12 @@ export default function ProfilePage() {
                                   {item.price}{" "}
                                   {t("profile.downloadHistory.credits")}
                                 </Badge>
+                              </td>
+                              <td
+                                className="py-2 px-3 font-mono text-xs max-w-[10rem] truncate"
+                                title={item.id || ""}
+                              >
+                                {item.id || "-"}
                               </td>
                               <td className="py-2 px-3 max-w-[22rem]">
                                 <a

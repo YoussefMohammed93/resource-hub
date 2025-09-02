@@ -1123,23 +1123,27 @@ export default function HomePage() {
               >
                 <Menu className="w-5 h-5 text-muted-foreground" />
               </button>
-              <Link href="/" aria-label={t("header.logo")} className="flex items-center">
-              <div className="relative w-44 sm:w-48 h-12">
-              <Image
-                  src="/logo-black.png"
-                  alt={t("header.logo")}
-                  fill
-                  className="block dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/logo-white.png"
-                  alt={t("header.logo")}
-                  fill
-                  className="hidden dark:block"
-                  priority
-                />
-              </div>
+              <Link
+                href="/"
+                aria-label={t("header.logo")}
+                className="flex items-center"
+              >
+                <div className="relative w-44 sm:w-48 h-12">
+                  <Image
+                    src="/logo-black.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="block dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/logo-white.png"
+                    alt={t("header.logo")}
+                    fill
+                    className="hidden dark:block"
+                    priority
+                  />
+                </div>
               </Link>
             </div>
             {/* Desktop Navigation Links */}
@@ -1207,7 +1211,6 @@ export default function HomePage() {
       >
         <div className="p-6 h-full overflow-y-auto">
           <div className="space-y-6">
-
             {/* Navigation Links */}
             <div className="space-y-1">
               <button
@@ -1510,7 +1513,7 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center min-h-[85vh] sm:min-h-[80vh] text-center space-y-6 sm:space-y-8 lg:space-y-12 py-8 sm:py-0">
             {/* Centered Content */}
             <div className="space-y-4 sm:space-y-6 max-w-4xl px-2 sm:px-0">
-              <h1 className="text-4xl md:text-4xl lg:text-5xl 2xl:text-6xl font-bold tracking-tight text-foreground font-sans leading-tight sm:leading-tight">
+              <h1 className="text-4xl md:text-4xl 2xl:text-6xl font-bold tracking-tight text-foreground font-sans leading-tight sm:leading-tight">
                 {t("hero.title")}{" "}
                 <span className="text-primary block sm:inline">
                   {t("hero.titleHighlight")}

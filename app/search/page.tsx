@@ -1081,9 +1081,13 @@ function SearchContent() {
       // First, try to find preferred images for this row height
       let foundPreferred = false;
 
+      // Determine maximum cards per row based on viewport width
+      // >=1750px => allow up to 6 cards; otherwise cap at 5
+      const maxPerRow = getViewportWidth() >= 1750 ? 6 : 5;
+
       for (
         let i = 0;
-        i < remainingImages.length && currentRow.length < 5;
+        i < remainingImages.length && currentRow.length < maxPerRow;
         i++
       ) {
         const result = remainingImages[i];
@@ -1150,8 +1154,8 @@ function SearchContent() {
           continue;
         }
 
-        // Stop adding if we already have 5 cards (maximum for 1600px+)
-        if (currentRow.length >= 5) {
+        // Stop adding if we already reached the maximum for this viewport
+        if (currentRow.length >= maxPerRow) {
           break;
         }
 
@@ -1167,19 +1171,19 @@ function SearchContent() {
         i = -1;
       }
 
-      // Enforce minimum 2 cards per row - no single cards allowed
+      // Enforce minimum cards per row based on viewport width
+      // >=1750px => minimum 4; >=1700px => minimum 3; otherwise minimum 2
+      const vw = getViewportWidth();
+      const minPerRow = vw >= 1750 ? 4 : vw >= 1700 ? 3 : 2;
+
+      // If nothing selected due to width checks, seed the row with at least one item
       if (currentRow.length === 0 && currentIndex < results.length) {
-        // Add the first image
         currentRow.push(results[currentIndex]);
         currentIndex++;
+      }
 
-        // MUST add a second image - no single cards allowed
-        if (currentIndex < results.length) {
-          currentRow.push(results[currentIndex]);
-          currentIndex++;
-        }
-      } else if (currentRow.length === 1 && currentIndex < results.length) {
-        // If we only have 1 card, force add another to meet minimum requirement
+      // Ensure the row meets the minimum required items when possible
+      while (currentRow.length < minPerRow && currentIndex < results.length) {
         currentRow.push(results[currentIndex]);
         currentIndex++;
       }
@@ -1278,7 +1282,7 @@ function SearchContent() {
     // Perfect fit - use actual widths
     return displayWidths.map((width) => `${width}px`).join(" ");
   };
-  
+
   // Handle image click to navigate to details
   const handleImageClick = (result: SearchResult) => {
     // Store image data in localStorage for the media page

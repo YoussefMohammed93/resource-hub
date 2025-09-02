@@ -242,8 +242,9 @@ export default function DashboardPage() {
   const [packageDaysValidity, setPackageDaysValidity] = useState<string>("");
   const [packageCredits, setPackageCredits] = useState<string>("");
   const [packageContactUrl, setPackageContactUrl] = useState<string>("");
-  const [packageSupportedSites, setPackageSupportedSites] =
-    useState<string[]>([""]);
+  const [packageSupportedSites, setPackageSupportedSites] = useState<string[]>([
+    "",
+  ]);
   const [packageNameError, setPackageNameError] = useState<string>("");
   const [packageDescriptionError, setPackageDescriptionError] =
     useState<string>("");
@@ -292,8 +293,9 @@ export default function DashboardPage() {
   const [editPackageCredits, setEditPackageCredits] = useState<string>("");
   const [editPackageContactUrl, setEditPackageContactUrl] =
     useState<string>("");
-  const [editPackageSupportedSites, setEditPackageSupportedSites] =
-    useState<string[]>([""]);
+  const [editPackageSupportedSites, setEditPackageSupportedSites] = useState<
+    string[]
+  >([""]);
   const [editPackageNameError, setEditPackageNameError] = useState<string>("");
   const [editPackageDescriptionError, setEditPackageDescriptionError] =
     useState<string>("");
@@ -5115,7 +5117,11 @@ export default function DashboardPage() {
                                 </td>
                                 <td className="py-4 px-4">
                                   <a
-                                    href={site.url.startsWith("http") ? site.url : `https://${site.url}`}
+                                    href={
+                                      site.url.startsWith("http")
+                                        ? site.url
+                                        : `https://${site.url}`
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-sm text-primary hover:text-primary/80 transition-colors flex items-center space-x-1 max-w-[200px] truncate"
@@ -5253,7 +5259,11 @@ export default function DashboardPage() {
                                   )}
                                 </div>
                                 <a
-                                  href={site.url.startsWith("http") ? site.url : `https://${site.url}`}
+                                  href={
+                                    site.url.startsWith("http")
+                                      ? site.url
+                                      : `https://${site.url}`
+                                  }
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className={`text-sm text-primary hover:text-primary/80 transition-colors flex items-center ${isRTL ? "space-x-reverse space-x-2" : "space-x-2"} p-2 bg-primary/5 rounded-lg border border-primary/10`}
@@ -5511,7 +5521,9 @@ export default function DashboardPage() {
                               className="text-sm font-medium text-foreground flex items-center"
                             >
                               <Timer className="w-4 h-4" />
-                              Days Validity
+                              {t(
+                                "dashboard.packageManagement.planDetails.validity"
+                              )}
                             </Label>
                             <Input
                               id="package-days"
@@ -5545,7 +5557,9 @@ export default function DashboardPage() {
                               className="text-sm font-medium text-foreground flex items-center"
                             >
                               <Coins className="w-4 h-4" />
-                              Credits
+                              {t(
+                                "dashboard.packageManagement.planDetails.credits"
+                              )}
                             </Label>
                             <Input
                               id="package-credits"
@@ -5614,19 +5628,73 @@ export default function DashboardPage() {
                             <Globe className="w-4 h-4" />
                             {t("dashboard.packageManagement.supportedSites")}
                           </Label>
+                          {/* Sites loading/error state */}
+                          {isLoadingSites && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-2">
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              {t("dashboard.loading")}
+                            </p>
+                          )}
+                          {!isLoadingSites && sitesError && (
+                            <div className="text-xs text-destructive flex items-center gap-2">
+                              <span>{sitesError}</span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={loadSites}
+                                className="h-6 px-2 text-xs"
+                              >
+                                {t("dashboard.siteManagement.table.retry")}
+                              </Button>
+                            </div>
+                          )}
+                          {!isLoadingSites &&
+                            !sitesError &&
+                            sites.length === 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                {t("dashboard.siteManagement.table.noData")}
+                              </p>
+                            )}
                           <div className="space-y-3">
                             {packageSupportedSites.map((site, index) => (
-                              <div key={index} className="flex items-center gap-2">
-                                <Input
-                                  value={site}
-                                  onChange={(e) => updateSupportedSite(index, e.target.value)}
-                                  placeholder={t(
-                                    "dashboard.packageManagement.placeholders.supportedSites"
-                                  )}
-                                  className="flex-1 transition-all focus-visible:ring-primary/20"
-                                />
+                              <div
+                                key={index}
+                                className="flex items-center gap-2"
+                              >
+                                <Select
+                                  value={site || undefined}
+                                  onValueChange={(val) =>
+                                    updateSupportedSite(index, val)
+                                  }
+                                >
+                                  <SelectTrigger className="flex-1 transition-all focus-visible:ring-primary/20">
+                                    <SelectValue
+                                      placeholder={t(
+                                        "dashboard.packageManagement.placeholders.supportedSites"
+                                      )}
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent className="max-h-72">
+                                    {sites.map((s) => (
+                                      <SelectItem key={s.url} value={s.url}>
+                                        <span className="flex items-center gap-2">
+                                          <img
+                                            src={s.icon}
+                                            alt={s.name || s.url}
+                                            className="w-4 h-4 rounded"
+                                            loading="lazy"
+                                          />
+                                          <span>
+                                            {s.name} ({s.url})
+                                          </span>
+                                        </span>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <div className="flex items-center gap-1">
-                                  {index === packageSupportedSites.length - 1 && (
+                                  {index ===
+                                    packageSupportedSites.length - 1 && (
                                     <Button
                                       type="button"
                                       variant="outline"
@@ -5658,11 +5726,6 @@ export default function DashboardPage() {
                               <span>{packageSupportedSitesError}</span>
                             </p>
                           )}
-                          <p className="text-xs text-muted-foreground">
-                            {t(
-                              "dashboard.packageManagement.placeholders.supportedSitesHelp"
-                            )}
-                          </p>
                         </div>
                       </div>
                       <DialogFooter>
@@ -5810,7 +5873,9 @@ export default function DashboardPage() {
                               className="text-sm font-medium text-foreground flex items-center"
                             >
                               <Timer className="w-4 h-4" />
-                              Days Validity
+                              {t(
+                                "dashboard.packageManagement.planDetails.validity"
+                              )}
                             </Label>
                             <Input
                               id="edit-package-days"
@@ -5842,7 +5907,9 @@ export default function DashboardPage() {
                               className="text-sm font-medium text-foreground flex items-center"
                             >
                               <Coins className="w-4 h-4" />
-                              Credits
+                              {t(
+                                "dashboard.packageManagement.planDetails.credits"
+                              )}
                             </Label>
                             <Input
                               id="edit-package-credits"
@@ -5907,19 +5974,73 @@ export default function DashboardPage() {
                             <Globe className="w-4 h-4" />
                             {t("dashboard.packageManagement.supportedSites")}
                           </Label>
+                          {/* Sites loading/error state */}
+                          {isLoadingSites && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-2">
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              {t("dashboard.loading")}
+                            </p>
+                          )}
+                          {!isLoadingSites && sitesError && (
+                            <div className="text-xs text-destructive flex items-center gap-2">
+                              <span>{sitesError}</span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={loadSites}
+                                className="h-6 px-2 text-xs"
+                              >
+                                {t("dashboard.siteManagement.table.retry")}
+                              </Button>
+                            </div>
+                          )}
+                          {!isLoadingSites &&
+                            !sitesError &&
+                            sites.length === 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                {t("dashboard.siteManagement.table.noData")}
+                              </p>
+                            )}
                           <div className="space-y-3">
                             {editPackageSupportedSites.map((site, index) => (
-                              <div key={index} className="flex items-center gap-2">
-                                <Input
-                                  value={site}
-                                  onChange={(e) => updateEditSupportedSite(index, e.target.value)}
-                                  placeholder={t(
-                                    "dashboard.packageManagement.placeholders.supportedSites"
-                                  )}
-                                  className="flex-1 transition-all focus-visible:ring-primary/20"
-                                />
+                              <div
+                                key={index}
+                                className="flex items-center gap-2"
+                              >
+                                <Select
+                                  value={site || undefined}
+                                  onValueChange={(val) =>
+                                    updateEditSupportedSite(index, val)
+                                  }
+                                >
+                                  <SelectTrigger className="flex-1 transition-all focus-visible:ring-primary/20">
+                                    <SelectValue
+                                      placeholder={t(
+                                        "dashboard.packageManagement.placeholders.supportedSites"
+                                      )}
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent className="max-h-72">
+                                    {sites.map((s) => (
+                                      <SelectItem key={s.url} value={s.url}>
+                                        <span className="flex items-center gap-2">
+                                          <img
+                                            src={s.icon}
+                                            alt={s.name || s.url}
+                                            className="w-4 h-4 rounded"
+                                            loading="lazy"
+                                          />
+                                          <span>
+                                            {s.name} ({s.url})
+                                          </span>
+                                        </span>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <div className="flex items-center gap-1">
-                                  {index === editPackageSupportedSites.length - 1 && (
+                                  {index ===
+                                    editPackageSupportedSites.length - 1 && (
                                     <Button
                                       type="button"
                                       variant="outline"
@@ -5935,7 +6056,9 @@ export default function DashboardPage() {
                                       type="button"
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => removeEditSupportedSite(index)}
+                                      onClick={() =>
+                                        removeEditSupportedSite(index)
+                                      }
                                       className="h-10 w-10 p-0 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
                                     >
                                       <Minus className="w-4 h-4" />
@@ -5951,11 +6074,6 @@ export default function DashboardPage() {
                               <span>{editPackageSupportedSitesError}</span>
                             </p>
                           )}
-                          <p className="text-xs text-muted-foreground">
-                            {t(
-                              "dashboard.packageManagement.placeholders.supportedSitesHelp"
-                            )}
-                          </p>
                         </div>
                       </div>
                       <DialogFooter className="flex justify-between items-center">

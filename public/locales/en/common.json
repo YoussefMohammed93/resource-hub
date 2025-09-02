@@ -621,7 +621,7 @@
       "daysValidity": "Validity Period (in days)",
       "credits": "Number of Credits",
       "contactUrl": "Contact Us URL",
-      "supportedSites": "Supported Sites (comma-separated)",
+      "supportedSites": "Supported Sites",
       "adding": "Adding Plan...",
       "updating": "Updating Plan...",
       "deleting": "Deleting Plan...",

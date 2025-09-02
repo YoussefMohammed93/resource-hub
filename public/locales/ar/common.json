@@ -621,7 +621,7 @@
       "daysValidity": "مدة الصلاحية (بالأيام)",
       "credits": "عدد النقاط",
       "contactUrl": "رابط تواصل معنا",
-      "supportedSites": "المواقع المدعومة (مفصولة بفواصل)",
+      "supportedSites": "المواقع المدعومة",
       "adding": "جاري إضافة الخطة...",
       "updating": "جاري تحديث الخطة...",
       "deleting": "جاري حذف الخطة...",
@@ -655,7 +655,7 @@
         "credits": "100",
         "contactUrl": "https://example.com/contact",
         "supportedSites": "freepik, shutterstock, adobe",
-        "supportedSitesHelp": "أدخل قائمة مفصولة بفواصل لأسماء المواقع أو النطاقات (يجب أن تطابق المواقع الموجودة)"
+        "supportedSitesHelp": "أدخل قائمة مفصولة بفواصل لأسماء المواقع أو النطاقات"
       },
       "buttons": {
         "cancel": "إلغاء",
