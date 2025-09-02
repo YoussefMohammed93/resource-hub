@@ -50,6 +50,17 @@ export function DownloadStatusIndicator({
   >(new Set());
   const [notificationCounter, setNotificationCounter] = useState(0);
 
+  // Normalize backend status variations (e.g., "in_queue") to UI statuses
+  const normalizeStatus = (status?: string): string => {
+    if (!status) return "unknown";
+    switch (status) {
+      case "in_queue":
+        return "queued";
+      default:
+        return status;
+    }
+  };
+
   // Fetch download tasks
   const fetchDownloadTasks = useCallback(async () => {
     if (!isAuthenticated) {
@@ -73,8 +84,17 @@ export function DownloadStatusIndicator({
         }
       }
 
+      // Normalize any non-standard statuses before sorting/using
+      const normalizedTasks = tasks.map((t) => ({
+        ...t,
+        progress: {
+          ...t.progress,
+          status: normalizeStatus(t.progress?.status),
+        },
+      }));
+
       // Sort tasks to show latest at the top
-      const sortedTasks = tasks.sort((a, b) => {
+      const sortedTasks = normalizedTasks.sort((a, b) => {
         // 1) Active statuses first (top): downloading, in_progress, preparing, queued, pending
         const isActive = (s?: string) =>
           s === "downloading" ||
@@ -89,24 +109,32 @@ export function DownloadStatusIndicator({
         if (!aActive && bActive) return 1;
 
         // 2) Recently downloaded (but only after active tasks)
-        const aRecentlyDownloaded = recentlyDownloadedTasks.has(a.data?.id || "");
-        const bRecentlyDownloaded = recentlyDownloadedTasks.has(b.data?.id || "");
+        const aRecentlyDownloaded = recentlyDownloadedTasks.has(
+          a.data?.id || ""
+        );
+        const bRecentlyDownloaded = recentlyDownloadedTasks.has(
+          b.data?.id || ""
+        );
         if (aRecentlyDownloaded && !bRecentlyDownloaded) return -1;
         if (!aRecentlyDownloaded && bRecentlyDownloaded) return 1;
 
         // 3) Status priority among remaining
         const statusPriority = {
+          queued: 1,
           downloading: 1,
           in_progress: 1,
           preparing: 2,
-          queued: 3,
           pending: 4,
           completed: 5,
           failed: 6,
         } as const;
 
-        const aPriority = statusPriority[a.progress?.status as keyof typeof statusPriority] ?? 7;
-        const bPriority = statusPriority[b.progress?.status as keyof typeof statusPriority] ?? 7;
+        const aPriority =
+          statusPriority[a.progress?.status as keyof typeof statusPriority] ??
+          7;
+        const bPriority =
+          statusPriority[b.progress?.status as keyof typeof statusPriority] ??
+          7;
         if (aPriority !== bPriority) return aPriority - bPriority;
 
         // Then sort by creation time (newest first)
@@ -144,14 +172,37 @@ export function DownloadStatusIndicator({
   useEffect(() => {
     if (isAuthenticated) {
       fetchDownloadTasks();
-
-      // Set up continuous polling to catch new tasks immediately
-      const interval = setInterval(() => {
-        fetchDownloadTasks();
-      }, 2000); // Poll every 2 seconds to catch new tasks quickly
-
-      return () => clearInterval(interval);
+      // No cleanup needed here
+      return () => {};
     }
+  }, [isAuthenticated, fetchDownloadTasks]);
+
+  // Poll while there are active tasks to keep progress fresh
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (!hasActiveDownloads) return;
+
+    const id = setInterval(() => {
+      fetchDownloadTasks();
+    }, 4000);
+    return () => clearInterval(id);
+  }, [isAuthenticated, hasActiveDownloads, fetchDownloadTasks]);
+
+  // Refresh when window regains focus or tab becomes visible
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const onFocus = () => fetchDownloadTasks();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") fetchDownloadTasks();
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [isAuthenticated, fetchDownloadTasks]);
 
   // Listen for custom events when new download tasks are created
@@ -166,7 +217,7 @@ export function DownloadStatusIndicator({
         setTimeout(() => setShowAttentionAnimation(false), 3000);
 
         // Increment notification counter
-        setNotificationCounter(prev => prev + 1);
+        setNotificationCounter((prev) => prev + 1);
 
         // Store task details for later credit deduction
         const { taskId, sitePrice } = event.detail;
@@ -175,25 +226,17 @@ export function DownloadStatusIndicator({
         }
       };
 
-      const handleStorageChange = () => {
-        fetchDownloadTasks();
-      };
-
       // Listen for custom event from download verification sheet
       window.addEventListener(
         "downloadTaskCreated",
         handleTaskCreated as EventListener
       );
-      window.addEventListener("storage", handleStorageChange);
-      window.addEventListener("focus", handleStorageChange);
 
       return () => {
         window.removeEventListener(
           "downloadTaskCreated",
           handleTaskCreated as EventListener
         );
-        window.removeEventListener("storage", handleStorageChange);
-        window.removeEventListener("focus", handleStorageChange);
       };
     }
   }, [isAuthenticated, fetchDownloadTasks]);
@@ -230,7 +273,7 @@ export function DownloadStatusIndicator({
       case "preparing":
         return t("download.indicator.status.preparing", "Preparing");
       case "queued":
-        return t("download.indicator.status.queued", "Queued");
+        return t("download.indicator.status.queued", "In queue");
       default:
         return t("download.indicator.status.unknown", "Unknown");
     }
@@ -248,9 +291,9 @@ export function DownloadStatusIndicator({
       case "preparing":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
       case "queued":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+        return "bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 border border-border";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 border border-border";
     }
   };
 
@@ -265,7 +308,8 @@ export function DownloadStatusIndicator({
       task.progress.status === "downloading" ||
       task.progress.status === "in_progress" ||
       task.progress.status === "preparing" ||
-      task.progress.status === "queued"
+      task.progress.status === "queued" ||
+      task.progress.status === "pending"
   ).length;
 
   // Handle popover open/close
@@ -274,6 +318,10 @@ export function DownloadStatusIndicator({
     // Reset notification counter when user opens the popover
     if (open && notificationCounter > 0) {
       setNotificationCounter(0);
+    }
+    // Fetch latest tasks immediately when opened
+    if (open) {
+      fetchDownloadTasks();
     }
   };
 
@@ -304,7 +352,7 @@ export function DownloadStatusIndicator({
           {notificationCounter > 0 && (
             <div className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
               <span className="text-xs font-bold text-white">
-                {notificationCounter > 9 ? '9+' : notificationCounter}
+                {notificationCounter > 9 ? "9+" : notificationCounter}
               </span>
             </div>
           )}
@@ -387,17 +435,28 @@ export function DownloadStatusIndicator({
 
                       {(task.progress.status === "downloading" ||
                         task.progress.status === "in_progress" ||
-                        task.progress.status === "preparing") && (
+                        task.progress.status === "preparing" ||
+                        task.progress.status === "queued" ||
+                        task.progress.status === "pending") && (
                         <div className="space-y-1">
                           <Progress
-                            value={task.progress.progress}
+                            value={
+                              typeof task.progress.progress === "number"
+                                ? task.progress.progress
+                                : 0
+                            }
                             className="h-1.5"
                           />
                           <p className="text-xs text-muted-foreground">
                             {t(
                               "download.indicator.progress.percentage",
                               "{{percent}}%",
-                              { percent: task.progress.progress }
+                              {
+                                percent:
+                                  typeof task.progress.progress === "number"
+                                    ? task.progress.progress
+                                    : 0,
+                              }
                             )}
                           </p>
                         </div>

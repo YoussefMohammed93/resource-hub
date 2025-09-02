@@ -857,13 +857,13 @@
       },
       "noDownloads": "No downloads yet.",
       "loadMore": "Load More Downloads",
-      "credits": "credits",
+      "credits": "Credits",
       "labels": {
-        "id": "ID",
+        "id": "File ID",
         "date": "Date",
         "url": "URL",
         "openOn": "Open on {{website}}",
-        "website": "website"
+        "website": "Website"
       },
       "types": {
         "image": "image",

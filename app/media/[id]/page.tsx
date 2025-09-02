@@ -111,6 +111,36 @@ export default function ImageDetailsPage() {
     return providerMapping[providerName] || providerName;
   }, []);
 
+  // Get best available natural dimensions and src for display
+  const getNaturalMedia = useCallback((): {
+    src: string;
+    width: number | null;
+    height: number | null;
+  } => {
+    const src = fileData?.high_resolution?.src || imageData?.thumbnail || "";
+    let w: number | null = null;
+    let h: number | null = null;
+
+    const hr = fileData?.high_resolution;
+    if (hr && hr.width && hr.height) {
+      const numW = typeof hr.width === "string" ? parseInt(hr.width, 10) : hr.width;
+      const numH = typeof hr.height === "string" ? parseInt(hr.height, 10) : hr.height;
+      if (!isNaN(numW as number) && !isNaN(numH as number)) {
+        w = numW as number;
+        h = numH as number;
+      }
+    }
+    if (w == null || h == null) {
+      const iw = imageData?.width ?? null;
+      const ih = imageData?.height ?? null;
+      if (iw && ih) {
+        w = iw;
+        h = ih;
+      }
+    }
+    return { src, width: w, height: h };
+  }, [fileData, imageData]);
+
   // Fetch enhanced provider data
   const fetchProviderData = useCallback(
     async (mediaData: SearchResult) => {
@@ -973,7 +1003,7 @@ export default function ImageDetailsPage() {
         className={`min-h-screen bg-background font-sans ${isRTL ? "font-tajawal" : ""}`}
       >
         <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-          <div className="media-header mx-auto max-w-7xl px-4 sm:px-5">
+          <div className="media-header mx-auto px-4 sm:px-5">
             <div className="flex items-center justify-between h-16">
               <div
                 className={`flex items-center gap-1 sm:gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
@@ -1031,7 +1061,7 @@ export default function ImageDetailsPage() {
     >
       {/* Header */}
       <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="media-header mx-auto max-w-7xl px-4 sm:px-5">
+        <div className="media-header mx-auto px-4 sm:px-5">
           <div className="flex items-center justify-between h-16">
             <div
               className={`flex items-center gap-1 sm:gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
@@ -1262,7 +1292,7 @@ export default function ImageDetailsPage() {
           </div>
         </div>
 
-        <main className="mx-auto max-w-7xl media-page px-4 sm:px-5 py-6 relative z-10">
+        <main className="w-full mx-auto max-w-[1800px] media-page px-4 sm:px-5 py-6 relative z-10">
           {/* Back Button */}
           <div className="mb-6">
             <Button
@@ -2063,120 +2093,128 @@ export default function ImageDetailsPage() {
                       isValidVideoUrl(
                         fileData?.high_resolution?.src || imageData.thumbnail
                       ) ? (
-                      <video
-                        key={
-                          fileData?.high_resolution?.src || imageData.thumbnail
-                        }
-                        className="w-full h-full object-contain rounded-lg"
-                        poster={imageData.poster || "/placeholder.png"}
-                        controls
-                        controlsList="nodownload"
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        crossOrigin="anonymous"
-                        style={{
-                          maxHeight: "650px",
-                          width: "100%",
-                          height: "auto",
-                        }}
-                        onLoadedData={async (e) => {
-                          const video = e.target as HTMLVideoElement;
-                          setIsVideoLoading(false);
-                          try {
-                            video.currentTime = 1;
-                            await new Promise((resolve) => {
-                              video.onseeked = resolve;
-                            });
-                            const thumbnailUrl =
-                              await generateVideoThumbnail(video);
-                            video.poster = thumbnailUrl;
-                          } catch (error) {
-                            console.warn(
-                              "Failed to generate video thumbnail:",
-                              error
-                            );
-                          }
-                        }}
-                        onError={(e) => {
-                          console.warn("Video load error, showing as image");
-                          setIsVideoLoading(false);
-                          const video = e.target as HTMLVideoElement;
-                          video.style.display = "none";
-                          const container = video.parentElement;
-                          if (container) {
-                            const fallbackImg = document.createElement("img");
-                            fallbackImg.src = imageData.thumbnail;
-                            fallbackImg.alt = imageData.title;
-                            fallbackImg.className =
-                              "w-full h-full object-contain max-h-[65vh]";
-                            container.appendChild(fallbackImg);
-                          }
-                        }}
-                        onCanPlay={() => {
-                          console.log("Video can start playing");
-                          setIsVideoLoading(false);
-                        }}
-                        onLoadStart={() => {
-                          console.log("Video load started");
-                          setIsVideoLoading(true);
-                        }}
-                        onWaiting={() => {
-                          setIsVideoLoading(true);
-                        }}
-                        onPlaying={() => {
-                          setIsVideoLoading(false);
-                        }}
-                      >
-                        {/* Multiple source elements for better browser compatibility */}
-                        <source
-                          src={
-                            fileData?.high_resolution?.src ||
-                            imageData.thumbnail
-                          }
-                          type={getVideoMimeType(
-                            fileData?.high_resolution?.src ||
-                              imageData.thumbnail
-                          )}
-                        />
-                        {/* Fallback message for browsers that don't support video */}
-                        <p className="text-muted-foreground text-center p-4">
-                          Your browser does not support the video tag.
-                          <a
-                            href={
-                              fileData?.high_resolution?.src ||
-                              imageData.thumbnail
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline ml-1"
+                      (() => {
+                        const natural = getNaturalMedia();
+                        const natW = natural.width || undefined;
+                        const natH = natural.height || undefined;
+                        return (
+                          <video
+                            key={fileData?.high_resolution?.src || imageData.thumbnail}
+                            poster={imageData.poster || "/placeholder.png"}
+                            controls
+                            controlsList="nodownload"
+                            muted
+                            loop
+                            playsInline
+                            preload="metadata"
+                            crossOrigin="anonymous"
+                            width={natW}
+                            height={natH}
+                            style={{
+                              maxHeight: "650px",
+                              maxWidth: "100%",
+                              width: natW ? `${natW}px` : "auto",
+                              height: natH ? `${natH}px` : "auto",
+                              borderRadius: "0.5rem",
+                              objectFit: "contain",
+                            }}
+                            onLoadedData={async (e) => {
+                              const video = e.target as HTMLVideoElement;
+                              setIsVideoLoading(false);
+                              try {
+                                video.currentTime = 1;
+                                await new Promise((resolve) => {
+                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                  video.onseeked = resolve as any;
+                                });
+                                const thumbnailUrl = await generateVideoThumbnail(video);
+                                video.poster = thumbnailUrl;
+                              } catch (error) {
+                                console.warn("Failed to generate video thumbnail:", error);
+                              }
+                            }}
+                            onError={(e) => {
+                              console.warn("Video load error, showing as image");
+                              setIsVideoLoading(false);
+                              const video = e.target as HTMLVideoElement;
+                              video.style.display = "none";
+                              const container = video.parentElement;
+                              if (container) {
+                                const fallbackImg = document.createElement("img");
+                                const natural = getNaturalMedia();
+                                fallbackImg.src = imageData.thumbnail;
+                                fallbackImg.alt = imageData.title;
+                                fallbackImg.style.maxHeight = "650px";
+                                fallbackImg.style.maxWidth = "100%";
+                                if (natural.width) fallbackImg.width = natural.width;
+                                if (natural.height) fallbackImg.height = natural.height;
+                                fallbackImg.className = "rounded-lg";
+                                container.appendChild(fallbackImg);
+                              }
+                            }}
+                            onCanPlay={() => {
+                              setIsVideoLoading(false);
+                            }}
+                            onLoadStart={() => {
+                              setIsVideoLoading(true);
+                            }}
+                            onWaiting={() => {
+                              setIsVideoLoading(true);
+                            }}
+                            onPlaying={() => {
+                              setIsVideoLoading(false);
+                            }}
                           >
-                            Download the video
-                          </a>
-                        </p>
-                      </video>
+                            {/* Multiple source elements for better browser compatibility */}
+                            <source
+                              src={fileData?.high_resolution?.src || imageData.thumbnail}
+                              type={getVideoMimeType(
+                                fileData?.high_resolution?.src || imageData.thumbnail
+                              )}
+                            />
+                            {/* Fallback message for browsers that don't support video */}
+                            <p className="text-muted-foreground text-center p-4">
+                              Your browser does not support the video tag.
+                              <a
+                                href={fileData?.high_resolution?.src || imageData.thumbnail}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline ml-1"
+                              >
+                                Download the video
+                              </a>
+                            </p>
+                          </video>
+                        );
+                      })()
                     ) : (
-                      <img
-                        key={
-                          fileData?.high_resolution?.src || imageData.thumbnail
-                        }
-                        src={
-                          fileData?.high_resolution?.src || imageData.thumbnail
-                        }
-                        alt={imageData.title}
-                        className="w-full h-full object-contain cursor-pointer hover:scale-[1.02] transition-transform duration-300"
-                        style={{
-                          maxHeight: "650px",
-                          width: "100%",
-                          height: "auto",
-                        }}
-                        onClick={() => setIsFullImageOpen(true)}
-                        onError={(e) => {
-                          const img = e.target as HTMLImageElement;
-                          img.src = "/placeholder.png";
-                        }}
-                      />
+                      (() => {
+                        const natural = getNaturalMedia();
+                        const natW = natural.width || undefined;
+                        const natH = natural.height || undefined;
+                        return (
+                          <img
+                            key={fileData?.high_resolution?.src || imageData.thumbnail}
+                            src={fileData?.high_resolution?.src || imageData.thumbnail}
+                            alt={imageData.title}
+                            width={natW}
+                            height={natH}
+                            className="cursor-pointer transition-transform duration-300"
+                            style={{
+                              maxHeight: "650px",
+                              maxWidth: "100%",
+                              width: natW ? `${natW}px` : "auto",
+                              height: natH ? `${natH}px` : "auto",
+                              objectFit: "contain",
+                            }}
+                            onClick={() => setIsFullImageOpen(true)}
+                            onError={(e) => {
+                              const img = e.target as HTMLImageElement;
+                              img.src = "/placeholder.png";
+                            }}
+                          />
+                        );
+                      })()
                     )}
                   </div>
                 </div>

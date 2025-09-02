@@ -9,7 +9,6 @@ import {
   Eye,
   PhoneCall,
   Menu,
-  X,
   Cat,
   Check,
   Zap,
@@ -73,7 +72,6 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/i18n-provider";
 import { HeaderControls } from "@/components/header-controls";
-import { ImageSearchDialog } from "@/components/image-search-dialog";
 import { DownloadVerificationSheet } from "@/components/download-verification-sheet";
 import { publicApi, type PricingPlan, type Site } from "@/lib/api";
 import { useAnimatedCounter } from "@/hooks/use-animated-counter";
@@ -707,7 +705,6 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchType, setSearchType] = useState("all");
-  const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [isDownloadSheetOpen, setIsDownloadSheetOpen] = useState(false);
@@ -1209,29 +1206,7 @@ export default function HomePage() {
         }`}
       >
         <div className="p-6 h-full overflow-y-auto">
-          {/* Mobile Close Button */}
-          <div
-            className={`absolute right-6 top-5 ${isRTL && "left-6 right-auto"}`}
-          >
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="cursor-pointer p-2 hover:bg-muted rounded-lg transition-colors min-h-[33px] min-w-[33px] flex items-center justify-center"
-              aria-label="Close navigation menu"
-            >
-              <X className="w-5 h-5 text-muted-foreground" />
-            </button>
-          </div>
-
           <div className="space-y-6">
-            {/* Logo Section */}
-            <div className="flex items-center space-x-2 pb-4 border-b border-border">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
-              </div>
-              <span className="text-lg font-semibold text-foreground">
-                {t("header.logo")}
-              </span>
-            </div>
 
             {/* Navigation Links */}
             <div className="space-y-1">
@@ -1646,17 +1621,6 @@ export default function HomePage() {
                       </>
                     )}
                   </Button>
-                  <Button
-                    onClick={() => setIsImageSearchOpen(true)}
-                    variant="outline"
-                    disabled={isSearching}
-                    className="w-full py-7 px-6 text-base font-semibold rounded-xl border-2 border-border hover:border-primary/50 min-h-[3.5rem] touch-manipulation flex flex-row gap-3 items-center justify-center disabled:opacity-50"
-                  >
-                    <ImageIcon className="w-5 h-5" />
-                    <span className="text-base font-medium">
-                      {t("hero.imageSearch.buttonText")}
-                    </span>
-                  </Button>
                 </div>
               </div>
               {/* Desktop Layout */}
@@ -1759,18 +1723,6 @@ export default function HomePage() {
                     )}
                   </Button>
                 </div>
-                {/* Image Search Button */}
-                <Button
-                  onClick={() => setIsImageSearchOpen(true)}
-                  variant="outline"
-                  disabled={isSearching}
-                  className="!px-5 border-2 border-border hover:border-primary/50 flex flex-col gap-2 h-auto min-h-12 2xl:min-h-20 disabled:opacity-50"
-                >
-                  <ImageIcon className="!w-6 !h-6" />
-                  <span className="text-xs font-medium">
-                    {t("hero.imageSearch.buttonText")}
-                  </span>
-                </Button>
               </div>
 
               {/* Error Display for Desktop */}
@@ -1807,16 +1759,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-
-        {/* Image Search Dialog */}
-        <ImageSearchDialog
-          open={isImageSearchOpen}
-          onOpenChange={setIsImageSearchOpen}
-          onImageUpload={(file) => {
-            console.log("Image uploaded:", file.name);
-            // Handle image upload logic here
-          }}
-        />
 
         {/* Download Verification Sheet */}
         <DownloadVerificationSheet

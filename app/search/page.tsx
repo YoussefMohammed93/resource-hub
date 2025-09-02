@@ -869,404 +869,419 @@ function SearchContent() {
     );
   };
 
-  // Create dynamic grid rows based on actual image dimensions and aspect ratios
+  // Advanced masonry grid with truly varied row heights
   const createDynamicGridRows = (results: SearchResult[]) => {
-    const rows: SearchResult[][] = [];
+    const rows: { items: SearchResult[]; height: number }[] = [];
     let currentIndex = 0;
 
-    while (currentIndex < results.length) {
-      const currentRow: SearchResult[] = [];
-      let totalWidth = 0;
-      const containerWidth = 100; // Percentage-based container width
-      const maxItemsPerRow = 6;
+    // Get viewport width for container calculations
+    const getViewportWidth = () => {
+      if (typeof window !== "undefined") {
+        return window.innerWidth;
+      }
+      return 1200; // fallback
+    };
 
-      // Build row by filling available space optimally
+    // Calculate available width for images (accounting for sidebar, padding, gaps)
+    const getAvailableWidth = () => {
+      const viewportWidth = getViewportWidth();
+      const sidebarWidth = viewportWidth >= 1024 ? 320 : 0; // lg breakpoint
+      const containerPadding = 40; // px-5 on both sides
+      const availableWidth = viewportWidth - sidebarWidth - containerPadding;
+      return Math.max(600, availableWidth); // minimum 600px
+    };
+
+    const availableWidth = getAvailableWidth();
+    const gapSize = 20; // gap between items
+
+    // Define varied row height patterns
+    const getRowHeightPattern = (rowIndex: number) => {
+      const viewportWidth = getViewportWidth();
+      let heightPatterns: number[];
+
+      if (viewportWidth >= 1600) {
+        heightPatterns = [500, 200, 350, 250, 400, 180, 300, 220, 450, 160];
+      } else if (viewportWidth >= 1200) {
+        heightPatterns = [400, 180, 300, 220, 350, 160, 280, 200, 380, 140];
+      } else {
+        heightPatterns = [350, 160, 250, 200, 300, 140, 240, 180, 320, 120];
+      }
+
+      return heightPatterns[rowIndex % heightPatterns.length];
+    };
+
+    // Calculate natural height for an image
+    const getNaturalHeight = (result: SearchResult) => {
+      const dimensions = getFallbackDimensions(result);
+      return dimensions.height;
+    };
+
+    // Check if an image is suitable for a specific row height
+    const isImageSuitableForRowHeight = (
+      result: SearchResult,
+      targetRowHeight: number
+    ) => {
+      const naturalHeight = getNaturalHeight(result);
+
+      // Calculate scaling factor needed
+      const scaleFactor = targetRowHeight / naturalHeight;
+
+      // Image is suitable if scaling isn't too extreme
+      // Allow more flexibility for better grouping
+      const isScaleReasonable = scaleFactor >= 0.2 && scaleFactor <= 5.0;
+
+      // Prefer images that don't need extreme scaling
+      const isPreferred = scaleFactor >= 0.5 && scaleFactor <= 2.0;
+
+      return {
+        suitable: isScaleReasonable,
+        preferred: isPreferred,
+        scaleFactor,
+      };
+    };
+
+    // Calculate optimal row height based on the images actually in the row
+    const calculateOptimalRowHeight = (
+      rowItems: SearchResult[],
+      targetRowHeight: number
+    ) => {
+      if (rowItems.length === 0) return targetRowHeight;
+
+      const viewportWidth = getViewportWidth();
+
+      // Get the first image's natural height as base
+      const firstImage = rowItems[0];
+      const firstDimensions = getFallbackDimensions(firstImage);
+      const baseHeight = firstDimensions.height;
+
+      // Calculate average aspect ratio of all images in row
+      const totalAspectRatio = rowItems.reduce((sum, item) => {
+        const dimensions = getFallbackDimensions(item);
+        return sum + dimensions.width / dimensions.height;
+      }, 0);
+      const avgAspectRatio = totalAspectRatio / rowItems.length;
+
+      // Create truly varied heights based on image content and viewport
+      let optimalHeight: number;
+
+      // Enhanced height calculation for better variety
+      if (baseHeight >= 800) {
+        // Very tall images
+        if (viewportWidth >= 1800) {
+          optimalHeight = 500;
+        } else if (viewportWidth >= 1600) {
+          optimalHeight = 450;
+        } else if (viewportWidth >= 1200) {
+          optimalHeight = 400;
+        } else {
+          optimalHeight = 350;
+        }
+      } else if (baseHeight >= 600) {
+        // Tall images
+        if (viewportWidth >= 1800) {
+          optimalHeight = 400;
+        } else if (viewportWidth >= 1600) {
+          optimalHeight = 380;
+        } else if (viewportWidth >= 1200) {
+          optimalHeight = 350;
+        } else {
+          optimalHeight = 320;
+        }
+      } else if (baseHeight >= 400) {
+        // Medium-tall images
+        if (viewportWidth >= 1800) {
+          optimalHeight = 320;
+        } else if (viewportWidth >= 1600) {
+          optimalHeight = 300;
+        } else if (viewportWidth >= 1200) {
+          optimalHeight = 280;
+        } else {
+          optimalHeight = 250;
+        }
+      } else if (baseHeight >= 250) {
+        // Medium images
+        if (viewportWidth >= 1800) {
+          optimalHeight = 280;
+        } else if (viewportWidth >= 1600) {
+          optimalHeight = 260;
+        } else if (viewportWidth >= 1200) {
+          optimalHeight = 240;
+        } else {
+          optimalHeight = 220;
+        }
+      } else if (baseHeight >= 150) {
+        // Small-medium images
+        if (viewportWidth >= 1800) {
+          optimalHeight = 240;
+        } else if (viewportWidth >= 1600) {
+          optimalHeight = 220;
+        } else if (viewportWidth >= 1200) {
+          optimalHeight = 200;
+        } else {
+          optimalHeight = 180;
+        }
+      } else {
+        // Small images
+        if (viewportWidth >= 1800) {
+          optimalHeight = 200;
+        } else if (viewportWidth >= 1600) {
+          optimalHeight = 180;
+        } else if (viewportWidth >= 1200) {
+          optimalHeight = 160;
+        } else {
+          optimalHeight = 140;
+        }
+      }
+
+      // Adjust based on average aspect ratio for more variety
+      if (avgAspectRatio > 2.5) {
+        // Very wide images - significantly reduce height
+        optimalHeight *= 0.7;
+      } else if (avgAspectRatio > 1.8) {
+        // Wide images - reduce height
+        optimalHeight *= 0.85;
+      } else if (avgAspectRatio < 0.6) {
+        // Very tall images - significantly increase height
+        optimalHeight *= 1.3;
+      } else if (avgAspectRatio < 0.9) {
+        // Tall images - increase height
+        optimalHeight *= 1.15;
+      }
+
+      // Ensure reasonable bounds with better variety
+      const minHeight =
+        viewportWidth >= 1800
+          ? 180
+          : viewportWidth >= 1600
+            ? 160
+            : viewportWidth >= 1200
+              ? 140
+              : 120;
+      const maxHeight =
+        viewportWidth >= 1800
+          ? 550
+          : viewportWidth >= 1600
+            ? 500
+            : viewportWidth >= 1200
+              ? 450
+              : 400;
+
+      return Math.round(
+        Math.max(minHeight, Math.min(maxHeight, optimalHeight))
+      );
+    };
+
+    while (currentIndex < results.length) {
+      const rowIndex = rows.length;
+      const targetRowHeight = getRowHeightPattern(rowIndex);
+      const currentRow: SearchResult[] = [];
+      let totalWidthUsed = 0;
+      let remainingImages = results.slice(currentIndex);
+
+      // First, try to find preferred images for this row height
+      let foundPreferred = false;
+
       for (
-        let i = currentIndex;
-        i < results.length && currentRow.length < maxItemsPerRow;
+        let i = 0;
+        i < remainingImages.length && currentRow.length < 5;
         i++
       ) {
-        const result = results[i];
-        const dimensions = getFallbackDimensions(result);
-        let aspectRatio = dimensions.width / dimensions.height;
+        const result = remainingImages[i];
+        const suitability = isImageSuitableForRowHeight(
+          result,
+          targetRowHeight
+        );
 
-        // Force PNG files to have 1:1 aspect ratio (except wide PNGs > 420px)
+        if (!suitability.suitable) continue;
+
+        // For the first image, prefer images that fit well with this row height
+        if (
+          currentRow.length === 0 &&
+          !suitability.preferred &&
+          !foundPreferred
+        ) {
+          // Look ahead to see if there are better matches
+          const hasPreferredLater = remainingImages
+            .slice(i + 1, i + 10)
+            .some(
+              (img) =>
+                isImageSuitableForRowHeight(img, targetRowHeight).preferred
+            );
+          if (hasPreferredLater) continue;
+        }
+
+        const dimensions = getFallbackDimensions(result);
+        let actualWidth = dimensions.width;
+        let actualHeight = dimensions.height;
+
+        // Handle PNG special cases
         const isPNG =
           result.file_type === "PNG" ||
           (result.file_type === "image" &&
             result.thumbnail?.toLowerCase().includes(".png")) ||
           result.thumbnail?.toLowerCase().endsWith(".png");
-        const apiWidth = parseInt(String(result.width)) || dimensions.width;
-        const isWidePNG = isPNG && apiWidth > 420;
+        const isWidePNG = isPNG && actualWidth > 420;
+
         if (isPNG && !isWidePNG) {
-          aspectRatio = 1.0;
+          const size = Math.max(actualWidth, actualHeight);
+          actualWidth = size;
+          actualHeight = size;
         }
 
-        // Calculate relative width based on aspect ratio
-        // Ultra-granular aspect ratio classification for perfect proportional sizing
-        let relativeWidth;
-        if (aspectRatio >= 8.0) {
-          relativeWidth = 60; // Extreme panoramic banners
-        } else if (aspectRatio >= 7.0) {
-          relativeWidth = 58; // Ultra wide banners
-        } else if (aspectRatio >= 6.0) {
-          relativeWidth = 56; // Super wide banners
-        } else if (aspectRatio >= 5.5) {
-          relativeWidth = 54; // Very wide banners
-        } else if (aspectRatio >= 5.0) {
-          relativeWidth = 52; // Wide banners
-        } else if (aspectRatio >= 4.5) {
-          relativeWidth = 51; // Panoramic ultra wide
-        } else if (aspectRatio >= 4.0) {
-          relativeWidth = 50; // Ultra wide panoramic
-        } else if (aspectRatio >= 3.8) {
-          relativeWidth = 49; // Very wide panoramic
-        } else if (aspectRatio >= 3.6) {
-          relativeWidth = 48; // Wide panoramic
-        } else if (aspectRatio >= 3.4) {
-          relativeWidth = 47; // Panoramic landscape
-        } else if (aspectRatio >= 3.2) {
-          relativeWidth = 46; // Extra wide landscape
-        } else if (aspectRatio >= 3.0) {
-          relativeWidth = 45; // Very wide landscape
-        } else if (aspectRatio >= 2.9) {
-          relativeWidth = 44; // Wide landscape plus
-        } else if (aspectRatio >= 2.8) {
-          relativeWidth = 43; // Wide landscape
-        } else if (aspectRatio >= 2.7) {
-          relativeWidth = 42; // Standard wide plus
-        } else if (aspectRatio >= 2.6) {
-          relativeWidth = 41; // Standard wide
-        } else if (aspectRatio >= 2.5) {
-          relativeWidth = 40; // Medium wide plus
-        } else if (aspectRatio >= 2.4) {
-          relativeWidth = 39; // Medium wide
-        } else if (aspectRatio >= 2.3) {
-          relativeWidth = 38; // Landscape wide
-        } else if (aspectRatio >= 2.2) {
-          relativeWidth = 37; // Landscape medium
-        } else if (aspectRatio >= 2.1) {
-          relativeWidth = 36; // Landscape standard
-        } else if (aspectRatio >= 2.0) {
-          relativeWidth = 35; // Classic wide
-        } else if (aspectRatio >= 1.95) {
-          relativeWidth = 34; // Nearly 2:1
-        } else if (aspectRatio >= 1.9) {
-          relativeWidth = 33; // Wide landscape
-        } else if (aspectRatio >= 1.85) {
-          relativeWidth = 32; // Medium landscape plus
-        } else if (aspectRatio >= 1.8) {
-          relativeWidth = 31; // Medium landscape
-        } else if (aspectRatio >= 1.75) {
-          relativeWidth = 30; // Landscape mild plus
-        } else if (aspectRatio >= 1.7) {
-          relativeWidth = 29; // Landscape mild
-        } else if (aspectRatio >= 1.65) {
-          relativeWidth = 28; // Slightly wide plus
-        } else if (aspectRatio >= 1.6) {
-          relativeWidth = 27; // Slightly wide
-        } else if (aspectRatio >= 1.55) {
-          relativeWidth = 26; // Classic landscape plus
-        } else if (aspectRatio >= 1.5) {
-          relativeWidth = 25; // Classic landscape
-        } else if (aspectRatio >= 1.45) {
-          relativeWidth = 24; // Mild landscape plus
-        } else if (aspectRatio >= 1.4) {
-          relativeWidth = 23; // Mild landscape
-        } else if (aspectRatio >= 1.35) {
-          relativeWidth = 22; // Light landscape plus
-        } else if (aspectRatio >= 1.3) {
-          relativeWidth = 21; // Light landscape
-        } else if (aspectRatio >= 1.25) {
-          relativeWidth = 20; // Subtle landscape plus
-        } else if (aspectRatio >= 1.2) {
-          relativeWidth = 19; // Subtle landscape
-        } else if (aspectRatio >= 1.15) {
-          relativeWidth = 18; // Nearly square wide plus
-        } else if (aspectRatio >= 1.1) {
-          relativeWidth = 17; // Nearly square wide
-        } else if (aspectRatio >= 1.05) {
-          relativeWidth = 16; // Almost square wide
-        } else if (aspectRatio >= 1.0) {
-          relativeWidth = 15; // Perfect square
-        } else if (aspectRatio >= 0.95) {
-          relativeWidth = 14; // Almost square tall
-        } else if (aspectRatio >= 0.9) {
-          relativeWidth = 13; // Nearly square tall
-        } else if (aspectRatio >= 0.85) {
-          relativeWidth = 12; // Nearly square tall plus
-        } else if (aspectRatio >= 0.8) {
-          relativeWidth = 11; // Subtle portrait
-        } else if (aspectRatio >= 0.75) {
-          relativeWidth = 10; // Subtle portrait plus
-        } else if (aspectRatio >= 0.7) {
-          relativeWidth = 9; // Light portrait
-        } else if (aspectRatio >= 0.65) {
-          relativeWidth = 8; // Light portrait plus
-        } else if (aspectRatio >= 0.6) {
-          relativeWidth = 7; // Standard portrait
-        } else if (aspectRatio >= 0.55) {
-          relativeWidth = 6; // Standard portrait plus
-        } else if (aspectRatio >= 0.5) {
-          relativeWidth = 5; // Tall portrait
-        } else if (aspectRatio >= 0.45) {
-          relativeWidth = 4; // Tall portrait plus
-        } else if (aspectRatio >= 0.4) {
-          relativeWidth = 3; // Very tall portrait
-        } else if (aspectRatio >= 0.35) {
-          relativeWidth = 2; // Very tall portrait plus
-        } else if (aspectRatio >= 0.3) {
-          relativeWidth = 1; // Extra tall portrait
-        } else if (aspectRatio >= 0.25) {
-          relativeWidth = 0.8; // Ultra tall portrait
-        } else if (aspectRatio >= 0.2) {
-          relativeWidth = 0.6; // Extremely tall portrait
-        } else if (aspectRatio >= 0.15) {
-          relativeWidth = 0.4; // Super narrow vertical
-        } else if (aspectRatio >= 0.1) {
-          relativeWidth = 0.3; // Ultra narrow vertical
-        } else if (aspectRatio >= 0.08) {
-          relativeWidth = 0.25; // Extreme narrow vertical
-        } else if (aspectRatio >= 0.06) {
-          relativeWidth = 0.2; // Hyper narrow vertical
-        } else if (aspectRatio >= 0.05) {
-          relativeWidth = 0.15; // Ultra thin vertical
-        } else if (aspectRatio >= 0.04) {
-          relativeWidth = 0.12; // Super thin vertical
-        } else if (aspectRatio >= 0.03) {
-          relativeWidth = 0.1; // Extremely thin vertical
-        } else if (aspectRatio >= 0.02) {
-          relativeWidth = 0.08; // Hair-thin vertical
-        } else if (aspectRatio >= 0.01) {
-          relativeWidth = 0.06; // Thread-thin vertical
-        } else {
-          relativeWidth = 0.05; // Microscopic vertical
-        }
+        // Calculate display width based on the target row height
+        const aspectRatio = actualWidth / actualHeight;
+        const displayWidth = Math.round(targetRowHeight * aspectRatio);
 
-        // Enforce a minimum share to avoid cards rendering at ~50px widths
-        relativeWidth = Math.max(relativeWidth, 12);
+        // Check if this image fits in the current row
+        const gapsNeeded = currentRow.length > 0 ? gapSize : 0;
+        const widthWithGap = displayWidth + gapsNeeded;
 
-        // Check if adding this item would overflow the row
+        // If adding this image would exceed available width and we have at least one item
         if (
-          totalWidth + relativeWidth > containerWidth &&
+          totalWidthUsed + widthWithGap > availableWidth &&
           currentRow.length > 0
         ) {
-          // If we have space for a narrow image, try to fit one more
-          const remainingSpace = containerWidth - totalWidth;
-          if (remainingSpace >= 12 && aspectRatio < 0.8) {
-            relativeWidth = remainingSpace;
-          } else {
-            break; // Row is full
-          }
+          break;
+        }
+
+        // Skip images that would create single-item rows - enforce minimum 2 cards
+        if (currentRow.length === 0 && displayWidth > availableWidth) {
+          // Try to find a smaller image to pair with this one instead
+          continue;
+        }
+
+        // Stop adding if we already have 5 cards (maximum for 1600px+)
+        if (currentRow.length >= 5) {
+          break;
         }
 
         currentRow.push(result);
-        totalWidth += relativeWidth;
-        currentIndex++;
+        totalWidthUsed += widthWithGap;
+        currentIndex += remainingImages.indexOf(result) + 1;
 
-        // If row is reasonably full (>85%) and we have at least 2 items, consider ending
-        if (totalWidth >= 85 && currentRow.length >= 2) {
-          // Check if next image is very narrow and can fit
-          const nextResult = results[i + 1];
-          if (nextResult && currentRow.length < maxItemsPerRow) {
-            const nextDimensions = getFallbackDimensions(nextResult);
-            const nextAspectRatio =
-              nextDimensions.width / nextDimensions.height;
-            const remainingSpace = containerWidth - totalWidth;
+        // Update remaining images
+        remainingImages = results.slice(currentIndex);
+        foundPreferred = true;
 
-            // If next image is narrow and fits in remaining space, continue
-            if (nextAspectRatio < 0.8 && remainingSpace >= 12) {
-              continue;
-            }
-          }
-          break;
-        }
+        // Reset loop counter since we modified the array
+        i = -1;
       }
 
-      // Ensure we have at least one item in the row
+      // Enforce minimum 2 cards per row - no single cards allowed
       if (currentRow.length === 0 && currentIndex < results.length) {
+        // Add the first image
+        currentRow.push(results[currentIndex]);
+        currentIndex++;
+
+        // MUST add a second image - no single cards allowed
+        if (currentIndex < results.length) {
+          currentRow.push(results[currentIndex]);
+          currentIndex++;
+        }
+      } else if (currentRow.length === 1 && currentIndex < results.length) {
+        // If we only have 1 card, force add another to meet minimum requirement
         currentRow.push(results[currentIndex]);
         currentIndex++;
       }
 
       if (currentRow.length > 0) {
-        rows.push(currentRow);
+        // Calculate the actual optimal height based on the images in this row
+        const actualRowHeight = calculateOptimalRowHeight(
+          currentRow,
+          targetRowHeight
+        );
+        rows.push({ items: currentRow, height: actualRowHeight });
       }
     }
 
     return rows;
   };
 
-  // Get grid template columns based on row items and their aspect ratios
-  const getGridTemplateColumns = (rowItems: SearchResult[]) => {
-    return rowItems
-      .map((item) => {
-        const dimensions = getFallbackDimensions(item);
-        let aspectRatio = dimensions.width / dimensions.height;
+  // Calculate grid columns using dynamic row heights
+  const getGridTemplateColumns = (
+    rowItems: SearchResult[],
+    rowHeight: number
+  ) => {
+    const getViewportWidth = () => {
+      if (typeof window !== "undefined") {
+        return window.innerWidth;
+      }
+      return 1200;
+    };
 
-        // Force PNG files to have 1:1 aspect ratio (except wide PNGs > 420px)
-        const isPNG =
-          item.file_type === "PNG" ||
-          (item.file_type === "image" &&
-            item.thumbnail?.toLowerCase().includes(".png")) ||
-          item.thumbnail?.toLowerCase().endsWith(".png");
-        const apiWidth = parseInt(String(item.width)) || dimensions.width;
-        const isWidePNG = isPNG && apiWidth > 420;
-        if (isPNG && !isWidePNG) {
-          aspectRatio = 1.0;
-        }
+    const getAvailableWidth = () => {
+      const viewportWidth = getViewportWidth();
+      const sidebarWidth = viewportWidth >= 1024 ? 320 : 0;
+      const containerPadding = 40;
+      const availableWidth = viewportWidth - sidebarWidth - containerPadding;
+      return Math.max(600, availableWidth);
+    };
 
-        // Calculate relative width based on aspect ratio
-        // Ultra-granular aspect ratio classification for perfect proportional sizing
-        let relativeWidth;
-        if (aspectRatio >= 8.0) {
-          relativeWidth = 60; // Extreme panoramic banners
-        } else if (aspectRatio >= 7.0) {
-          relativeWidth = 58; // Ultra wide banners
-        } else if (aspectRatio >= 6.0) {
-          relativeWidth = 56; // Super wide banners
-        } else if (aspectRatio >= 5.5) {
-          relativeWidth = 54; // Very wide banners
-        } else if (aspectRatio >= 5.0) {
-          relativeWidth = 52; // Wide banners
-        } else if (aspectRatio >= 4.5) {
-          relativeWidth = 51; // Panoramic ultra wide
-        } else if (aspectRatio >= 4.0) {
-          relativeWidth = 50; // Ultra wide panoramic
-        } else if (aspectRatio >= 3.8) {
-          relativeWidth = 49; // Very wide panoramic
-        } else if (aspectRatio >= 3.6) {
-          relativeWidth = 48; // Wide panoramic
-        } else if (aspectRatio >= 3.4) {
-          relativeWidth = 47; // Panoramic landscape
-        } else if (aspectRatio >= 3.2) {
-          relativeWidth = 46; // Extra wide landscape
-        } else if (aspectRatio >= 3.0) {
-          relativeWidth = 45; // Very wide landscape
-        } else if (aspectRatio >= 2.9) {
-          relativeWidth = 44; // Wide landscape plus
-        } else if (aspectRatio >= 2.8) {
-          relativeWidth = 43; // Wide landscape
-        } else if (aspectRatio >= 2.7) {
-          relativeWidth = 42; // Standard wide plus
-        } else if (aspectRatio >= 2.6) {
-          relativeWidth = 41; // Standard wide
-        } else if (aspectRatio >= 2.5) {
-          relativeWidth = 40; // Medium wide plus
-        } else if (aspectRatio >= 2.4) {
-          relativeWidth = 39; // Medium wide
-        } else if (aspectRatio >= 2.3) {
-          relativeWidth = 38; // Landscape wide
-        } else if (aspectRatio >= 2.2) {
-          relativeWidth = 37; // Landscape medium
-        } else if (aspectRatio >= 2.1) {
-          relativeWidth = 36; // Landscape standard
-        } else if (aspectRatio >= 2.0) {
-          relativeWidth = 35; // Classic wide
-        } else if (aspectRatio >= 1.95) {
-          relativeWidth = 34; // Nearly 2:1
-        } else if (aspectRatio >= 1.9) {
-          relativeWidth = 33; // Wide landscape
-        } else if (aspectRatio >= 1.85) {
-          relativeWidth = 32; // Medium landscape plus
-        } else if (aspectRatio >= 1.8) {
-          relativeWidth = 31; // Medium landscape
-        } else if (aspectRatio >= 1.75) {
-          relativeWidth = 30; // Landscape mild plus
-        } else if (aspectRatio >= 1.7) {
-          relativeWidth = 29; // Landscape mild
-        } else if (aspectRatio >= 1.65) {
-          relativeWidth = 28; // Slightly wide plus
-        } else if (aspectRatio >= 1.6) {
-          relativeWidth = 27; // Slightly wide
-        } else if (aspectRatio >= 1.55) {
-          relativeWidth = 26; // Classic landscape plus
-        } else if (aspectRatio >= 1.5) {
-          relativeWidth = 25; // Classic landscape
-        } else if (aspectRatio >= 1.45) {
-          relativeWidth = 24; // Mild landscape plus
-        } else if (aspectRatio >= 1.4) {
-          relativeWidth = 23; // Mild landscape
-        } else if (aspectRatio >= 1.35) {
-          relativeWidth = 22; // Light landscape plus
-        } else if (aspectRatio >= 1.3) {
-          relativeWidth = 21; // Light landscape
-        } else if (aspectRatio >= 1.25) {
-          relativeWidth = 20; // Subtle landscape plus
-        } else if (aspectRatio >= 1.2) {
-          relativeWidth = 19; // Subtle landscape
-        } else if (aspectRatio >= 1.15) {
-          relativeWidth = 18; // Nearly square wide plus
-        } else if (aspectRatio >= 1.1) {
-          relativeWidth = 17; // Nearly square wide
-        } else if (aspectRatio >= 1.05) {
-          relativeWidth = 16; // Almost square wide
-        } else if (aspectRatio >= 1.0) {
-          relativeWidth = 15; // Perfect square
-        } else if (aspectRatio >= 0.95) {
-          relativeWidth = 14; // Almost square tall
-        } else if (aspectRatio >= 0.9) {
-          relativeWidth = 13; // Nearly square tall
-        } else if (aspectRatio >= 0.85) {
-          relativeWidth = 12; // Nearly square tall plus
-        } else if (aspectRatio >= 0.8) {
-          relativeWidth = 11; // Subtle portrait
-        } else if (aspectRatio >= 0.75) {
-          relativeWidth = 10; // Subtle portrait plus
-        } else if (aspectRatio >= 0.7) {
-          relativeWidth = 9; // Light portrait
-        } else if (aspectRatio >= 0.65) {
-          relativeWidth = 8; // Light portrait plus
-        } else if (aspectRatio >= 0.6) {
-          relativeWidth = 7; // Standard portrait
-        } else if (aspectRatio >= 0.55) {
-          relativeWidth = 6; // Standard portrait plus
-        } else if (aspectRatio >= 0.5) {
-          relativeWidth = 5; // Tall portrait
-        } else if (aspectRatio >= 0.45) {
-          relativeWidth = 4; // Tall portrait plus
-        } else if (aspectRatio >= 0.4) {
-          relativeWidth = 3; // Very tall portrait
-        } else if (aspectRatio >= 0.35) {
-          relativeWidth = 2; // Very tall portrait plus
-        } else if (aspectRatio >= 0.3) {
-          relativeWidth = 1; // Extra tall portrait
-        } else if (aspectRatio >= 0.25) {
-          relativeWidth = 0.8; // Ultra tall portrait
-        } else if (aspectRatio >= 0.2) {
-          relativeWidth = 0.6; // Extremely tall portrait
-        } else if (aspectRatio >= 0.15) {
-          relativeWidth = 0.4; // Super narrow vertical
-        } else if (aspectRatio >= 0.1) {
-          relativeWidth = 0.3; // Ultra narrow vertical
-        } else if (aspectRatio >= 0.08) {
-          relativeWidth = 0.25; // Extreme narrow vertical
-        } else if (aspectRatio >= 0.06) {
-          relativeWidth = 0.2; // Hyper narrow vertical
-        } else if (aspectRatio >= 0.05) {
-          relativeWidth = 0.15; // Ultra thin vertical
-        } else if (aspectRatio >= 0.04) {
-          relativeWidth = 0.12; // Super thin vertical
-        } else if (aspectRatio >= 0.03) {
-          relativeWidth = 0.1; // Extremely thin vertical
-        } else if (aspectRatio >= 0.02) {
-          relativeWidth = 0.08; // Hair-thin vertical
-        } else if (aspectRatio >= 0.01) {
-          relativeWidth = 0.06; // Thread-thin vertical
-        } else {
-          relativeWidth = 0.05; // Microscopic vertical
-        }
+    const availableWidth = getAvailableWidth();
+    const gapSize = 20;
+    const totalGaps = (rowItems.length - 1) * gapSize;
+    const widthForImages = availableWidth - totalGaps;
 
-        // Enforce a minimum column fraction to avoid overly narrow columns
-        relativeWidth = Math.max(relativeWidth, 12);
+    // Calculate actual display widths for each image using the specific row height
+    const displayWidths = rowItems.map((item) => {
+      const dimensions = getFallbackDimensions(item);
+      let actualWidth = dimensions.width;
+      let actualHeight = dimensions.height;
 
-        return `${relativeWidth}fr`;
-      })
-      .join(" ");
+      const isPNG =
+        item.file_type === "PNG" ||
+        (item.file_type === "image" &&
+          item.thumbnail?.toLowerCase().includes(".png")) ||
+        item.thumbnail?.toLowerCase().endsWith(".png");
+      const isWidePNG = isPNG && actualWidth > 420;
+
+      if (isPNG && !isWidePNG) {
+        const size = Math.max(actualWidth, actualHeight);
+        actualWidth = size;
+        actualHeight = size;
+      }
+
+      const aspectRatio = actualWidth / actualHeight;
+      return Math.round(rowHeight * aspectRatio); // Use the specific row height
+    });
+
+    // If total width exceeds available space, scale proportionally
+    const totalDisplayWidth = displayWidths.reduce(
+      (sum, width) => sum + width,
+      0
+    );
+
+    if (totalDisplayWidth > widthForImages) {
+      const scaleFactor = widthForImages / totalDisplayWidth;
+      return displayWidths
+        .map((width) => `${Math.round(width * scaleFactor)}px`)
+        .join(" ");
+    }
+
+    // If we have extra space, distribute it proportionally
+    if (totalDisplayWidth < widthForImages) {
+      const extraSpace = widthForImages - totalDisplayWidth;
+      const totalAspectRatio = displayWidths.reduce(
+        (sum, width) => sum + width,
+        0
+      );
+
+      return displayWidths
+        .map((width) => {
+          const proportion = width / totalAspectRatio;
+          const extraWidth = Math.round(extraSpace * proportion);
+          return `${width + extraWidth}px`;
+        })
+        .join(" ");
+    }
+
+    // Perfect fit - use actual widths
+    return displayWidths.map((width) => `${width}px`).join(" ");
   };
-
+  
+  // Handle image click to navigate to details
   const handleImageClick = (result: SearchResult) => {
-    // Store image data in localStorage for the details page
+    // Store image data in localStorage for the media page
     localStorage.setItem(`image_${result.id}`, JSON.stringify(result));
 
     // Navigate to the media details page
@@ -1597,92 +1612,6 @@ function SearchContent() {
             {/* Background Pattern */}
             <div className="absolute inset-0 bg-grid-pattern opacity-35 dark:opacity-80"></div>
 
-            {/* Floating Decorative Elements - Skeleton versions */}
-            <div
-              className={`absolute top-20 ${isRTL ? "right-5/12" : "left-5/12"} transform -translate-x-1/2 md:top-32`}
-            >
-              <Skeleton className="w-[120px] h-[120px] rounded-lg opacity-30" />
-            </div>
-
-            <div
-              className={`hidden md:block absolute top-1/3 ${isRTL ? "left-4 md:left-8" : "right-4 md:right-8"}`}
-            >
-              <Skeleton className="w-[100px] h-[120px] rounded-lg opacity-40" />
-            </div>
-
-            <div
-              className={`absolute bottom-32 ${isRTL ? "left-1/4" : "right-1/4"} transform translate-x-1/2`}
-            >
-              <Skeleton className="w-[80px] h-[80px] rounded-lg opacity-25" />
-            </div>
-
-            <div
-              className={`hidden lg:block absolute top-16 ${isRTL ? "left-1/4" : "right-1/4"}`}
-            >
-              <Skeleton className="w-[60px] h-[60px] rounded-lg opacity-35" />
-            </div>
-
-            {/* Floating Icon Skeletons */}
-            <div
-              className={`hidden md:block absolute top-8 ${isRTL ? "left-1/3 md:left-2/12" : "right-1/3 md:right-2/5"} md:top-12`}
-            >
-              <Skeleton className="w-10 h-10 rounded-lg" />
-            </div>
-
-            <div
-              className={`hidden sm:block absolute top-32 ${isRTL ? "right-20" : "left-20"}`}
-            >
-              <Skeleton className="w-10 h-10 rounded-lg" />
-            </div>
-
-            <div
-              className={`hidden md:block absolute top-64 ${isRTL ? "left-32" : "right-32"}`}
-            >
-              <Skeleton className="w-12 h-12 rounded-lg" />
-            </div>
-
-            <div
-              className={`hidden sm:block absolute bottom-40 ${isRTL ? "right-32" : "left-32"}`}
-            >
-              <Skeleton className="w-9 h-9 rounded-lg" />
-            </div>
-
-            <div
-              className={`hidden lg:block absolute top-1/2 ${isRTL ? "right-16" : "left-16"} transform -translate-y-1/2`}
-            >
-              <Skeleton className="w-8 h-8 rounded-lg" />
-            </div>
-
-            <div
-              className={`hidden md:block absolute top-1/3 ${isRTL ? "right-1/2" : "left-1/2"} transform -translate-x-1/2`}
-            >
-              <Skeleton className="w-10 h-10 rounded-lg" />
-            </div>
-
-            <div
-              className={`hidden md:block absolute top-40 ${isRTL ? "left-16" : "right-16"}`}
-            >
-              <Skeleton className="w-11 h-11 rounded-lg" />
-            </div>
-
-            <div
-              className={`hidden sm:block absolute bottom-20 ${isRTL ? "left-1/4" : "right-1/4"}`}
-            >
-              <Skeleton className="w-8 h-8 rounded-lg" />
-            </div>
-
-            <div
-              className={`hidden lg:block absolute bottom-32 ${isRTL ? "right-1/3" : "left-1/3"}`}
-            >
-              <Skeleton className="w-9 h-9 rounded-lg" />
-            </div>
-
-            <div
-              className={`hidden md:block absolute top-2 ${isRTL ? "right-5/8" : "left-5/8"}`}
-            >
-              <Skeleton className="w-10 h-10 rounded-lg" />
-            </div>
-
             <div className="min-h-screen relative z-10 p-4 sm:p-6 space-y-6">
               <div className="w-full flex flex-col gap-5 sm:flex-row sm:items-center max-w-3xl mx-auto search-container-3xl search-section-3xl">
                 {/* Search Bar - Centered */}
@@ -1697,30 +1626,6 @@ function SearchContent() {
                   <div className="w-full max-w-md">
                     <Skeleton className="w-full h-14 rounded-xl" />
                   </div>
-                </div>
-              </div>
-
-              <div className="relative z-10">
-                {/* Platforms Grid Skeleton - Modern Card Design */}
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 2xl:grid-cols-7 platforms-grid-3xl gap-1 sm:gap-2">
-                  {Array.from({ length: 7 }).map((_, i) => (
-                    <Skeleton
-                      key={i}
-                      className="w-full h-[45px] rounded-xl platform-card"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Suggestions */}
-              <div
-                className={`flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center ${isRTL ? "space-x-reverse sm:space-x-3" : "space-x-3"}`}
-              >
-                <Skeleton className="w-24 h-4" />
-                <div className="grid place-content-center grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 w-fit">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="w-20 h-10 rounded-full" />
-                  ))}
                 </div>
               </div>
 
@@ -1769,7 +1674,7 @@ function SearchContent() {
                               key={item.id}
                               className="rounded-lg"
                               style={{
-                                height: "220px", // Fixed height like actual results
+                                height: "230px", // Fixed height like actual results
                               }}
                             />
                           );
@@ -2872,27 +2777,35 @@ function SearchContent() {
                   })}
                 </div>
 
-                {/* Desktop Layout - Dynamic CSS Grid */}
+                {/* Desktop Layout - Masonry Grid with explicit item heights */}
                 <div className="hidden sm:block w-full">
                   {createDynamicGridRows(searchResults).map(
-                    (row: SearchResult[], rowIndex: number) => (
+                    (
+                      rowData: { items: SearchResult[]; height: number },
+                      rowIndex: number
+                    ) => (
                       <div
                         key={rowIndex}
-                        className="grid mb-3 2xl:mb-4"
+                        className="grid mb-4 2xl:mb-6"
                         style={{
-                          gridTemplateColumns: getGridTemplateColumns(row),
+                          gridTemplateColumns: getGridTemplateColumns(
+                            rowData.items,
+                            rowData.height
+                          ),
                           gap: "20px",
                         }}
                       >
-                        {row.map((result: SearchResult) => {
+                        {rowData.items.map((result: SearchResult) => {
+                          const rowHeight = rowData.height;
                           return (
                             <div
                               key={result.id}
-                              className={`group relative bg-card rounded-lg overflow-hidden transition-all duration-300 cursor-pointer h-[220px] search-card-responsive ${
+                              className={`group relative bg-card rounded-lg overflow-hidden transition-all duration-300 cursor-pointer search-card-responsive ${
                                 result.file_type === "audio"
                                   ? "border border-primary/50 shadow-sm hover:border-primary hover:shadow-md"
                                   : "border border-border hover:border-primary/50"
                               }`}
+                              style={{ height: `${rowHeight}px` }}
                               onMouseEnter={() => setHoveredImage(result.id)}
                               onMouseLeave={() => setHoveredImage(null)}
                               onClick={() => handleImageClick(result)}

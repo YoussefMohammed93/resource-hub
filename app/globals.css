@@ -329,18 +329,7 @@ section[id] {
   }
   .media-page,
   .media-header {
-    max-width: 1650px !important;
+    max-width: 1800px !important;
   }
   
-  /* Search results card height for 1600px+ screens */
-  .search-card-responsive {
-    height: 290px !important;
-  }
-}
-
-@media (min-width: 1750px) {
-  /* Search results card height for 1600px+ screens */
-  .search-card-responsive {
-    height: 365px !important;
-  }
 }

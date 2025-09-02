@@ -33,8 +33,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
 import { authApi, userApi } from "@/lib/api";
-import { getFileExtension } from "@/lib/download-utils";
 import Footer from "@/components/footer";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -83,9 +83,6 @@ export default function ProfilePage() {
   const [history, setHistory] = useState<UserHistoryItem[]>([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState<boolean>(true);
   const [historyError, setHistoryError] = useState<string | null>(null);
-  const [previewUrls, setPreviewUrls] = useState<Record<string, string | null>>(
-    {}
-  );
 
   // Password change handlers
   const handlePasswordChange = (field: string, value: string) => {
@@ -197,68 +194,6 @@ export default function ProfilePage() {
     if (isAuthenticated) fetchHistory();
   }, [isAuthenticated]);
 
-  // Fetch preview images for non-direct URLs using server route
-  useEffect(() => {
-    const controller = new AbortController();
-    const run = async () => {
-      const tasks: Promise<void>[] = [];
-      const nextMap: Record<string, string | null> = {};
-      for (const item of history) {
-        const key = item.id || item.file;
-        const ext = getFileExtension(item.file).toLowerCase();
-        const isDirect = [
-          ".jpg",
-          ".jpeg",
-          ".png",
-          ".gif",
-          ".webp",
-          ".svg",
-          ".bmp",
-          ".tiff",
-          ".mp4",
-          ".avi",
-          ".mov",
-          ".wmv",
-          ".flv",
-          ".webm",
-          ".mkv",
-          ".mp3",
-          ".wav",
-          ".flac",
-          ".aac",
-          ".ogg",
-          ".wma",
-        ].includes(ext);
-        if (isDirect) {
-          nextMap[key] = item.file; // direct render ok
-          continue;
-        }
-        if (previewUrls[key] !== undefined) continue; // already fetched
-        tasks.push(
-          fetch(
-            `/api/media-proxy/preview?url=${encodeURIComponent(item.file)}`,
-            {
-              signal: controller.signal,
-            }
-          )
-            .then((r) => (r.ok ? r.json() : { previewUrl: null }))
-            .then((data) => {
-              nextMap[key] = data?.previewUrl || null;
-            })
-            .catch(() => {
-              nextMap[key] = null;
-            })
-        );
-      }
-      if (tasks.length) {
-        await Promise.all(tasks);
-        setPreviewUrls((prev) => ({ ...prev, ...nextMap }));
-      }
-    };
-    if (history.length) run();
-    return () => controller.abort();
-  }, [history, previewUrls]);
-
   const togglePasswordVisibility = (field: "current" | "new" | "confirm") => {
     setShowPasswords((prev) => ({
       ...prev,
@@ -362,22 +297,33 @@ export default function ProfilePage() {
     >
       {/* Header */}
       <header className="bg-background border-b border-border">
-        <header className="px-4 sm:px-5 py-4">
+        <div className="px-4 sm:px-5 py-4">
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className={`flex items-center ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}
+              aria-label={t("header.logo")}
+              className="flex items-center"
             >
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+              <div className="relative w-44 sm:w-48 h-12">
+                <Image
+                  src="/logo-black.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="block dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/logo-white.png"
+                  alt={t("header.logo")}
+                  fill
+                  className="hidden dark:block"
+                  priority
+                />
               </div>
-              <span className="text-base sm:text-xl font-semibold text-foreground">
-                {t("header.logo")}
-              </span>
             </Link>
             <HeaderControls />
           </div>
-        </header>
+        </div>
       </header>
       {/* Main Content */}
       <main className="px-5 py-6 sm:py-8 space-y-4 sm:space-y-5 mb-5">
@@ -984,160 +930,77 @@ export default function ProfilePage() {
                   );
                 }
                 return (
-                  <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-h-[70vh] 2xl:max-h-[60vh] overflow-y-auto pr-1">
-                    {filteredHistory.map((item, idx) => {
-                      const ext = getFileExtension(item.file).toLowerCase();
-                      const isImage = [
-                        ".jpg",
-                        ".jpeg",
-                        ".png",
-                        ".gif",
-                        ".webp",
-                        ".svg",
-                        ".bmp",
-                        ".tiff",
-                      ].includes(ext);
-                      const isVideo = [
-                        ".mp4",
-                        ".avi",
-                        ".mov",
-                        ".wmv",
-                        ".flv",
-                        ".webm",
-                        ".mkv",
-                      ].includes(ext);
-                      const isAudio = [
-                        ".mp3",
-                        ".wav",
-                        ".flac",
-                        ".aac",
-                        ".ogg",
-                        ".wma",
-                      ].includes(ext);
-                      let websiteName = item.from;
-                      if (!websiteName) {
-                        try {
-                          const u = new URL(item.file);
-                          const host = u.hostname.replace(/^www\./, "");
-                          websiteName = host.split(".")[0] || host;
-                        } catch {}
-                      }
-
-                      return (
-                        <div
-                          key={item.id ?? idx}
-                          className="relative rounded-xl border bg-card/60 dark:bg-muted/40 p-3 flex flex-col"
-                        >
-                          <div className="aspect-video rounded-lg overflow-hidden bg-secondary/30 flex items-center justify-center">
-                            {isImage ? (
-                              // Show image directly from API link (no proxy)
-                              <img
-                                src={item.file}
-                                alt={item.from}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : isVideo ? (
-                              <video
-                                src={item.file}
-                                controls
-                                className="w-full h-full object-contain bg-black"
-                              />
-                            ) : isAudio ? (
-                              <div className="w-full p-3">
-                                <audio
-                                  src={item.file}
-                                  controls
-                                  className="w-full"
-                                />
-                              </div>
-                            ) : (
-                              (() => {
-                                const key = item.id ?? item.file;
-                                const preview = previewUrls[key];
-                                if (preview) {
-                                  return (
-                                    <img
-                                      src={preview}
-                                      alt={item.from || "Preview"}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  );
-                                }
-                                return (
-                                  <div className="text-xs text-muted-foreground p-4 text-center">
-                                    Generating preview...
-                                  </div>
-                                );
-                              })()
-                            )}
-                          </div>
-
-                          <div className="mt-3 space-y-2">
-                            <div
-                              className={`flex flex-wrap ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}
-                            >
-                              <Badge variant="default">{item.from}</Badge>
-                              <Badge variant="outline">
-                                {item.price}{" "}
-                                {t("profile.downloadHistory.credits")}
-                              </Badge>
-                            </div>
-                            <div className="space-y-3 text-sm text-muted-foreground">
-                              {item.id && (
-                                <div>
-                                  {t("profile.downloadHistory.labels.id")}:{" "}
-                                  {item.id}
-                                </div>
-                              )}
-                              {item.date && (
-                                <div>
-                                  {t("profile.downloadHistory.labels.date")}:{" "}
-                                  {item.date}
-                                </div>
-                              )}
-                              <div className="flex items-center gap-1">
-                                <span className="shrink-0">
-                                  {t("profile.downloadHistory.labels.url")}:
-                                </span>
+                  <div className="overflow-x-auto overflow-y-auto max-h-[60vh]">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th
+                            className={`py-2 px-3 text-left ${isRTL ? "text-right" : "text-left"}`}
+                          >
+                            {t("profile.downloadHistory.labels.id")}
+                          </th>
+                          <th
+                            className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
+                          >
+                            {t("profile.downloadHistory.labels.website")}
+                          </th>
+                          <th
+                            className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
+                          >
+                            {t("profile.downloadHistory.credits")}
+                          </th>
+                          <th
+                            className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
+                          >
+                            {t("profile.downloadHistory.labels.url")}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="align-top">
+                        {filteredHistory.map((item, idx) => {
+                          let websiteName = item.from;
+                          if (!websiteName) {
+                            try {
+                              const u = new URL(item.file);
+                              const host = u.hostname.replace(/^www\./, "");
+                              websiteName = host.split(".")[0] || host;
+                            } catch {}
+                          }
+                          return (
+                            <tr key={item.id ?? idx} className="border-b">
+                              <td
+                                className="py-2 px-3 font-mono text-xs max-w-[10rem] truncate"
+                                title={item.id || ""}
+                              >
+                                {item.id || "-"}
+                              </td>
+                              <td className="py-2 px-3">
+                                <Badge variant="secondary">
+                                  {item.from || websiteName}
+                                </Badge>
+                              </td>
+                              <td className="py-2 px-3">
+                                <Badge variant="outline">
+                                  {item.price}{" "}
+                                  {t("profile.downloadHistory.credits")}
+                                </Badge>
+                              </td>
+                              <td className="py-2 px-3 max-w-[22rem]">
                                 <a
                                   href={item.file}
                                   target="_blank"
                                   rel="noreferrer"
                                   title={item.file}
-                                  className="block w-full max-w-full truncate text-primary hover:underline"
+                                  className="block w-full truncate text-primary hover:underline"
                                 >
                                   {item.file}
                                 </a>
-                              </div>
-                            </div>
-                            <div
-                              className={`flex ${isRTL ? "flex-row-reverse" : ""} gap-2 pt-1`}
-                            >
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="w-full"
-                                asChild
-                              >
-                                <a
-                                  href={item.file}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  {t("profile.downloadHistory.labels.openOn", {
-                                    website:
-                                      websiteName ||
-                                      t(
-                                        "profile.downloadHistory.labels.website"
-                                      ),
-                                  })}
-                                </a>
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 );
               })()

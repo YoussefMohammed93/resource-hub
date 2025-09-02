@@ -243,7 +243,7 @@ export default function DashboardPage() {
   const [packageCredits, setPackageCredits] = useState<string>("");
   const [packageContactUrl, setPackageContactUrl] = useState<string>("");
   const [packageSupportedSites, setPackageSupportedSites] =
-    useState<string>("");
+    useState<string[]>([""]);
   const [packageNameError, setPackageNameError] = useState<string>("");
   const [packageDescriptionError, setPackageDescriptionError] =
     useState<string>("");
@@ -254,6 +254,27 @@ export default function DashboardPage() {
     useState<string>("");
   const [packageSupportedSitesError, setPackageSupportedSitesError] =
     useState<string>("");
+
+  // Functions to handle supported sites array
+  const addSupportedSite = () => {
+    setPackageSupportedSites([...packageSupportedSites, ""]);
+  };
+
+  const removeSupportedSite = (index: number) => {
+    if (packageSupportedSites.length > 1) {
+      const newSites = packageSupportedSites.filter((_, i) => i !== index);
+      setPackageSupportedSites(newSites);
+    }
+  };
+
+  const updateSupportedSite = (index: number, value: string) => {
+    const newSites = [...packageSupportedSites];
+    newSites[index] = value;
+    setPackageSupportedSites(newSites);
+    if (packageSupportedSitesError) {
+      setPackageSupportedSitesError("");
+    }
+  };
   const [isAddingPackage, setIsAddingPackage] = useState<boolean>(false);
 
   // Edit package states
@@ -272,7 +293,7 @@ export default function DashboardPage() {
   const [editPackageContactUrl, setEditPackageContactUrl] =
     useState<string>("");
   const [editPackageSupportedSites, setEditPackageSupportedSites] =
-    useState<string>("");
+    useState<string[]>([""]);
   const [editPackageNameError, setEditPackageNameError] = useState<string>("");
   const [editPackageDescriptionError, setEditPackageDescriptionError] =
     useState<string>("");
@@ -284,6 +305,27 @@ export default function DashboardPage() {
     useState<string>("");
   const [editPackageSupportedSitesError, setEditPackageSupportedSitesError] =
     useState<string>("");
+
+  // Functions to handle edit supported sites array
+  const addEditSupportedSite = () => {
+    setEditPackageSupportedSites([...editPackageSupportedSites, ""]);
+  };
+
+  const removeEditSupportedSite = (index: number) => {
+    if (editPackageSupportedSites.length > 1) {
+      const newSites = editPackageSupportedSites.filter((_, i) => i !== index);
+      setEditPackageSupportedSites(newSites);
+    }
+  };
+
+  const updateEditSupportedSite = (index: number, value: string) => {
+    const newSites = [...editPackageSupportedSites];
+    newSites[index] = value;
+    setEditPackageSupportedSites(newSites);
+    if (editPackageSupportedSitesError) {
+      setEditPackageSupportedSitesError("");
+    }
+  };
   const [isEditingPackage, setIsEditingPackage] = useState<boolean>(false);
 
   // Delete package states
@@ -1476,7 +1518,6 @@ export default function DashboardPage() {
 
     // Validate supported sites (required)
     const sitesArray = packageSupportedSites
-      .split(",")
       .map((site) => site.trim())
       .filter((site) => site.length > 0);
 
@@ -1574,7 +1615,7 @@ export default function DashboardPage() {
         setPackageDaysValidity("");
         setPackageCredits("");
         setPackageContactUrl("");
-        setPackageSupportedSites("");
+        setPackageSupportedSites([""]);
 
         // Close dialog
         setIsAddPackageDialogOpen(false);
@@ -1645,7 +1686,9 @@ export default function DashboardPage() {
     setEditPackageCredits(plan.credits.toString());
     setEditPackageContactUrl(plan.contactUsUrl || "");
     setEditPackageSupportedSites(
-      plan.supportedSites ? plan.supportedSites.join(", ") : ""
+      Array.isArray(plan.supportedSites) && plan.supportedSites.length > 0
+        ? plan.supportedSites
+        : [""]
     );
     setIsEditPackageDialogOpen(true);
   };
@@ -1709,7 +1752,6 @@ export default function DashboardPage() {
 
     // Validate supported sites (required)
     const editSitesArray = editPackageSupportedSites
-      .split(",")
       .map((site) => site.trim())
       .filter((site) => site.length > 0);
 
@@ -1803,7 +1845,7 @@ export default function DashboardPage() {
         setEditPackageDaysValidity("");
         setEditPackageCredits("");
         setEditPackageContactUrl("");
-        setEditPackageSupportedSites("");
+        setEditPackageSupportedSites([""]);
       } else {
         // Handle API error
         const errorMessage =
@@ -1852,7 +1894,7 @@ export default function DashboardPage() {
           setEditPackageDaysValidity("");
           setEditPackageCredits("");
           setEditPackageContactUrl("");
-          setEditPackageSupportedSites("");
+          setEditPackageSupportedSites([""]);
         }, 300);
       } else {
         // Handle API error
@@ -5073,7 +5115,7 @@ export default function DashboardPage() {
                                 </td>
                                 <td className="py-4 px-4">
                                   <a
-                                    href={site.url}
+                                    href={site.url.startsWith("http") ? site.url : `https://${site.url}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-sm text-primary hover:text-primary/80 transition-colors flex items-center space-x-1 max-w-[200px] truncate"
@@ -5211,7 +5253,7 @@ export default function DashboardPage() {
                                   )}
                                 </div>
                                 <a
-                                  href={site.url}
+                                  href={site.url.startsWith("http") ? site.url : `https://${site.url}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className={`text-sm text-primary hover:text-primary/80 transition-colors flex items-center ${isRTL ? "space-x-reverse space-x-2" : "space-x-2"} p-2 bg-primary/5 rounded-lg border border-primary/10`}
@@ -5568,27 +5610,48 @@ export default function DashboardPage() {
                         </div>
                         {/* Supported Sites */}
                         <div className="space-y-2">
-                          <Label
-                            htmlFor="package-sites"
-                            className="text-sm font-medium text-foreground flex items-center"
-                          >
+                          <Label className="text-sm font-medium text-foreground flex items-center">
                             <Globe className="w-4 h-4" />
                             {t("dashboard.packageManagement.supportedSites")}
                           </Label>
-                          <Input
-                            id="package-sites"
-                            value={packageSupportedSites}
-                            onChange={(e) => {
-                              setPackageSupportedSites(e.target.value);
-                              if (packageSupportedSitesError) {
-                                setPackageSupportedSitesError("");
-                              }
-                            }}
-                            placeholder={t(
-                              "dashboard.packageManagement.placeholders.supportedSites"
-                            )}
-                            className="transition-all focus-visible:ring-primary/20"
-                          />
+                          <div className="space-y-3">
+                            {packageSupportedSites.map((site, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <Input
+                                  value={site}
+                                  onChange={(e) => updateSupportedSite(index, e.target.value)}
+                                  placeholder={t(
+                                    "dashboard.packageManagement.placeholders.supportedSites"
+                                  )}
+                                  className="flex-1 transition-all focus-visible:ring-primary/20"
+                                />
+                                <div className="flex items-center gap-1">
+                                  {index === packageSupportedSites.length - 1 && (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={addSupportedSite}
+                                      className="h-10 w-10 p-0 hover:bg-primary/10"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                  {packageSupportedSites.length > 1 && (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => removeSupportedSite(index)}
+                                      className="h-10 w-10 p-0 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
+                                    >
+                                      <Minus className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                           {packageSupportedSitesError && (
                             <p className="text-sm text-destructive flex items-center space-x-1">
                               <span className="w-1 h-1 bg-destructive rounded-full"></span>
@@ -5840,27 +5903,48 @@ export default function DashboardPage() {
                         </div>
                         {/* Supported Sites */}
                         <div className="space-y-2">
-                          <Label
-                            htmlFor="edit-package-sites"
-                            className="text-sm font-medium text-foreground flex items-center"
-                          >
+                          <Label className="text-sm font-medium text-foreground flex items-center">
                             <Globe className="w-4 h-4" />
                             {t("dashboard.packageManagement.supportedSites")}
                           </Label>
-                          <Input
-                            id="edit-package-sites"
-                            value={editPackageSupportedSites}
-                            onChange={(e) => {
-                              setEditPackageSupportedSites(e.target.value);
-                              if (editPackageSupportedSitesError) {
-                                setEditPackageSupportedSitesError("");
-                              }
-                            }}
-                            placeholder={t(
-                              "dashboard.packageManagement.placeholders.supportedSites"
-                            )}
-                            className="transition-all focus-visible:ring-primary/20"
-                          />
+                          <div className="space-y-3">
+                            {editPackageSupportedSites.map((site, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <Input
+                                  value={site}
+                                  onChange={(e) => updateEditSupportedSite(index, e.target.value)}
+                                  placeholder={t(
+                                    "dashboard.packageManagement.placeholders.supportedSites"
+                                  )}
+                                  className="flex-1 transition-all focus-visible:ring-primary/20"
+                                />
+                                <div className="flex items-center gap-1">
+                                  {index === editPackageSupportedSites.length - 1 && (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={addEditSupportedSite}
+                                      className="h-10 w-10 p-0 hover:bg-primary/10"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                  {editPackageSupportedSites.length > 1 && (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => removeEditSupportedSite(index)}
+                                      className="h-10 w-10 p-0 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
+                                    >
+                                      <Minus className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                           {editPackageSupportedSitesError && (
                             <p className="text-sm text-destructive flex items-center space-x-1">
                               <span className="w-1 h-1 bg-destructive rounded-full"></span>

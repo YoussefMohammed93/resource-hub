@@ -5,6 +5,7 @@ import { Layers } from "lucide-react";
 import { FileData } from "@/lib/api";
 import { RelatedFilesCard } from "./related-files-card";
 import { useState } from "react";
+import Link from "next/link";
 
 interface SearchResult {
   id: string;
@@ -91,352 +92,218 @@ export function RelatedFilesSection({
     }
   };
 
-  // Create dynamic grid rows based on actual image dimensions and aspect ratios
+  // Get viewport width for responsive height calculations
+  const getViewportWidth = () => {
+    if (typeof window === 'undefined') return 1200;
+    return window.innerWidth;
+  };
+
+  // Get row height pattern based on viewport width and row index
+  const getRowHeightPattern = (rowIndex: number) => {
+    const viewportWidth = getViewportWidth();
+    
+    if (viewportWidth >= 1800) {
+      const heightOptions = [180, 240, 300, 400, 500, 550];
+      return heightOptions[rowIndex % heightOptions.length];
+    } else if (viewportWidth >= 1600) {
+      const heightOptions = [200, 260, 320, 380, 450];
+      return heightOptions[rowIndex % heightOptions.length];
+    } else if (viewportWidth >= 1200) {
+      const heightOptions = [220, 280, 340, 400];
+      return heightOptions[rowIndex % heightOptions.length];
+    } else {
+      const heightOptions = [240, 300, 360];
+      return heightOptions[rowIndex % heightOptions.length];
+    }
+  };
+
+  // Calculate optimal row height based on first image and average aspect ratio
+  const calculateOptimalRowHeight = (rowItems: SearchResult[], targetRowHeight: number) => {
+    if (rowItems.length === 0) return targetRowHeight;
+    
+    const viewportWidth = getViewportWidth();
+    const firstImage = rowItems[0];
+    const firstDimensions = getFallbackDimensions(firstImage);
+    let baseHeight = firstDimensions.height;
+    
+    // Calculate average aspect ratio of all images in row
+    const totalAspectRatio = rowItems.reduce((sum, item) => {
+      const dims = getFallbackDimensions(item);
+      return sum + (dims.width / dims.height);
+    }, 0);
+    const avgAspectRatio = totalAspectRatio / rowItems.length;
+    
+    // Adjust base height based on average aspect ratio
+    if (avgAspectRatio > 2.0) {
+      baseHeight *= 0.8; // Reduce height for wide images
+    } else if (avgAspectRatio < 0.8) {
+      baseHeight *= 1.2; // Increase height for tall images
+    }
+    
+    // Apply viewport-specific scaling and constraints
+    let minHeight, maxHeight, scaleFactor;
+    
+    if (viewportWidth >= 1800) {
+      minHeight = 180;
+      maxHeight = 550;
+      scaleFactor = 0.9;
+    } else if (viewportWidth >= 1600) {
+      minHeight = 200;
+      maxHeight = 450;
+      scaleFactor = 0.95;
+    } else if (viewportWidth >= 1200) {
+      minHeight = 220;
+      maxHeight = 400;
+      scaleFactor = 1.0;
+    } else {
+      minHeight = 240;
+      maxHeight = 360;
+      scaleFactor = 1.1;
+    }
+    
+    const optimalHeight = baseHeight * scaleFactor;
+    return Math.round(Math.max(minHeight, Math.min(maxHeight, optimalHeight)));
+  };
+
+  // Check if image is suitable for target row height
+  const isImageSuitableForRowHeight = (result: SearchResult, targetHeight: number) => {
+    const dimensions = getFallbackDimensions(result);
+    const naturalHeight = dimensions.height;
+    
+    // Calculate how much the image would need to be scaled
+    const scaleFactor = targetHeight / naturalHeight;
+    
+    // Prefer images that don't need extreme scaling
+    if (scaleFactor < 0.5 || scaleFactor > 2.0) {
+      return { suitable: false, score: 0 };
+    }
+    
+    // Score based on how close the natural height is to target
+    const heightDiff = Math.abs(naturalHeight - targetHeight);
+    const score = Math.max(0, 100 - (heightDiff / targetHeight) * 100);
+    
+    return { suitable: true, score };
+  };
+
+  // Create dynamic grid rows with varied heights based on image content
   const createDynamicGridRows = (results: SearchResult[]) => {
-    const rows: SearchResult[][] = [];
+    const rows: { items: SearchResult[]; height: number }[] = [];
     let currentIndex = 0;
 
     while (currentIndex < results.length) {
+      const rowIndex = rows.length;
+      const targetRowHeight = getRowHeightPattern(rowIndex);
       const currentRow: SearchResult[] = [];
-      let totalWidth = 0;
-      const containerWidth = 100; // Percentage-based container width
-      const maxItemsPerRow = 6;
-
-      // Build row by filling available space optimally
-      for (
-        let i = currentIndex;
-        i < results.length && currentRow.length < maxItemsPerRow;
-        i++
-      ) {
-        const result = results[i];
-        const dimensions = getFallbackDimensions(result);
-        let aspectRatio = dimensions.width / dimensions.height;
-
-        // Force PNG files to have 1:1 aspect ratio (except wide PNGs > 420px)
-        const isPNG =
-          result.file_type === "PNG" ||
-          (result.file_type === "image" &&
-            result.thumbnail?.toLowerCase().includes(".png")) ||
-          result.thumbnail?.toLowerCase().endsWith(".png");
-        const apiWidth = parseInt(String(result.width)) || dimensions.width;
-        const isWidePNG = isPNG && apiWidth > 420;
-        if (isPNG && !isWidePNG) {
-          aspectRatio = 1.0;
-        }
-
-        // Calculate relative width based on aspect ratio
-        let relativeWidth;
-        if (aspectRatio >= 8.0) {
-          relativeWidth = 60; // Extreme panoramic banners
-        } else if (aspectRatio >= 7.0) {
-          relativeWidth = 58; // Ultra wide banners
-        } else if (aspectRatio >= 6.0) {
-          relativeWidth = 56; // Super wide banners
-        } else if (aspectRatio >= 5.5) {
-          relativeWidth = 54; // Very wide banners
-        } else if (aspectRatio >= 5.0) {
-          relativeWidth = 52; // Wide banners
-        } else if (aspectRatio >= 4.5) {
-          relativeWidth = 51; // Panoramic ultra wide
-        } else if (aspectRatio >= 4.0) {
-          relativeWidth = 50; // Ultra wide panoramic
-        } else if (aspectRatio >= 3.8) {
-          relativeWidth = 49; // Very wide panoramic
-        } else if (aspectRatio >= 3.6) {
-          relativeWidth = 48; // Wide panoramic
-        } else if (aspectRatio >= 3.4) {
-          relativeWidth = 47; // Panoramic landscape
-        } else if (aspectRatio >= 3.2) {
-          relativeWidth = 46; // Extra wide landscape
-        } else if (aspectRatio >= 3.0) {
-          relativeWidth = 45; // Very wide landscape
-        } else if (aspectRatio >= 2.9) {
-          relativeWidth = 44; // Wide landscape plus
-        } else if (aspectRatio >= 2.8) {
-          relativeWidth = 43; // Wide landscape
-        } else if (aspectRatio >= 2.7) {
-          relativeWidth = 42; // Standard wide plus
-        } else if (aspectRatio >= 2.6) {
-          relativeWidth = 41; // Standard wide
-        } else if (aspectRatio >= 2.5) {
-          relativeWidth = 40; // Medium wide plus
-        } else if (aspectRatio >= 2.4) {
-          relativeWidth = 39; // Medium wide
-        } else if (aspectRatio >= 2.3) {
-          relativeWidth = 38; // Landscape wide
-        } else if (aspectRatio >= 2.2) {
-          relativeWidth = 37; // Landscape medium
-        } else if (aspectRatio >= 2.1) {
-          relativeWidth = 36; // Landscape standard
-        } else if (aspectRatio >= 2.0) {
-          relativeWidth = 35; // Classic wide
-        } else if (aspectRatio >= 1.95) {
-          relativeWidth = 34; // Nearly 2:1
-        } else if (aspectRatio >= 1.9) {
-          relativeWidth = 33; // Wide landscape
-        } else if (aspectRatio >= 1.85) {
-          relativeWidth = 32; // Medium landscape plus
-        } else if (aspectRatio >= 1.8) {
-          relativeWidth = 31; // Medium landscape
-        } else if (aspectRatio >= 1.75) {
-          relativeWidth = 30; // Landscape mild plus
-        } else if (aspectRatio >= 1.7) {
-          relativeWidth = 29; // Landscape mild
-        } else if (aspectRatio >= 1.65) {
-          relativeWidth = 28; // Slightly wide plus
-        } else if (aspectRatio >= 1.6) {
-          relativeWidth = 27; // Slightly wide
-        } else if (aspectRatio >= 1.55) {
-          relativeWidth = 26; // Classic landscape plus
-        } else if (aspectRatio >= 1.5) {
-          relativeWidth = 25; // Classic landscape
-        } else if (aspectRatio >= 1.45) {
-          relativeWidth = 24; // Mild landscape plus
-        } else if (aspectRatio >= 1.4) {
-          relativeWidth = 23; // Mild landscape
-        } else if (aspectRatio >= 1.35) {
-          relativeWidth = 22; // Light landscape plus
-        } else if (aspectRatio >= 1.3) {
-          relativeWidth = 21; // Light landscape
-        } else if (aspectRatio >= 1.25) {
-          relativeWidth = 20; // Subtle landscape plus
-        } else if (aspectRatio >= 1.2) {
-          relativeWidth = 19; // Subtle landscape
-        } else if (aspectRatio >= 1.15) {
-          relativeWidth = 18; // Nearly square wide plus
-        } else if (aspectRatio >= 1.1) {
-          relativeWidth = 17; // Nearly square wide
-        } else if (aspectRatio >= 1.05) {
-          relativeWidth = 16; // Almost square wide
-        } else if (aspectRatio >= 1.0) {
-          relativeWidth = 15; // Perfect square
-        } else if (aspectRatio >= 0.95) {
-          relativeWidth = 14; // Almost square tall
-        } else if (aspectRatio >= 0.9) {
-          relativeWidth = 13; // Nearly square tall
-        } else if (aspectRatio >= 0.85) {
-          relativeWidth = 12; // Nearly square tall plus
-        } else if (aspectRatio >= 0.8) {
-          relativeWidth = 11; // Subtle portrait
-        } else if (aspectRatio >= 0.75) {
-          relativeWidth = 10; // Subtle portrait plus
-        } else if (aspectRatio >= 0.7) {
-          relativeWidth = 9; // Light portrait
-        } else if (aspectRatio >= 0.65) {
-          relativeWidth = 8; // Light portrait plus
-        } else if (aspectRatio >= 0.6) {
-          relativeWidth = 7; // Standard portrait
-        } else if (aspectRatio >= 0.55) {
-          relativeWidth = 6; // Standard portrait plus
-        } else if (aspectRatio >= 0.5) {
-          relativeWidth = 5; // Tall portrait
-        } else if (aspectRatio >= 0.45) {
-          relativeWidth = 4; // Tall portrait plus
-        } else if (aspectRatio >= 0.4) {
-          relativeWidth = 3; // Very tall portrait
-        } else if (aspectRatio >= 0.35) {
-          relativeWidth = 2; // Very tall portrait plus
-        } else if (aspectRatio >= 0.3) {
-          relativeWidth = 1; // Extra tall portrait
-        } else {
-          relativeWidth = 0.8; // Ultra tall portrait
-        }
-
-        // Enforce a minimum share to avoid cards rendering at ~50px widths
-        relativeWidth = Math.max(relativeWidth, 12);
-
-        // Check if adding this item would overflow the row
-        if (
-          totalWidth + relativeWidth > containerWidth &&
-          currentRow.length > 0
-        ) {
-          // If we have space for a narrow image, try to fit one more
-          const remainingSpace = containerWidth - totalWidth;
-          if (remainingSpace >= 12 && aspectRatio < 0.8) {
-            relativeWidth = remainingSpace;
-          } else {
-            break; // Row is full
-          }
-        }
-
-        currentRow.push(result);
-        totalWidth += relativeWidth;
-        currentIndex++;
-
-        // If row is reasonably full (>85%) and we have at least 2 items, consider ending
-        if (totalWidth >= 85 && currentRow.length >= 2) {
-          // Check if next image is very narrow and can fit
-          const nextResult = results[i + 1];
-          if (nextResult && currentRow.length < maxItemsPerRow) {
-            const nextDimensions = getFallbackDimensions(nextResult);
-            const nextAspectRatio =
-              nextDimensions.width / nextDimensions.height;
-            const remainingSpace = containerWidth - totalWidth;
-
-            // If next image is narrow and fits in remaining space, continue
-            if (nextAspectRatio < 0.8 && remainingSpace >= 12) {
-              continue;
+      const remainingImages = results.slice(currentIndex);
+      
+      // Sort remaining images by suitability for this row height
+      const sortedImages = remainingImages
+        .map(img => ({
+          ...img,
+          suitability: isImageSuitableForRowHeight(img, targetRowHeight)
+        }))
+        .sort((a, b) => b.suitability.score - a.suitability.score);
+      
+      // Build row with most suitable images, enforcing min 2, max 5
+      for (let i = 0; i < sortedImages.length && currentRow.length < 5; i++) {
+        const result = sortedImages[i];
+        const suitability = isImageSuitableForRowHeight(result, targetRowHeight);
+        
+        // Add image if suitable or if we need to fill minimum requirement
+        if (suitability.suitable || currentRow.length < 2) {
+          currentRow.push(result);
+          // Remove from remaining images
+          const originalIndex = results.findIndex(r => r.id === result.id);
+          if (originalIndex >= currentIndex) {
+            results.splice(originalIndex, 1);
+            if (originalIndex === currentIndex) {
+              // Don't increment currentIndex since we removed current item
+            } else {
+              // Adjust currentIndex if we removed an item before it
+              currentIndex--;
             }
           }
-          break;
         }
       }
-
-      // Ensure we have at least one item in the row
-      if (currentRow.length === 0 && currentIndex < results.length) {
+      
+      // Enforce minimum 2 cards per row
+      while (currentRow.length < 2 && currentIndex < results.length) {
         currentRow.push(results[currentIndex]);
-        currentIndex++;
+        results.splice(currentIndex, 1);
       }
-
+      
+      // If we have items in the row, calculate optimal height and add to rows
       if (currentRow.length > 0) {
-        rows.push(currentRow);
+        const actualRowHeight = calculateOptimalRowHeight(currentRow, targetRowHeight);
+        rows.push({ items: currentRow, height: actualRowHeight });
+      }
+      
+      // Move to next batch of images
+      if (results.length === 0) break;
+      currentIndex = 0; // Reset since we're modifying the array
+    }
+
+    // Rebalance if the last row has only one item
+    if (rows.length > 1 && rows[rows.length - 1].items.length === 1) {
+      const lastIndex = rows.length - 1;
+      const prevIndex = lastIndex - 1;
+      const lastRow = rows[lastIndex];
+      const prevRow = rows[prevIndex];
+
+      if (prevRow.items.length > 2 || prevRow.items.length === 5) {
+        // Move the most suitable item from previous row to the last row
+        let bestIdx = 0;
+        let bestScore = -1;
+        for (let i = 0; i < prevRow.items.length; i++) {
+          const suitability = isImageSuitableForRowHeight(prevRow.items[i], lastRow.height);
+          const score = suitability.suitable ? suitability.score : 0;
+          if (score > bestScore) {
+            bestScore = score;
+            bestIdx = i;
+          }
+        }
+        const moved = prevRow.items.splice(bestIdx, 1)[0];
+        lastRow.items.push(moved);
+
+        // Recalculate heights for both rows
+        const prevTarget = getRowHeightPattern(prevIndex);
+        prevRow.height = calculateOptimalRowHeight(prevRow.items, prevTarget);
+        const lastTarget = getRowHeightPattern(lastIndex);
+        lastRow.height = calculateOptimalRowHeight(lastRow.items, lastTarget);
+      } else if (prevRow.items.length < 5) {
+        // Merge the single item into the previous row when it has capacity
+        prevRow.items.push(...lastRow.items);
+        const prevTarget = getRowHeightPattern(prevIndex);
+        prevRow.height = calculateOptimalRowHeight(prevRow.items, prevTarget);
+        rows.pop();
+      } else {
+        // Fallback: move one item from previous row
+        const moved = prevRow.items.pop()!;
+        lastRow.items.push(moved);
+        const prevTarget = getRowHeightPattern(prevIndex);
+        prevRow.height = calculateOptimalRowHeight(prevRow.items, prevTarget);
+        const lastTarget = getRowHeightPattern(lastIndex);
+        lastRow.height = calculateOptimalRowHeight(lastRow.items, lastTarget);
       }
     }
 
     return rows;
   };
 
-  // Get grid template columns based on row items and their aspect ratios
-  const getGridTemplateColumns = (rowItems: SearchResult[]) => {
+  // Get grid template columns based on row items, their aspect ratios, and row height
+  const getGridTemplateColumns = (rowItems: SearchResult[], rowHeight: number) => {
     return rowItems
       .map((item) => {
         const dimensions = getFallbackDimensions(item);
-        let aspectRatio = dimensions.width / dimensions.height;
-
-        // Force PNG files to have 1:1 aspect ratio (except wide PNGs > 420px)
-        const isPNG =
-          item.file_type === "PNG" ||
-          (item.file_type === "image" &&
-            item.thumbnail?.toLowerCase().includes(".png")) ||
-          item.thumbnail?.toLowerCase().endsWith(".png");
-        const apiWidth = parseInt(String(item.width)) || dimensions.width;
-        const isWidePNG = isPNG && apiWidth > 420;
-        if (isPNG && !isWidePNG) {
-          aspectRatio = 1.0;
-        }
-
-        // Calculate relative width based on aspect ratio (same logic as above)
-        let relativeWidth;
-        if (aspectRatio >= 8.0) {
-          relativeWidth = 60;
-        } else if (aspectRatio >= 7.0) {
-          relativeWidth = 58;
-        } else if (aspectRatio >= 6.0) {
-          relativeWidth = 56;
-        } else if (aspectRatio >= 5.5) {
-          relativeWidth = 54;
-        } else if (aspectRatio >= 5.0) {
-          relativeWidth = 52;
-        } else if (aspectRatio >= 4.5) {
-          relativeWidth = 51;
-        } else if (aspectRatio >= 4.0) {
-          relativeWidth = 50;
-        } else if (aspectRatio >= 3.8) {
-          relativeWidth = 49;
-        } else if (aspectRatio >= 3.6) {
-          relativeWidth = 48;
-        } else if (aspectRatio >= 3.4) {
-          relativeWidth = 47;
-        } else if (aspectRatio >= 3.2) {
-          relativeWidth = 46;
-        } else if (aspectRatio >= 3.0) {
-          relativeWidth = 45;
-        } else if (aspectRatio >= 2.9) {
-          relativeWidth = 44;
-        } else if (aspectRatio >= 2.8) {
-          relativeWidth = 43;
-        } else if (aspectRatio >= 2.7) {
-          relativeWidth = 42;
-        } else if (aspectRatio >= 2.6) {
-          relativeWidth = 41;
-        } else if (aspectRatio >= 2.5) {
-          relativeWidth = 40;
-        } else if (aspectRatio >= 2.4) {
-          relativeWidth = 39;
-        } else if (aspectRatio >= 2.3) {
-          relativeWidth = 38;
-        } else if (aspectRatio >= 2.2) {
-          relativeWidth = 37;
-        } else if (aspectRatio >= 2.1) {
-          relativeWidth = 36;
-        } else if (aspectRatio >= 2.0) {
-          relativeWidth = 35;
-        } else if (aspectRatio >= 1.95) {
-          relativeWidth = 34;
-        } else if (aspectRatio >= 1.9) {
-          relativeWidth = 33;
-        } else if (aspectRatio >= 1.85) {
-          relativeWidth = 32;
-        } else if (aspectRatio >= 1.8) {
-          relativeWidth = 31;
-        } else if (aspectRatio >= 1.75) {
-          relativeWidth = 30;
-        } else if (aspectRatio >= 1.7) {
-          relativeWidth = 29;
-        } else if (aspectRatio >= 1.65) {
-          relativeWidth = 28;
-        } else if (aspectRatio >= 1.6) {
-          relativeWidth = 27;
-        } else if (aspectRatio >= 1.55) {
-          relativeWidth = 26;
-        } else if (aspectRatio >= 1.5) {
-          relativeWidth = 25;
-        } else if (aspectRatio >= 1.45) {
-          relativeWidth = 24;
-        } else if (aspectRatio >= 1.4) {
-          relativeWidth = 23;
-        } else if (aspectRatio >= 1.35) {
-          relativeWidth = 22;
-        } else if (aspectRatio >= 1.3) {
-          relativeWidth = 21;
-        } else if (aspectRatio >= 1.25) {
-          relativeWidth = 20;
-        } else if (aspectRatio >= 1.2) {
-          relativeWidth = 19;
-        } else if (aspectRatio >= 1.15) {
-          relativeWidth = 18;
-        } else if (aspectRatio >= 1.1) {
-          relativeWidth = 17;
-        } else if (aspectRatio >= 1.05) {
-          relativeWidth = 16;
-        } else if (aspectRatio >= 1.0) {
-          relativeWidth = 15;
-        } else if (aspectRatio >= 0.95) {
-          relativeWidth = 14;
-        } else if (aspectRatio >= 0.9) {
-          relativeWidth = 13;
-        } else if (aspectRatio >= 0.85) {
-          relativeWidth = 12;
-        } else if (aspectRatio >= 0.8) {
-          relativeWidth = 11;
-        } else if (aspectRatio >= 0.75) {
-          relativeWidth = 10;
-        } else if (aspectRatio >= 0.7) {
-          relativeWidth = 9;
-        } else if (aspectRatio >= 0.65) {
-          relativeWidth = 8;
-        } else if (aspectRatio >= 0.6) {
-          relativeWidth = 7;
-        } else if (aspectRatio >= 0.55) {
-          relativeWidth = 6;
-        } else if (aspectRatio >= 0.5) {
-          relativeWidth = 5;
-        } else if (aspectRatio >= 0.45) {
-          relativeWidth = 4;
-        } else if (aspectRatio >= 0.4) {
-          relativeWidth = 3;
-        } else if (aspectRatio >= 0.35) {
-          relativeWidth = 2;
-        } else if (aspectRatio >= 0.3) {
-          relativeWidth = 1;
-        } else {
-          relativeWidth = 0.8;
-        }
-
-        // Enforce a minimum column fraction to avoid overly narrow columns
-        relativeWidth = Math.max(relativeWidth, 12);
-
-        return `${relativeWidth}fr`;
+        const aspectRatio = dimensions.width / dimensions.height;
+        
+        // Calculate width based on row height and aspect ratio
+        const calculatedWidth = rowHeight * aspectRatio;
+        
+        // Convert to relative units (fr) based on calculated width
+        const relativeWidth = Math.max(calculatedWidth / 20, 8); // Minimum 8fr
+        
+        return `${relativeWidth.toFixed(1)}fr`;
       })
       .join(" ");
   };
@@ -444,8 +311,6 @@ export function RelatedFilesSection({
   const handleImageClick = (result: SearchResult) => {
     // Store image data in localStorage for the details page
     localStorage.setItem(`image_${result.file_id}`, JSON.stringify(result));
-    // Navigate to the media details page
-    window.location.href = `/media/${result.file_id}`;
   };
 
   return (
@@ -480,23 +345,26 @@ export function RelatedFilesSection({
         ))}
       </div>
 
-      {/* Desktop Layout - Dynamic CSS Grid */}
+      {/* Desktop Layout - Dynamic Masonry Grid with varied heights */}
       <div className="hidden sm:block w-full">
         {createDynamicGridRows(transformedResults).map(
-          (row: SearchResult[], rowIndex: number) => (
+          (rowData: { items: SearchResult[]; height: number }, rowIndex: number) => (
             <div
               key={rowIndex}
-              className="grid mb-3 2xl:mb-4"
+              className="grid mb-4 2xl:mb-6"
               style={{
-                gridTemplateColumns: getGridTemplateColumns(row),
+                gridTemplateColumns: getGridTemplateColumns(rowData.items, rowData.height),
                 gap: "20px",
               }}
             >
-              {row.map((result: SearchResult) => {
+              {rowData.items.map((result: SearchResult) => {
+                const rowHeight = rowData.height;
                 return (
-                  <div
+                  <Link
+                    href={`/media/${result.file_id}`}
                     key={result.id}
-                    className="group relative rounded-lg overflow-hidden transition-all duration-300 cursor-pointer h-[220px] search-card-responsive"
+                    className="group relative rounded-lg overflow-hidden transition-all duration-300 cursor-pointer search-card-responsive block"
+                    style={{ height: `${rowHeight}px` }}
                     onMouseEnter={() => setHoveredImage(result.id)}
                     onMouseLeave={() => setHoveredImage(null)}
                     onClick={() => handleImageClick(result)}
@@ -576,7 +444,7 @@ export function RelatedFilesSection({
                         />
                       )}
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

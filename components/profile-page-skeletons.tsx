@@ -2,18 +2,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 // Profile Header Skeleton
-export function ProfileHeaderSkeleton({ isRTL }: { isRTL: boolean }) {
+export function ProfileHeaderSkeleton({}: { isRTL: boolean }) {
   return (
     <header className="bg-background border-b border-border">
       <header className="px-4 sm:px-5 py-4">
         <div className="flex items-center justify-between">
-          <div
-            className={`flex items-center ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}
-          >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Mobile Menu Button */}
+            <div className="cursor-pointer md:hidden p-2 hover:bg-muted rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center">
+              <Skeleton className="w-5 h-5" />
             </div>
-            <Skeleton className="h-6 w-32" />
+            <div className="relative w-44 sm:w-48 h-12">
+              <Skeleton className="w-full h-full rounded" />
+            </div>
           </div>
           <Skeleton className="h-8 w-8 rounded-full" />
         </div>
@@ -169,55 +170,71 @@ export function DownloadHistorySkeleton({ isRTL }: { isRTL: boolean }) {
   return (
     <Card className="dark:bg-muted/50">
       <CardHeader>
-        <div className={`flex items-start justify-between ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
-          <div className={`flex items-center ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}>
+        <div
+          className={`flex items-start justify-between ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
+        >
+          <div
+            className={`flex items-center ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
+          >
             <Skeleton className="w-10 h-10 rounded-lg" />
             <div className="space-y-2">
               <Skeleton className="h-5 w-32" />
               <Skeleton className="h-3 w-48" />
             </div>
           </div>
-          <div className={`w-full sm:w-80 ${isRTL ? "text-right" : "text-left"}`}>
+          <div
+            className={`w-full sm:w-80 ${isRTL ? "text-right" : "text-left"}`}
+          >
             <Skeleton className="h-9 w-full" />
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-h-[70vh] 2xl:max-h-[60vh] overflow-y-auto pr-1">
-          {Array.from({ length: 8 }, (_, i) => (
-            <div
-              key={i}
-              className="relative rounded-xl border bg-card/60 dark:bg-muted/40 p-3 flex flex-col"
-            >
-              <div className="aspect-video rounded-lg overflow-hidden bg-secondary/30 flex items-center justify-center">
-                <Skeleton className="w-full h-full" />
-              </div>
-
-              <div className="mt-3 space-y-2">
-                {/* Badges row */}
-                <div className={`flex flex-wrap ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"}`}>
-                  <Skeleton className="h-5 w-20 rounded-full" />
-                  <Skeleton className="h-5 w-24 rounded-full" />
-                </div>
-
-                {/* Meta rows */}
-                <div className="space-y-3 text-sm">
-                  <Skeleton className="h-3 w-44" />
-                  <Skeleton className="h-3 w-36" />
-                  {/* URL row with chip-like appearance */}
-                  <div className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
-                    <Skeleton className="h-4 w-14" />
-                    <Skeleton className="h-6 w-40 rounded-full" />
-                  </div>
-                </div>
-
-                {/* Action button */}
-                <div className={`flex ${isRTL ? "flex-row-reverse" : ""} gap-2 pt-1`}>
-                  <Skeleton className="h-8 w-full" />
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="overflow-x-auto overflow-y-auto max-h-[60vh]">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b">
+                <th
+                  className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
+                >
+                  <Skeleton className="h-4 w-24" />
+                </th>
+                <th
+                  className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
+                >
+                  <Skeleton className="h-4 w-24" />
+                </th>
+                <th
+                  className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
+                >
+                  <Skeleton className="h-4 w-16" />
+                </th>
+                <th
+                  className={`py-2 px-3 ${isRTL ? "text-right" : "text-left"}`}
+                >
+                  <Skeleton className="h-4 w-40" />
+                </th>
+              </tr>
+            </thead>
+            <tbody className="align-top">
+              {Array.from({ length: 8 }, (_, i) => (
+                <tr key={i} className="border-b">
+                  <td className="py-2 px-3">
+                    <Skeleton className="h-4 w-28" />
+                  </td>
+                  <td className="py-2 px-3">
+                    <Skeleton className="h-5 w-24 rounded-full" />
+                  </td>
+                  <td className="py-2 px-3">
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                  </td>
+                  <td className="py-2 px-3">
+                    <Skeleton className="h-4 w-64" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>
