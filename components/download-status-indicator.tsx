@@ -45,10 +45,12 @@ export function DownloadStatusIndicator({
   const [downloadingTasks, setDownloadingTasks] = useState<Set<string>>(
     new Set()
   );
-  const [recentlyDownloadedTasks, setRecentlyDownloadedTasks] = useState<
+  const [, setRecentlyDownloadedTasks] = useState<
     Set<string>
   >(new Set());
   const [notificationCounter, setNotificationCounter] = useState(0);
+  // Track the order in which the user initiated downloads (most recent first)
+  const [recentOrder, setRecentOrder] = useState<string[]>([]);
 
   // Normalize backend status variations (e.g., "in_queue") to UI statuses
   const normalizeStatus = (status?: string): string => {
@@ -93,51 +95,20 @@ export function DownloadStatusIndicator({
         },
       }));
 
-      // Sort tasks to show latest at the top
+      // Sort tasks so the last clicked/created (by user action) appears first
       const sortedTasks = normalizedTasks.sort((a, b) => {
-        // 1) Active statuses first (top): downloading, in_progress, preparing, queued, pending
-        const isActive = (s?: string) =>
-          s === "downloading" ||
-          s === "in_progress" ||
-          s === "preparing" ||
-          s === "queued" ||
-          s === "pending";
+        // 1) Compare by recentOrder (lower index = more recent)
+        const aId = a.data?.id || "";
+        const bId = b.data?.id || "";
+        const ai = recentOrder.indexOf(aId);
+        const bi = recentOrder.indexOf(bId);
+        const aIn = ai !== -1;
+        const bIn = bi !== -1;
+        if (aIn && bIn) return ai - bi;
+        if (aIn && !bIn) return -1;
+        if (!aIn && bIn) return 1;
 
-        const aActive = isActive(a.progress?.status);
-        const bActive = isActive(b.progress?.status);
-        if (aActive && !bActive) return -1;
-        if (!aActive && bActive) return 1;
-
-        // 2) Recently downloaded (but only after active tasks)
-        const aRecentlyDownloaded = recentlyDownloadedTasks.has(
-          a.data?.id || ""
-        );
-        const bRecentlyDownloaded = recentlyDownloadedTasks.has(
-          b.data?.id || ""
-        );
-        if (aRecentlyDownloaded && !bRecentlyDownloaded) return -1;
-        if (!aRecentlyDownloaded && bRecentlyDownloaded) return 1;
-
-        // 3) Status priority among remaining
-        const statusPriority = {
-          queued: 1,
-          downloading: 1,
-          in_progress: 1,
-          preparing: 2,
-          pending: 4,
-          completed: 5,
-          failed: 6,
-        } as const;
-
-        const aPriority =
-          statusPriority[a.progress?.status as keyof typeof statusPriority] ??
-          7;
-        const bPriority =
-          statusPriority[b.progress?.status as keyof typeof statusPriority] ??
-          7;
-        if (aPriority !== bPriority) return aPriority - bPriority;
-
-        // Then sort by creation time (newest first)
+        // 2) Fallback: sort by creation time (newest first)
         const aTime = new Date(a.created_at || 0).getTime();
         const bTime = new Date(b.created_at || 0).getTime();
         return bTime - aTime;
@@ -223,6 +194,16 @@ export function DownloadStatusIndicator({
         const { taskId, sitePrice } = event.detail;
         if (taskId && sitePrice) {
           sessionStorage.setItem(`task_${taskId}_price`, sitePrice.toString());
+        }
+
+        // Update recent order to put this task at the very top
+        if (taskId) {
+          setRecentOrder((prev) => {
+            const next = prev.filter((id) => id !== taskId);
+            next.unshift(taskId);
+            // Optionally limit the list size
+            return next.slice(0, 200);
+          });
         }
       };
 
@@ -362,7 +343,7 @@ export function DownloadStatusIndicator({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className={cn("w-80 p-0", isRTL ? "mr-2" : "ml-2")}
+        className={cn("w-72 p-0", isRTL ? "mr-2" : "ml-2")}
         align={isRTL ? "end" : "start"}
       >
         <div className="p-4 border-b">
@@ -429,7 +410,7 @@ export function DownloadStatusIndicator({
                         </Badge>
                       </div>
 
-                      <p className="text-xs text-muted-foreground truncate max-w-[250px] mb-2">
+                      <p className="text-xs text-muted-foreground truncate max-w-[185px] mb-2">
                         {task.data.downloadUrl}
                       </p>
 

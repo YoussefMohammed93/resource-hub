@@ -84,7 +84,7 @@ export function DownloadVerificationSheet({
   const [downloadStatus, setDownloadStatus] = useState<
     "idle" | "preparing" | "downloading" | "completed" | "failed"
   >("idle");
-  const [showProgress, setShowProgress] = useState(false);
+  const [, setShowProgress] = useState(false);
   const [verificationData, setVerificationData] =
     useState<ApiVerificationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -319,217 +319,35 @@ export function DownloadVerificationSheet({
             )}
 
             {/* Success State */}
-            {verificationData?.success &&
-              verificationData.data &&
-              !isVerifying && (
+          {verificationData?.success &&
+            verificationData.data &&
+            !isVerifying && (
                 <div className="space-y-6">
-                  {/* Download Status Overview */}
-                  <Card className="overflow-hidden">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        <Shield />
-                        {t("download.verification.status.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* Status Grid */}
-                      <div className="grid grid-cols-1 gap-3">
-                        {/* Supported Status */}
-                        <div className="flex items-center justify-between p-4 rounded-xl border bg-card/50">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`p-2 rounded-full ${verificationData.data.is_supported ? "bg-primary/10" : "bg-destructive/10"}`}
-                            >
-                              {getStatusIcon(
-                                verificationData.data.is_supported
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-sm leading-tight">
-                                {t("download.verification.status.supported")}
-                              </h4>
-                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                                {verificationData.data.is_supported
-                                  ? t(
-                                      "download.verification.status.supportedDescription"
-                                    )
-                                  : t(
-                                      "download.verification.status.notSupportedDescription"
-                                    )}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Allowed Status */}
-                        <div className="flex items-center justify-between p-4 rounded-xl border bg-card/50">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`p-2 rounded-full ${verificationData.data.is_allowed ? "bg-primary/10" : "bg-destructive/10"}`}
-                            >
-                              {getStatusIcon(verificationData.data.is_allowed)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-sm leading-tight">
-                                {t("download.verification.status.allowed")}
-                              </h4>
-                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                                {verificationData.data.is_allowed
-                                  ? t(
-                                      "download.verification.status.allowedDescription"
-                                    )
-                                  : t(
-                                      "download.verification.status.notAllowedDescription"
-                                    )}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Affordable Status */}
-                        <div className="flex items-center justify-between p-4 rounded-xl border bg-card/50">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`p-2 rounded-full ${verificationData.data.can_afford ? "bg-primary/10" : "bg-destructive/10"}`}
-                            >
-                              {getStatusIcon(verificationData.data.can_afford)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-sm leading-tight">
-                                {t("download.verification.status.affordable")}
-                              </h4>
-                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                                {verificationData.data.can_afford
-                                  ? t(
-                                      "download.verification.status.affordableDescription"
-                                    )
-                                  : t(
-                                      "download.verification.status.notAffordableDescription"
-                                    )}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Overall Status Banner */}
-                      <div
-                        className={`relative overflow-hidden rounded-xl p-4 sm:p-6 ${
-                          canDownload
-                            ? "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20"
-                            : "bg-gradient-to-br from-destructive/10 via-destructive/5 to-transparent border border-destructive/20"
-                        }`}
-                      >
-                        <div className="flex flex-col sm:flex-row items-start gap-4">
-                          <div
-                            className={`p-3 rounded-full ${canDownload ? "bg-primary/20" : "bg-destructive/20"}`}
-                          >
-                            {canDownload ? (
-                              <CheckCircle className="w-6 h-6 text-primary" />
-                            ) : (
-                              <AlertTriangle className="w-6 h-6 text-destructive" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3
-                              className={`text-base sm:text-lg font-bold mb-2 leading-tight ${canDownload ? "text-primary" : "text-destructive"}`}
-                            >
-                              {canDownload
-                                ? t(
-                                    "download.verification.status.readyToDownload"
-                                  )
-                                : t(
-                                    "download.verification.status.downloadNotAvailable"
-                                  )}
-                            </h3>
-                            <p
-                              className={`text-sm sm:text-base leading-relaxed ${canDownload ? "text-primary/80" : "text-destructive/80"}`}
-                            >
-                              {canDownload
-                                ? t(
-                                    "download.verification.status.readyToDownloadDescription"
-                                  )
-                                : t(
-                                    "download.verification.status.downloadNotAvailableDescription",
-                                    {
-                                      issues: failureReasons
-                                        .map((reason) =>
-                                          t(
-                                            `download.verification.reasons.${reason}`
-                                          )
-                                        )
-                                        .join(", "),
-                                    }
-                                  )}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Decorative elements */}
-                        <div
-                          className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20 ${canDownload ? "bg-primary" : "bg-destructive"}`}
-                        />
-                        <div
-                          className={`absolute -bottom-16 -right-16 w-24 h-24 rounded-full blur-2xl opacity-10 ${canDownload ? "bg-primary" : "bg-destructive"}`}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Display detailed failure reasons */}
-                  {!canDownload && failureReasons.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-destructive">
-                          <AlertTriangle className="w-5 h-5" />
-                          {t("download.verification.issuesTitle")}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {failureReasons.map((reason, index) => {
-                            const reasonKey = `download.verification.detailedReasons.${reason}`;
-                            return (
-                              <div
-                                key={index}
-                                className="border rounded-lg p-4 bg-muted/30"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div className="flex-shrink-0 mt-0.5">
-                                    <div className="w-2 h-2 bg-destructive rounded-full" />
-                                  </div>
-                                  <div className="flex-1 space-y-2">
-                                    <h4 className="font-medium text-sm">
-                                      {t(`${reasonKey}.title`)}
-                                    </h4>
-                                    <p className="text-sm text-muted-foreground">
-                                      {t(`${reasonKey}.description`, {
-                                        requiredCredits:
-                                          verificationData?.data?.site?.price ||
-                                          0,
-                                        availableCredits:
-                                          subscriptionData?.credits
-                                            ?.remaining || 0,
-                                        expiryDate:
-                                          subscriptionData?.until || "",
-                                        dailyLimit: 10,
-                                        resetTime: "24 hours",
-                                        fileSize: "50MB",
-                                        maxSize: "100MB",
-                                      })}
-                                    </p>
-                                    <p className="text-sm font-medium text-primary">
-                                      {t(`${reasonKey}.suggestion`)}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                  {/* Primary Download Button just under title/description */}
+                  <div>
+                    {canDownload ? (
+                      <Button onClick={handleDownload} disabled={isDownloading} className="w-full" size="lg">
+                        {isDownloading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            {downloadStatus === "preparing" && t("download.verification.progress.preparingStatus")}
+                            {downloadStatus === "downloading" && t("download.verification.progress.downloadingProgress", { progress: downloadProgress.toFixed(0) })}
+                            {downloadStatus === "completed" && t("download.verification.progress.completedStatus")}
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4" />
+                            {t("download.verification.startDownload")}
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button disabled className="w-full" variant="destructive" size="lg">
+                        <XCircle className="w-4 h-4" />
+                        {t("download.verification.cannotDownload")}
+                      </Button>
+                    )}
+                  </div>
 
                   {/* Site Information */}
                   <Card>
@@ -598,6 +416,143 @@ export function DownloadVerificationSheet({
                       )}
                     </CardContent>
                   </Card>
+
+                  {/* Download Status Overview */}
+                  <Card className="overflow-hidden">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Shield />
+                        {t("download.verification.status.title")}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Status Grid */}
+                      <div className="grid grid-cols-1 gap-3">
+                        {/* Supported Status */}
+                        <div className="flex items-center justify-between p-4 rounded-xl border bg-card/50">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-full ${verificationData.data.is_supported ? "bg-primary/10" : "bg-destructive/10"}`}>
+                              {getStatusIcon(verificationData.data.is_supported)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-sm leading-tight">{t("download.verification.status.supported")}</h4>
+                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                {verificationData.data.is_supported
+                                  ? t("download.verification.status.supportedDescription")
+                                  : t("download.verification.status.notSupportedDescription")}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Allowed Status */}
+                        <div className="flex items-center justify-between p-4 rounded-xl border bg-card/50">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-full ${verificationData.data.is_allowed ? "bg-primary/10" : "bg-destructive/10"}`}>
+                              {getStatusIcon(verificationData.data.is_allowed)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-sm leading-tight">{t("download.verification.status.allowed")}</h4>
+                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                {verificationData.data.is_allowed
+                                  ? t("download.verification.status.allowedDescription")
+                                  : t("download.verification.status.notAllowedDescription")}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Affordable Status */}
+                        <div className="flex items-center justify-between p-4 rounded-xl border bg-card/50">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-full ${verificationData.data.can_afford ? "bg-primary/10" : "bg-destructive/10"}`}>
+                              {getStatusIcon(verificationData.data.can_afford)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-sm leading-tight">{t("download.verification.status.affordable")}</h4>
+                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                {verificationData.data.can_afford
+                                  ? t("download.verification.status.affordableDescription")
+                                  : t("download.verification.status.notAffordableDescription")}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Overall Status Banner */}
+                      <div className={`relative overflow-hidden rounded-xl p-4 sm:p-6 ${canDownload ? "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20" : "bg-gradient-to-br from-destructive/10 via-destructive/5 to-transparent border border-destructive/20"}`}>
+                        <div className="flex flex-col sm:flex-row items-start gap-4">
+                          <div className={`p-3 rounded-full ${canDownload ? "bg-primary/20" : "bg-destructive/20"}`}>
+                            {canDownload ? (
+                              <CheckCircle className="w-6 h-6 text-primary" />
+                            ) : (
+                              <AlertTriangle className="w-6 h-6 text-destructive" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className={`text-base sm:text-lg font-bold mb-2 leading-tight ${canDownload ? "text-primary" : "text-destructive"}`}>
+                              {canDownload ? t("download.verification.status.readyToDownload") : t("download.verification.status.downloadNotAvailable")}
+                            </h3>
+                            <p className={`text-sm sm:text-base leading-relaxed ${canDownload ? "text-primary/80" : "text-destructive/80"}`}>
+                              {canDownload
+                                ? t("download.verification.status.readyToDownloadDescription")
+                                : t("download.verification.status.downloadNotAvailableDescription", {
+                                    issues: failureReasons.map((reason) => t(`download.verification.reasons.${reason}`)).join(", "),
+                                  })}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Decorative elements */}
+                        <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20 ${canDownload ? "bg-primary" : "bg-destructive"}`} />
+                        <div className={`absolute -bottom-16 -right-16 w-24 h-24 rounded-full blur-2xl opacity-10 ${canDownload ? "bg-primary" : "bg-destructive"}`} />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Failure reasons under status */}
+                  {!canDownload && failureReasons.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-destructive">
+                          <AlertTriangle className="w-5 h-5" />
+                          {t("download.verification.issuesTitle")}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {failureReasons.map((reason, index) => {
+                            const reasonKey = `download.verification.detailedReasons.${reason}`;
+                            return (
+                              <div key={index} className="border rounded-lg p-4 bg-muted/30">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 mt-0.5">
+                                    <div className="w-2 h-2 bg-destructive rounded-full" />
+                                  </div>
+                                  <div className="flex-1 space-y-2">
+                                    <h4 className="font-medium text-sm">{t(`${reasonKey}.title`)}</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                      {t(`${reasonKey}.description`, {
+                                        requiredCredits: verificationData?.data?.site?.price || 0,
+                                        availableCredits: subscriptionData?.credits?.remaining || 0,
+                                        expiryDate: subscriptionData?.until || "",
+                                        dailyLimit: 10,
+                                        resetTime: "24 hours",
+                                        fileSize: "50MB",
+                                        maxSize: "100MB",
+                                      })}
+                                    </p>
+                                    <p className="text-sm font-medium text-primary">{t(`${reasonKey}.suggestion`)}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
                   {/* Subscription Information */}
                   <Card>
@@ -777,112 +732,12 @@ export function DownloadVerificationSheet({
             )}
           </div>
 
-          {/* Footer with action buttons */}
-          {verificationData?.success &&
-            verificationData.data &&
-            !isVerifying && (
-              <div>
-                {/* Download Progress Section - Only show when file is actually downloading */}
-                {isDownloading && showProgress && (
-                  <div className="space-y-4 pt-6 border-t mt-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium">
-                          {downloadStatus === "preparing" &&
-                            t("download.verification.progress.preparing")}
-                          {downloadStatus === "downloading" &&
-                            t("download.verification.progress.downloading")}
-                          {downloadStatus === "completed" &&
-                            t("download.verification.progress.completed")}
-                          {downloadStatus === "failed" &&
-                            t("download.verification.progress.failed")}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {downloadProgress.toFixed(0)}%
-                        </span>
-                      </div>
-                      <Progress value={downloadProgress} className="h-2" />
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      {downloadStatus === "preparing" && (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>
-                            {t("download.verification.progress.initializing")}
-                          </span>
-                        </>
-                      )}
-                      {downloadStatus === "downloading" && (
-                        <>
-                          <Download className="w-4 h-4" />
-                          <span>
-                            {t(
-                              "download.verification.progress.downloadingFromSource"
-                            )}
-                          </span>
-                        </>
-                      )}
-                      {downloadStatus === "completed" && (
-                        <>
-                          <CheckCircle className="w-4 h-4 text-primary" />
-                          <span>
-                            {t(
-                              "download.verification.progress.fileDownloadedSuccessfully"
-                            )}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-6 border-t mt-6">
-                  {canDownload ? (
-                    <Button
-                      onClick={handleDownload}
-                      disabled={isDownloading}
-                      className="flex-1"
-                      size="lg"
-                    >
-                      {isDownloading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          {downloadStatus === "preparing" &&
-                            t("download.verification.progress.preparingStatus")}
-                          {downloadStatus === "downloading" &&
-                            t(
-                              "download.verification.progress.downloadingProgress",
-                              { progress: downloadProgress.toFixed(0) }
-                            )}
-                          {downloadStatus === "completed" &&
-                            t("download.verification.progress.completedStatus")}
-                        </>
-                      ) : (
-                        <>
-                          <Download className="w-4 h-4" />
-                          {t("download.verification.startDownload")}
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <Button
-                      disabled
-                      className="flex-1"
-                      variant="destructive"
-                      size="lg"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      {t("download.verification.cannotDownload")}
-                    </Button>
-                  )}
-
-                  <Button onClick={onClose} variant="outline" size="lg">
-                    {t("download.verification.close")}
-                  </Button>
-                </div>
-              </div>
-            )}
+          {/* Bottom Close Button */}
+          <div className="pt-6 border-t mt-6">
+            <Button onClick={onClose} variant="outline" size="lg" className="w-full">
+              {t("download.verification.close")}
+            </Button>
+          </div>
         </SheetContent>
       </Sheet>
     </>
