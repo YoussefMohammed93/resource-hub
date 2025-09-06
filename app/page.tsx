@@ -1171,13 +1171,6 @@ export default function HomePage() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => handleSmoothScroll("categories")}
-                className={`hover:bg-primary hover:text-white ${isRTL && "text-base"}`}
-              >
-                {t("header.navigation.categories")}
-              </Button>
-              <Button
-                variant="ghost"
                 onClick={() => handleSmoothScroll("features")}
                 className={`hover:bg-primary hover:text-white ${isRTL && "text-base"}`}
               >
@@ -1233,14 +1226,6 @@ export default function HomePage() {
               >
                 <span className="text-base">
                   {t("header.navigation.pricing")}
-                </span>
-              </button>
-              <button
-                onClick={() => handleSmoothScroll("categories")}
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
-              >
-                <span className="text-base">
-                  {t("header.navigation.categories")}
                 </span>
               </button>
               <button
@@ -2104,6 +2089,46 @@ export default function HomePage() {
                               </DialogContent>
                             </Dialog>
                           )}
+                          {/* Always-visible quick preview of supported sites for better discoverability */}
+                          {planSupportedSites.length > 0 && (
+                            <div className="mt-4">
+                              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                                {planSupportedSites.slice(0, 5).map((site) => (
+                                  <div
+                                    key={`preview-${site.id}`}
+                                    className="flex items-center justify-center gap-2 bg-muted/30 border border-border/50 rounded-md p-2 overflow-hidden"
+                                    title={site.name}
+                                  >
+                                    <img
+                                      src={site.icon}
+                                      alt={`${site.name} icon`}
+                                      width={24}
+                                      height={24}
+                                      className="w-6 h-6 rounded object-contain"
+                                      onError={(e) => {
+                                        e.currentTarget.src =
+                                          "https://via.placeholder.com/24x24/6366f1/ffffff?text=" +
+                                          site.name.charAt(0);
+                                      }}
+                                    />
+                                  </div>
+                                ))}
+                                {planSupportedSites.length > 5 && (
+                                  <div className="col-span-2 flex items-center justify-center bg-muted/30 border border-border/50 rounded-md p-2 text-xs text-muted-foreground">
+                                    {isRTL
+                                      ? `+${planSupportedSites.length - 5} المزيد`
+                                      : `+${planSupportedSites.length - 5} more`}
+                                  </div>
+                                )}
+                              </div>
+                              {/* Helper text to guide users to open the full list */}
+                              <p className={`mt-4 text-[12px] text-muted-foreground ${isRTL && "!text-sm"}`}>
+                                {isRTL
+                                  ? "انقر على \"المواقع المدعومة\" أعلاه لعرض المواقع."
+                                  : "Click on \"Supported Sites\" above to view websites."}
+                              </p>
+                            </div>
+                          )}
                         </div>
                         <div className="pt-4 border-t border-border">
                           <h4
@@ -2131,7 +2156,7 @@ export default function HomePage() {
                         </div>
                       </div>
                       {/* CTA Button - Now at bottom */}
-                      <div className="mt-auto pt-4">
+                      <div className="mt-auto">
                         <Button
                           className="w-full py-6 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl"
                           asChild
@@ -2573,7 +2598,7 @@ export default function HomePage() {
                       value={parseInt(stat.value)}
                       label={stat.label}
                       suffix={stat.suffix}
-                      delay={index * 1500}
+                      delay={index * 3500}
                       icon={getStatIcon(key)}
                     />
                   );

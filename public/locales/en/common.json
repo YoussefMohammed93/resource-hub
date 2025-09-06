@@ -1328,7 +1328,9 @@
       "stockImages": "Stock images related to",
       "defaultQuery": "search",
       "description": "There is more than {{count}} stock images and vectors to {{query}}, enjoy!",
-      "vectorsText": "vectors"
+      "vectorsText": "vectors",
+      "showingFor": "Showing results for",
+      "totalFound": "{{count}} results found"
     },
     "status": {
       "online": "Online",

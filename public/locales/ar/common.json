@@ -1342,7 +1342,9 @@
       "stockImages": "صور مخزنة متعلقة بـ",
       "defaultQuery": "البحث",
       "description": "يوجد أكثر من {{count}} صورة مخزنة ورسوم متجهة لـ {{query}}، استمتع!",
-      "vectorsText": "رسوم متجهة"
+      "vectorsText": "رسوم متجهة",
+      "showingFor": "عرض النتائج لـ",
+      "totalFound": "{{count}} نتيجة"
     },
     "status": {
       "online": "متصل",

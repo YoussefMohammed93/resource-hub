@@ -1585,7 +1585,7 @@ function SearchContent() {
                   <Skeleton className="w-4 h-4 ml-auto" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  {Array.from({ length: 8 }).map((_, i) => (
+                  {Array.from({ length: 14 }).map((_, i) => (
                     <Skeleton key={i} className="w-full h-16 rounded-lg" />
                   ))}
                 </div>
@@ -1635,7 +1635,7 @@ function SearchContent() {
 
               {/* Search Results Count */}
               <div className="text-center space-y-2">
-                <Skeleton className="w-64 h-6 mx-auto" />
+                <Skeleton className="w-64 h-12 mx-auto rounded-full" />
                 <Skeleton className="w-80 h-4 mx-auto" />
               </div>
 
@@ -1993,7 +1993,12 @@ function SearchContent() {
                               : "text-muted-foreground group-hover:text-primary"
                         }`}
                       >
-                        {provider.count} {t("search.filters.items")}
+                        <span
+                          className="block w-full truncate"
+                          title={provider.name}
+                        >
+                          {provider.name}
+                        </span>
                         {!provider.isOnline && (
                           <div className="text-xs text-red-500 mt-1">
                             {t("search.status.offline")}
@@ -2085,9 +2090,6 @@ function SearchContent() {
                       className="text-sm sm:text-lg font-medium relative group px-5 !h-10"
                     >
                       {type.id}
-                      <span className="pl-1 text-[11px] sm:text-base">
-                        {type.count} {t("search.filters.items")}
-                      </span>
                     </Button>
                   ))
                 )}
@@ -2388,26 +2390,26 @@ function SearchContent() {
               </div>
             </div>
 
-            {/* Search Results Count */}
-            <div className="text-center space-y-2">
+            {/* Search Results Header */}
+            <div className="text-center space-y-3">
               <div
-                className={`flex items-center justify-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+                className={`flex items-center justify-center ${isRTL ? "flex-row-reverse" : ""}`}
               >
-                <h2 className="text-lg font-semibold text-foreground">
-                  {t("search.results.stockImages")}{" "}
-                  <span className="text-primary">
-                    {searchQuery || t("search.results.defaultQuery")}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 shadow-sm">
+                  <Search className="w-4 h-4 text-primary" />
+                  <span className="text-sm text-muted-foreground">
+                    {t("search.results.showingFor")}
                   </span>
-                  .
-                </h2>
+                  <span className="text-sm font-semibold text-primary">
+                    “{searchQuery || t("search.results.defaultQuery")}”
+                  </span>
+                </div>
               </div>
-              <p className="text-muted-foreground">
-                {t("search.results.description", {
-                  count: totalResults,
-                  query: searchQuery || t("search.results.defaultQuery"),
-                })}{" "}
-                {t("search.results.vectorsText")}{" "}
-              </p>
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <span className="text-sm sm:text-base">
+                  {t("search.results.totalFound", { count: totalResults })}
+                </span>
+              </div>
             </div>
 
             {/* Offline Providers Notification */}

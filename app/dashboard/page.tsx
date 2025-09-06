@@ -6223,9 +6223,9 @@ export default function DashboardPage() {
                       {pricingPlans.map((plan) => (
                         <Card
                           key={plan.id}
-                          className="relative overflow-hidden border-border/50 p-0"
+                          className="relative overflow-hidden border-border/50 p-0 h-full flex flex-col"
                         >
-                          <CardContent className="p-0 dark:bg-secondary">
+                          <CardContent className="p-0 dark:bg-secondary h-full flex flex-col">
                             {/* Header Section */}
                             <div className="bg-secondary/50 dark:bg-secondary p-4 sm:p-6 border-b border-border/50">
                               <div className="flex items-start justify-between">
@@ -6243,7 +6243,7 @@ export default function DashboardPage() {
                               </div>
                             </div>
                             {/* Details Section */}
-                            <div className="p-4 sm:p-6 space-y-4">
+                            <div className="p-4 sm:p-6 space-y-4 flex-1 flex flex-col">
                               {/* Credits and Validity */}
                               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                                 <div className="space-y-1">
@@ -6295,8 +6295,9 @@ export default function DashboardPage() {
                                       </span>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                      {(plan.supportedSites || []).map(
-                                        (site, index) => (
+                                      {(plan.supportedSites || [])
+                                        .slice(0, 4)
+                                        .map((site, index) => (
                                           <span
                                             key={`${plan.id}-site-${index}`}
                                             className={`inline-flex items-center ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"} px-3 py-2 rounded-lg bg-secondary/50 dark:bg-card/50 border border-secondary text-sm font-medium text-foreground`}
@@ -6306,7 +6307,20 @@ export default function DashboardPage() {
                                             </div>
                                             <span>{site}</span>
                                           </span>
-                                        )
+                                        ))}
+                                      {plan.supportedSites.length > 4 && (
+                                        <span
+                                          className={`inline-flex items-center ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"} px-3 py-2 rounded-lg bg-secondary/50 dark:bg-card/50 border border-secondary text-sm font-medium text-muted-foreground`}
+                                        >
+                                          <div className="w-4 h-4 bg-primary/10 border border-primary/10 rounded flex items-center justify-center">
+                                            <Globe className="w-3 h-3 text-primary" />
+                                          </div>
+                                          <span>
+                                            {isRTL
+                                              ? `+${plan.supportedSites.length - 4} المزيد`
+                                              : `+${plan.supportedSites.length - 4} more`}
+                                          </span>
+                                        </span>
                                       )}
                                     </div>
                                   </div>
@@ -6341,7 +6355,7 @@ export default function DashboardPage() {
                               </div>
                             </div>
                             {/* Footer Section */}
-                            <div className="p-4 sm:p-6 !pt-0 space-y-3">
+                            <div className="p-4 sm:p-6 !pt-0 space-y-3 mt-auto">
                               <Button
                                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                                 onClick={() => handleEditPackage(plan)}
@@ -6469,7 +6483,7 @@ export default function DashboardPage() {
 
                           {/* Transaction Details */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-2">
+                            <div className="flex items-center justify-between space-x-2 mb-2">
                               <span className="text-base font-medium text-foreground truncate">
                                 {entry.user_name}
                               </span>
