@@ -52,7 +52,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import Footer from "@/components/footer";
 import FAQSection from "@/components/faq-section";
@@ -83,6 +82,7 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { Badge } from "@/components/ui/badge";
 
 // StatisticCard component for animated counters
 interface StatisticCardProps {
@@ -151,553 +151,410 @@ function StatisticCard({
   );
 }
 
-// Platform data organized by categories for tabbed interface
-const platformsByCategory = {
-  imagesVectors: [
-    {
-      id: 1,
-      name: "Freepik",
-      url: "https://www.freepik.com",
-      icon: "/freepik-small.png",
-    },
-    {
-      id: 2,
-      name: "Shutterstock",
-      url: "https://www.shutterstock.com",
-      icon: "/shutterstock-small.webp",
-    },
-    {
-      id: 3,
-      name: "Adobe Stock",
-      url: "https://stock.adobe.com",
-      icon: null,
-      bgColor: "bg-red-600",
-      initials: "Ae",
-    },
-    {
-      id: 101,
-      name: "Freepik",
-      url: "https://www.freepik.com",
-      icon: "/freepik-small.png",
-    },
-    {
-      id: 200,
-      name: "Shutterstock",
-      url: "https://www.shutterstock.com",
-      icon: "/shutterstock-small.webp",
-    },
-    {
-      id: 300,
-      name: "Adobe Stock",
-      url: "https://stock.adobe.com",
-      icon: null,
-      bgColor: "bg-red-600",
-      initials: "Ae",
-    },
-    {
-      id: 4,
-      name: "Getty Images",
-      url: "https://www.gettyimages.com",
-      icon: null,
-      bgColor: "bg-violet-500",
-      initials: "G",
-    },
-    {
-      id: 5,
-      name: "Unsplash",
-      url: "https://unsplash.com",
-      icon: null,
-      bgColor: "bg-blue-500",
-      initials: "U",
-    },
-    {
-      id: 6,
-      name: "Pexels",
-      url: "https://www.pexels.com",
-      icon: null,
-      bgColor: "bg-green-600",
-      initials: "P",
-    },
-    {
-      id: 7,
-      name: "Pixabay",
-      url: "https://pixabay.com",
-      icon: null,
-      bgColor: "bg-blue-600",
-      initials: "Px",
-    },
-    {
-      id: 8,
-      name: "Vecteezy",
-      url: "https://www.vecteezy.com",
-      icon: null,
-      bgColor: "bg-indigo-600",
-      initials: "V",
-    },
-    {
-      id: 9,
-      name: "Dreamstime",
-      url: "https://www.dreamstime.com",
-      icon: null,
-      bgColor: "bg-teal-600",
-      initials: "DT",
-    },
-    {
-      id: 10,
-      name: "123RF",
-      url: "https://www.123rf.com",
-      icon: null,
-      bgColor: "bg-purple-600",
-      initials: "123",
-    },
-    {
-      id: 11,
-      name: "Depositphotos",
-      url: "https://depositphotos.com",
-      icon: null,
-      bgColor: "bg-orange-600",
-      initials: "D",
-    },
-    {
-      id: 12,
-      name: "iStock",
-      url: "https://www.istockphoto.com",
-      icon: null,
-      bgColor: "bg-emerald-600",
-      initials: "iS",
-    },
-    {
-      id: 13,
-      name: "Envato Elements",
-      url: "https://elements.envato.com",
-      icon: null,
-      bgColor: "bg-green-700",
-      initials: "EE",
-    },
-    {
-      id: 14,
-      name: "Creative Market",
-      url: "https://creativemarket.com",
-      icon: null,
-      bgColor: "bg-pink-600",
-      initials: "CM",
-    },
-    {
-      id: 15,
-      name: "Canva",
-      url: "https://www.canva.com",
-      icon: null,
-      bgColor: "bg-cyan-500",
-      initials: "C",
-    },
-    {
-      id: 16,
-      name: "Figma Community",
-      url: "https://www.figma.com/community",
-      icon: null,
-      bgColor: "bg-purple-500",
-      initials: "F",
-    },
-    {
-      id: 17,
-      name: "Flaticon",
-      url: "https://www.flaticon.com",
-      icon: null,
-      bgColor: "bg-blue-700",
-      initials: "FI",
-    },
-    {
-      id: 18,
-      name: "Icons8",
-      url: "https://icons8.com",
-      icon: null,
-      bgColor: "bg-yellow-600",
-      initials: "I8",
-    },
-    {
-      id: 19,
-      name: "Noun Project",
-      url: "https://thenounproject.com",
-      icon: null,
-      bgColor: "bg-gray-700",
-      initials: "NP",
-    },
-    {
-      id: 20,
-      name: "Storyset",
-      url: "https://storyset.com",
-      icon: null,
-      bgColor: "bg-rose-600",
-      initials: "SS",
-    },
-  ],
-  videos: [
-    {
-      id: 21,
-      name: "Shutterstock",
-      url: "https://www.shutterstock.com/video",
-      icon: "/shutterstock-small.webp",
-    },
-    {
-      id: 22,
-      name: "Adobe Stock",
-      url: "https://stock.adobe.com/video",
-      icon: null,
-      bgColor: "bg-red-600",
-      initials: "Ae",
-    },
-    {
-      id: 23,
-      name: "Getty Images",
-      url: "https://www.gettyimages.com/video",
-      icon: null,
-      bgColor: "bg-violet-500",
-      initials: "G",
-    },
-    {
-      id: 24,
-      name: "Pond5",
-      url: "https://www.pond5.com",
-      icon: null,
-      bgColor: "bg-emerald-600",
-      initials: "P5",
-    },
-    {
-      id: 25,
-      name: "VideoHive",
-      url: "https://videohive.net",
-      icon: null,
-      bgColor: "bg-orange-600",
-      initials: "VH",
-    },
-    {
-      id: 26,
-      name: "Pexels Videos",
-      url: "https://www.pexels.com/videos",
-      icon: null,
-      bgColor: "bg-green-600",
-      initials: "P",
-    },
-    {
-      id: 27,
-      name: "Pixabay Videos",
-      url: "https://pixabay.com/videos",
-      icon: null,
-      bgColor: "bg-blue-600",
-      initials: "Px",
-    },
-    {
-      id: 28,
-      name: "Vimeo Stock",
-      url: "https://vimeo.com/stock",
-      icon: null,
-      bgColor: "bg-blue-500",
-      initials: "V",
-    },
-    {
-      id: 29,
-      name: "Motion Array",
-      url: "https://motionarray.com",
-      icon: null,
-      bgColor: "bg-purple-600",
-      initials: "MA",
-    },
-    {
-      id: 30,
-      name: "Storyblocks",
-      url: "https://www.storyblocks.com",
-      icon: null,
-      bgColor: "bg-indigo-600",
-      initials: "SB",
-    },
-    {
-      id: 31,
-      name: "Artgrid",
-      url: "https://artgrid.io",
-      icon: null,
-      bgColor: "bg-gray-700",
-      initials: "AG",
-    },
-    {
-      id: 32,
-      name: "Coverr",
-      url: "https://coverr.co",
-      icon: null,
-      bgColor: "bg-teal-600",
-      initials: "C",
-    },
-    {
-      id: 33,
-      name: "Mixkit",
-      url: "https://mixkit.co",
-      icon: null,
-      bgColor: "bg-pink-600",
-      initials: "MK",
-    },
-    {
-      id: 34,
-      name: "Videvo",
-      url: "https://www.videvo.net",
-      icon: null,
-      bgColor: "bg-cyan-600",
-      initials: "VD",
-    },
-    {
-      id: 35,
-      name: "Life of Vids",
-      url: "https://www.lifeofvids.com",
-      icon: null,
-      bgColor: "bg-rose-600",
-      initials: "LV",
-    },
-    {
-      id: 36,
-      name: "Mazwai",
-      url: "https://mazwai.com",
-      icon: null,
-      bgColor: "bg-amber-600",
-      initials: "M",
-    },
-    {
-      id: 37,
-      name: "Dissolve",
-      url: "https://dissolve.com",
-      icon: null,
-      bgColor: "bg-lime-600",
-      initials: "D",
-    },
-    {
-      id: 38,
-      name: "Clipstill",
-      url: "https://www.clipstill.com",
-      icon: null,
-      bgColor: "bg-violet-600",
-      initials: "CS",
-    },
-    {
-      id: 39,
-      name: "Envato Elements",
-      url: "https://elements.envato.com/video",
-      icon: null,
-      bgColor: "bg-green-700",
-      initials: "EE",
-    },
-    {
-      id: 40,
-      name: "Footage Firm",
-      url: "https://footagefirm.com",
-      icon: null,
-      bgColor: "bg-slate-600",
-      initials: "FF",
-    },
-  ],
-  soundEffects: [
-    {
-      id: 41,
-      name: "AudioJungle",
-      url: "https://audiojungle.net",
-      icon: null,
-      bgColor: "bg-purple-600",
-      initials: "AJ",
-    },
-    {
-      id: 42,
-      name: "Pond5",
-      url: "https://www.pond5.com/sound-effects",
-      icon: null,
-      bgColor: "bg-emerald-600",
-      initials: "P5",
-    },
-    {
-      id: 43,
-      name: "Adobe Stock",
-      url: "https://stock.adobe.com/audio",
-      icon: null,
-      bgColor: "bg-red-600",
-      initials: "Ae",
-    },
-    {
-      id: 44,
-      name: "Shutterstock",
-      url: "https://www.shutterstock.com/music",
-      icon: "/shutterstock-small.webp",
-    },
-    {
-      id: 45,
-      name: "Freesound",
-      url: "https://freesound.org",
-      icon: null,
-      bgColor: "bg-blue-700",
-      initials: "FS",
-    },
-    {
-      id: 46,
-      name: "Zapsplat",
-      url: "https://www.zapsplat.com",
-      icon: null,
-      bgColor: "bg-yellow-600",
-      initials: "ZS",
-    },
-    {
-      id: 47,
-      name: "Epidemic Sound",
-      url: "https://www.epidemicsound.com",
-      icon: null,
-      bgColor: "bg-green-600",
-      initials: "ES",
-    },
-    {
-      id: 48,
-      name: "Artlist",
-      url: "https://artlist.io",
-      icon: null,
-      bgColor: "bg-black",
-      initials: "AL",
-    },
-    {
-      id: 49,
-      name: "Musicbed",
-      url: "https://www.musicbed.com",
-      icon: null,
-      bgColor: "bg-blue-600",
-      initials: "MB",
-    },
-    {
-      id: 50,
-      name: "PremiumBeat",
-      url: "https://www.premiumbeat.com",
-      icon: null,
-      bgColor: "bg-orange-600",
-      initials: "PB",
-    },
-    {
-      id: 51,
-      name: "AudioBlocks",
-      url: "https://www.audioblocks.com",
-      icon: null,
-      bgColor: "bg-indigo-600",
-      initials: "AB",
-    },
-    {
-      id: 52,
-      name: "Soundstripe",
-      url: "https://www.soundstripe.com",
-      icon: null,
-      bgColor: "bg-pink-600",
-      initials: "SS",
-    },
-    {
-      id: 53,
-      name: "Bensound",
-      url: "https://www.bensound.com",
-      icon: null,
-      bgColor: "bg-teal-600",
-      initials: "BS",
-    },
-    {
-      id: 54,
-      name: "YouTube Audio Library",
-      url: "https://www.youtube.com/audiolibrary",
-      icon: null,
-      bgColor: "bg-red-500",
-      initials: "YT",
-    },
-    {
-      id: 55,
-      name: "BBC Sound Effects",
-      url: "https://sound-effects.bbcrewind.co.uk",
-      icon: null,
-      bgColor: "bg-gray-700",
-      initials: "BBC",
-    },
-    {
-      id: 56,
-      name: "Splice Sounds",
-      url: "https://splice.com/sounds",
-      icon: null,
-      bgColor: "bg-cyan-600",
-      initials: "SP",
-    },
-    {
-      id: 57,
-      name: "Loopmasters",
-      url: "https://www.loopmasters.com",
-      icon: null,
-      bgColor: "bg-violet-600",
-      initials: "LM",
-    },
-    {
-      id: 58,
-      name: "Native Instruments",
-      url: "https://www.native-instruments.com",
-      icon: null,
-      bgColor: "bg-slate-700",
-      initials: "NI",
-    },
-    {
-      id: 59,
-      name: "Envato Elements",
-      url: "https://elements.envato.com/audio",
-      icon: null,
-      bgColor: "bg-green-700",
-      initials: "EE",
-    },
-    {
-      id: 60,
-      name: "Motion Array",
-      url: "https://motionarray.com/browse/music",
-      icon: null,
-      bgColor: "bg-purple-600",
-      initials: "MA",
-    },
-  ],
+// Credit-based supported sites with pricing/variants
+type SiteVariant = {
+  label: string; // e.g. "EPS/JPG", "HD", "4K", "Icon", "Package"
+  points: number; // allow fractional values like 1.5
 };
 
-// Platform interface
-interface Platform {
-  id: number;
+type CreditSite = {
+  id: string;
   name: string;
-  url?: string;
-  icon: string | null;
-  bgColor?: string;
-  initials?: string;
-}
+  url: string;
+  variants: SiteVariant[]; // one or more variants per site
+};
 
-// Helper function to render platform cards
-const PlatformCard = ({ platform }: { platform: Platform }) => (
-  <a
-    href={platform.url}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="group relative aspect-square bg-background dark:bg-muted/50 border border-border/50 rounded-lg transition-all duration-200 hover:border-primary/40 cursor-pointer overflow-hidden"
-    title={platform.name}
-  >
-    <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-    <div className="relative w-full h-full p-2 flex flex-col items-center justify-center">
-      <div className="w-12 h-12 sm:w-24 sm:h-24 mb-1 sm:mb-2 relative">
-        {platform.icon ? (
-          <Image
-            src={platform.icon}
-            alt={platform.name}
-            fill
-            className="object-contain"
-          />
-        ) : (
-          <div
-            className={`w-full h-full ${platform.bgColor} rounded flex items-center justify-center`}
-          >
-            <span className="text-white font-bold text-sm sm:text-lg">
-              {platform.initials}
-            </span>
+const creditSites: CreditSite[] = [
+  {
+    id: "adobe-stock",
+    name: "Adobe Stock",
+    url: "https://stock.adobe.com",
+    variants: [
+      { label: "EPS/JPG", points: 1 },
+      { label: "HD", points: 30 },
+      { label: "4K", points: 35 },
+    ],
+  },
+  {
+    id: "shutterstock",
+    name: "Shutterstock",
+    url: "https://www.shutterstock.com",
+    variants: [
+      { label: "EPS/JPG", points: 2 },
+      { label: "HD", points: 30 },
+      { label: "4K", points: 40 },
+    ],
+  },
+  {
+    id: "freepik",
+    name: "Freepik",
+    url: "https://www.freepik.com",
+    variants: [
+      { label: "Graphics", points: 1 },
+      { label: "Video", points: 30 },
+    ],
+  },
+  {
+    id: "pikbest",
+    name: "Pikbest",
+    url: "https://www.pikbest.com",
+    variants: [{ label: "All", points: 1 }],
+  },
+  {
+    id: "creativefabrica",
+    name: "Creative Fabrica",
+    url: "https://www.creativefabrica.com",
+    variants: [{ label: "All", points: 1 }],
+  },
+  {
+    id: "iconscout",
+    name: "Iconscout",
+    url: "https://iconscout.com",
+    variants: [{ label: "All", points: 1 }],
+  },
+  {
+    id: "vecteezy",
+    name: "Vecteezy",
+    url: "https://www.vecteezy.com",
+    variants: [{ label: "All", points: 1 }],
+  },
+  {
+    id: "rawpixel",
+    name: "Rawpixel",
+    url: "https://www.rawpixel.com",
+    variants: [{ label: "All", points: 1 }],
+  },
+  {
+    id: "lovepik",
+    name: "Lovepik",
+    url: "https://www.lovepik.com",
+    variants: [{ label: "All", points: 1 }],
+  },
+  {
+    id: "epidemicsound",
+    name: "Epidemic Sound",
+    url: "https://www.epidemicsound.com",
+    variants: [{ label: "All", points: 1 }],
+  },
+  {
+    id: "pngtree",
+    name: "PNGTree",
+    url: "https://pngtree.com",
+    variants: [{ label: "All", points: 1 }],
+  },
+  {
+    id: "flaticon",
+    name: "Flaticon",
+    url: "https://www.flaticon.com",
+    variants: [
+      { label: "Icon", points: 1 },
+      { label: "Package", points: 5 },
+    ],
+  },
+  {
+    id: "mockupcloud",
+    name: "Mockup Cloud",
+    url: "https://www.mockupcloud.com",
+    variants: [{ label: "All", points: 1.5 }],
+  },
+  {
+    id: "envato-elements",
+    name: "Envato Elements",
+    url: "https://elements.envato.com",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "storyblocks",
+    name: "Storyblocks",
+    url: "https://www.storyblocks.com",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "soundstripe",
+    name: "Soundstripe",
+    url: "https://www.soundstripe.com",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "motionarray",
+    name: "Motion Array",
+    url: "https://motionarray.com",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "motionelements",
+    name: "MotionElements",
+    url: "https://www.motionelements.com",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "pixelbuddha",
+    name: "Pixelbuddha",
+    url: "https://pixelbuddha.net",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "deeezy",
+    name: "Deeezy",
+    url: "https://www.deeezy.com",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "123rf",
+    name: "123RF",
+    url: "https://www.123rf.com",
+    variants: [{ label: "EPS/JPG", points: 2 }],
+  },
+  {
+    id: "pixeden",
+    name: "Pixeden",
+    url: "https://www.pixeden.com",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "artlist",
+    name: "Artlist",
+    url: "https://artlist.io",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "designi",
+    name: "Designi",
+    url: "https://www.designi.com.br",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "uihut",
+    name: "UIHUT",
+    url: "https://www.uihut.com",
+    variants: [{ label: "All", points: 2 }],
+  },
+  {
+    id: "depositphotos",
+    name: "Depositphotos",
+    url: "https://depositphotos.com",
+    variants: [{ label: "EPS/JPG", points: 3 }],
+  },
+  {
+    id: "pixelsquid",
+    name: "PixelSquid",
+    url: "https://www.pixelsquid.com",
+    variants: [{ label: "All", points: 3 }],
+  },
+  {
+    id: "productioncrate",
+    name: "ProductionCrate",
+    url: "https://www.productioncrate.com",
+    variants: [{ label: "All", points: 3 }],
+  },
+  {
+    id: "graphicscrate",
+    name: "GraphicsCrate",
+    url: "https://graphics.crate.com",
+    variants: [{ label: "All", points: 3 }],
+  },
+  {
+    id: "vectorstock",
+    name: "VectorStock",
+    url: "https://www.vectorstock.com",
+    variants: [{ label: "All", points: 3 }],
+  },
+  {
+    id: "ui8",
+    name: "UI8",
+    url: "https://ui8.net",
+    variants: [{ label: "All", points: 4 }],
+  },
+  {
+    id: "dreamstime",
+    name: "Dreamstime",
+    url: "https://www.dreamstime.com",
+    variants: [{ label: "EPS/JPG", points: 4 }],
+  },
+  {
+    id: "uplabs",
+    name: "UpLabs",
+    url: "https://www.uplabs.com",
+    variants: [{ label: "All", points: 3 }],
+  },
+  {
+    id: "craftwork",
+    name: "Craftwork",
+    url: "https://craftwork.design",
+    variants: [{ label: "All", points: 5 }],
+  },
+  {
+    id: "istockphoto",
+    name: "iStockphoto",
+    url: "https://www.istockphoto.com",
+    variants: [
+      { label: "EPS/JPG", points: 5 },
+      { label: "FHD", points: 65 },
+    ],
+  },
+  {
+    id: "artgrid",
+    name: "Artgrid",
+    url: "https://artgrid.io",
+    variants: [
+      { label: "HD", points: 2 },
+      { label: "4K", points: 15 },
+    ],
+  },
+  {
+    id: "yellowimages",
+    name: "Yellow Images (Mockup)",
+    url: "https://yellowimages.com",
+    variants: [{ label: "All", points: 22 }],
+  },
+  {
+    id: "alamy",
+    name: "Alamy",
+    url: "https://www.alamy.com",
+    variants: [{ label: "All", points: 32 }],
+  },
+];
+
+// Card for credit site
+const CreditSiteCard = ({ site }: { site: CreditSite }) => {
+  const { i18n } = useTranslation("common");
+  const minPoints = Math.min(...site.variants.map((v) => v.points));
+  const formatPoints = (n: number) => {
+    // Show integers without decimals, fractions with comma for Arabic
+    const isInt = Number.isInteger(n);
+    const numStr = isInt
+      ? String(n)
+      : i18n.language === "ar"
+        ? String(n).replace(".", ",")
+        : String(n);
+    const unit =
+      i18n.language === "ar"
+        ? n === 1
+          ? "نقطة"
+          : "نقاط"
+        : n === 1
+          ? "point"
+          : "points";
+    return `${numStr} ${unit}`;
+  };
+
+  // Get high-quality icon URL for specific sites with poor favicons
+  const getIconUrl = (siteId: string, url: string) => {
+    const iconMap: Record<string, string> = {
+      "adobe-stock":
+        "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/adobe.svg",
+      pikbest: "https://logo.clearbit.com/pikbest.com",
+      creativefabrica: "https://logo.clearbit.com/creativefabrica.com",
+      storyblocks: "https://logo.clearbit.com/storyblocks.com",
+      craftwork: "https://logo.clearbit.com/craftwork.design",
+      vecteezy: "https://logo.clearbit.com/vecteezy.com",
+      lovepik: "https://logo.clearbit.com/lovepik.com",
+      pngtree: "https://logo.clearbit.com/pngtree.com",
+      uplabs: "https://logo.clearbit.com/uplabs.com",
+      graphicscrate: "https://logo.clearbit.com/graphics.crate.com",
+    };
+
+    return (
+      iconMap[siteId] ||
+      `https://www.google.com/s2/favicons?domain=${encodeURIComponent(url)}&sz=128`
+    );
+  };
+
+  const iconUrl = getIconUrl(site.id, site.url);
+  const isCustomIcon = [
+    "adobe-stock",
+    "pikbest",
+    "creativefabrica",
+    "storyblocks",
+    "craftwork",
+  ].includes(site.id);
+
+  return (
+    <div className="group relative aspect-[8/9] bg-gradient-to-br from-background via-background to-muted/20 dark:from-muted/30 dark:via-muted/20 dark:to-muted/10 border border-border/60 rounded-2xl transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 cursor-pointer overflow-hidden">
+      {/* Animated background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-primary/4 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out" />
+
+      {/* Subtle glow effect */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-primary/10 opacity-0 group-hover:opacity-30 blur-xl transition-all duration-500" />
+
+      <a
+        href={site.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative z-10 flex flex-col items-center justify-between h-full p-5 text-center"
+        title={site.name}
+      >
+        {/* Icon section with enhanced styling */}
+        <div className="flex-shrink-0 mb-3">
+          <div className="relative w-18 h-18 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/60 dark:from-muted/20 dark:to-muted/40 border border-border/40 flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
+            {/* Icon glow effect */}
+            <div className="absolute inset-0 rounded-2xl bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <img
+              src={iconUrl}
+              alt={`${site.name} favicon`}
+              width={72}
+              height={72}
+              loading="lazy"
+              decoding="async"
+              className={`relative z-10 ${isCustomIcon ? "w-12 h-12 sm:w-16 sm:h-16" : "w-14 h-14 sm:w-16 sm:h-16"} object-contain transition-transform duration-300`}
+              onError={(e) => {
+                // Fallback to Google favicon service if custom icon fails
+                const target = e.target as HTMLImageElement;
+                if (
+                  target.src !==
+                  `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`
+                ) {
+                  target.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                  target.className =
+                    "relative z-10 w-14 h-14 sm:w-16 sm:h-16 object-contain transition-transform duration-300";
+                }
+              }}
+            />
           </div>
-        )}
-      </div>
-      <span className="text-xs sm:text-base font-medium text-muted-foreground group-hover:text-foreground transition-colors text-center leading-tight">
-        {platform.name}
-      </span>
+        </div>
+
+        {/* Content section */}
+        <div className="flex-1 flex flex-col justify-center space-y-3">
+          {/* Site name with better typography */}
+          <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300 leading-tight tracking-tight">
+            {site.name}
+          </h3>
+
+          {/* Enhanced badges with better spacing and design */}
+          <div className="flex flex-wrap justify-center gap-3">
+            {site.variants.map((variant, i) => {
+              const isLowestPrice = variant.points <= minPoints;
+              return (
+                <Badge
+                  key={i}
+                  variant={isLowestPrice ? "success" : "outline"}
+                  className={`
+                    text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full shadow-sm transition-all duration-200
+                    ${
+                      isLowestPrice
+                        ? "bg-gradient-to-r from-green-500/90 to-emerald-500/90 text-white border-green-400/50 shadow-green-500/20"
+                        : "bg-muted/80 hover:bg-muted border-border/60 hover:border-primary/40"
+                    }
+                    group-hover:shadow-md
+                  `}
+                >
+                  <span className="font-medium">{variant.label}</span>
+                  <span className="mx-1 opacity-70">•</span>
+                  <span className="font-bold">
+                    {formatPoints(variant.points)}
+                  </span>
+                </Badge>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Subtle bottom accent */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </a>
     </div>
-  </a>
-);
+  );
+};
 
 export default function HomePage() {
   const { t } = useTranslation("common");
@@ -1778,53 +1635,22 @@ export default function HomePage() {
                 {t("supportedPlatforms.description")}
               </p>
             </div>
-            {/* Tabbed Platforms Interface */}
-            <div className="max-w-[1200px] mx-auto border border-primary/80 dark:border-primary/30 p-5 rounded-xl shadow-2xs">
-              <Tabs defaultValue="imagesVectors" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-8">
-                  <TabsTrigger
-                    value="imagesVectors"
-                    className="text-sm sm:text-base"
-                  >
-                    {t("supportedPlatforms.tabs.imagesVectors")}
-                  </TabsTrigger>
-                  <TabsTrigger value="videos" className="text-sm sm:text-base">
-                    {t("supportedPlatforms.tabs.videos")}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="soundEffects"
-                    className="text-sm sm:text-base"
-                  >
-                    {t("supportedPlatforms.tabs.soundEffects")}
-                  </TabsTrigger>
-                </TabsList>
-
-                <div className="max-h-[50vh] overflow-y-auto overflow-x-hidden pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 scrollbar-thumb-rounded-full">
-                  <TabsContent value="imagesVectors" className="mt-0">
-                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3 py-5 sm:gap-4 w-full">
-                      {platformsByCategory.imagesVectors.map((platform) => (
-                        <PlatformCard key={platform.id} platform={platform} />
-                      ))}
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="videos" className="mt-0">
-                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3 py-5 sm:gap-4 w-full">
-                      {platformsByCategory.videos.map((platform) => (
-                        <PlatformCard key={platform.id} platform={platform} />
-                      ))}
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="soundEffects" className="mt-0">
-                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3 py-5 sm:gap-4 w-full">
-                      {platformsByCategory.soundEffects.map((platform) => (
-                        <PlatformCard key={platform.id} platform={platform} />
-                      ))}
-                    </div>
-                  </TabsContent>
+            {/* Credit-based Platforms Grid (sorted ascending by min points) */}
+            <div className="credit-sites-grid-container max-w-[1220px] mx-auto border border-primary/80 dark:border-primary/30 p-5 rounded-xl shadow-2xs">
+              <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 scrollbar-thumb-rounded-full">
+                <div className="credit-sites-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 py-2 sm:gap-4 w-full">
+                  {creditSites
+                    .slice()
+                    .sort((a, b) => {
+                      const minA = Math.min(...a.variants.map((v) => v.points));
+                      const minB = Math.min(...b.variants.map((v) => v.points));
+                      return minA - minB;
+                    })
+                    .map((site: CreditSite) => (
+                      <CreditSiteCard key={site.id} site={site} />
+                    ))}
                 </div>
-              </Tabs>
+              </div>
             </div>
           </div>
         </section>
@@ -2122,10 +1948,12 @@ export default function HomePage() {
                                 )}
                               </div>
                               {/* Helper text to guide users to open the full list */}
-                              <p className={`mt-4 text-[12px] text-muted-foreground ${isRTL && "!text-sm"}`}>
+                              <p
+                                className={`mt-4 text-[12px] text-muted-foreground ${isRTL && "!text-sm"}`}
+                              >
                                 {isRTL
-                                  ? "انقر على \"المواقع المدعومة\" أعلاه لعرض المواقع."
-                                  : "Click on \"Supported Sites\" above to view websites."}
+                                  ? 'انقر على "المواقع المدعومة" أعلاه لعرض المواقع.'
+                                  : 'Click on "Supported Sites" above to view websites.'}
                               </p>
                             </div>
                           )}

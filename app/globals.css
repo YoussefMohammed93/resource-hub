@@ -333,5 +333,10 @@ section[id] {
   .media-header {
     max-width: 1800px !important;
   }
-  
+  .credit-sites-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+  .credit-sites-grid-container {
+    max-width: 1700px !important;
+  }
 }
