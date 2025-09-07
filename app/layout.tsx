@@ -1,7 +1,7 @@
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { Tajawal } from "next/font/google";
+import { Cairo } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { I18nProvider } from "@/components/i18n-provider";
 import { AuthProvider } from "@/components/auth-provider";
@@ -11,10 +11,10 @@ import { Toaster } from "sonner";
 
 const geistSans = GeistSans;
 
-const tajawal = Tajawal({
+const cairo = Cairo({
   subsets: ["arabic"],
-  weight: ["200", "300", "400", "500", "700", "800", "900"],
-  variable: "--font-tajawal",
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900", "1000"],
+  variable: "--font-tajawal", // keep the same CSS variable so existing classes continue to work
 });
 
 export const metadata: Metadata = {
@@ -50,7 +50,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.className} ${tajawal.variable} font-sans antialiased`}
+        className={`${geistSans.className} ${cairo.variable} font-sans antialiased`}
       >
         <I18nProvider>
           <ThemeProvider

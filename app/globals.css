@@ -145,6 +145,7 @@ section[id] {
       var(--font-tajawal), ui-sans-serif, system-ui, sans-serif,
       "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
       "Noto Color Emoji";
+    font-weight: 700;
   }
 
   .font-tajawal {
@@ -152,6 +153,7 @@ section[id] {
       var(--font-tajawal), ui-sans-serif, system-ui, sans-serif,
       "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
       "Noto Color Emoji";
+    font-weight: 700;
   }
 
   .bg-grid-pattern {
