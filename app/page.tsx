@@ -429,12 +429,8 @@ const CreditSiteCard = ({ site }: { site: CreditSite }) => {
         : String(n);
     const unit =
       i18n.language === "ar"
-        ? n === 1
-          ? "نقطة"
-          : "نقاط"
-        : n === 1
-          ? "point"
-          : "points";
+        ? (n === 1 ? "نقطة" : "نقاط")
+        : (n === 1 ? "credit" : "credits");
     return `${numStr} ${unit}`;
   };
 
@@ -470,87 +466,62 @@ const CreditSiteCard = ({ site }: { site: CreditSite }) => {
   ].includes(site.id);
 
   return (
-    <div className="group relative aspect-[8/9] bg-gradient-to-br from-background via-background to-muted/20 dark:from-muted/30 dark:via-muted/20 dark:to-muted/10 border border-border/60 rounded-2xl transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 cursor-pointer overflow-hidden">
-      {/* Animated background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-primary/4 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out" />
-
-      {/* Subtle glow effect */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-primary/10 opacity-0 group-hover:opacity-30 blur-xl transition-all duration-500" />
-
+    <div className="group relative bg-background border border-border/60 rounded-xl hover:border-primary/40 hover:shadow-md transition-all cursor-pointer overflow-hidden min-h-[230px]">
       <a
         href={site.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="relative z-10 flex flex-col items-center justify-between h-full p-5 text-center"
+        className="relative z-10 flex flex-col items-center justify-between gap-2 h-full p-4 pb-4 text-center"
         title={site.name}
       >
-        {/* Icon section with enhanced styling */}
-        <div className="flex-shrink-0 mb-3">
-          <div className="relative w-18 h-18 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/60 dark:from-muted/20 dark:to-muted/40 border border-border/40 flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
-            {/* Icon glow effect */}
-            <div className="absolute inset-0 rounded-2xl bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* Big icon */}
+        <div className="flex-shrink-0">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted/40 border border-border/40 flex items-center justify-center">
             <img
               src={iconUrl}
               alt={`${site.name} favicon`}
-              width={72}
-              height={72}
+              width={96}
+              height={96}
               loading="lazy"
               decoding="async"
-              className={`relative z-10 ${isCustomIcon ? "w-12 h-12 sm:w-16 sm:h-16" : "w-14 h-14 sm:w-16 sm:h-16"} object-contain transition-transform duration-300`}
+              className={`${isCustomIcon ? "w-14 h-14 sm:w-20 sm:h-20" : "w-16 h-16 sm:w-20 sm:h-20"} object-contain`}
               onError={(e) => {
-                // Fallback to Google favicon service if custom icon fails
                 const target = e.target as HTMLImageElement;
-                if (
-                  target.src !==
-                  `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`
-                ) {
+                if (target.src !== `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`) {
                   target.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                  target.className =
-                    "relative z-10 w-14 h-14 sm:w-16 sm:h-16 object-contain transition-transform duration-300";
+                  target.className = "w-18 h-18 sm:w-20 sm:h-20 object-contain";
                 }
               }}
             />
           </div>
         </div>
 
-        {/* Content section */}
-        <div className="flex-1 flex flex-col justify-center space-y-3">
-          {/* Site name with better typography */}
-          <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300 leading-tight tracking-tight">
-            {site.name}
-          </h3>
+        {/* Name */}
+        <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-foreground group-hover:text-primary leading-tight w-full">
+          {site.name}
+        </h3>
 
-          {/* Enhanced badges with better spacing and design */}
-          <div className="flex flex-wrap justify-center gap-3">
-            {site.variants.map((variant, i) => {
-              const isLowestPrice = variant.points <= minPoints;
-              return (
-                <Badge
-                  key={i}
-                  variant={isLowestPrice ? "success" : "outline"}
-                  className={`
-                    text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full shadow-sm transition-all duration-200
-                    ${
-                      isLowestPrice
-                        ? "bg-gradient-to-r from-green-500/90 to-emerald-500/90 text-white border-green-400/50 shadow-green-500/20"
-                        : "bg-muted/80 hover:bg-muted border-border/60 hover:border-primary/40"
-                    }
-                    group-hover:shadow-md
-                  `}
-                >
-                  <span className="font-medium">{variant.label}</span>
-                  <span className="mx-1 opacity-70">•</span>
-                  <span className="font-bold">
-                    {formatPoints(variant.points)}
-                  </span>
-                </Badge>
-              );
-            })}
-          </div>
+        {/* Badges */}
+        <div className="mt-1 flex flex-wrap justify-center gap-1.5 w-full">
+          {site.variants.map((variant, i) => {
+            const isLowestPrice = variant.points <= minPoints;
+            return (
+              <Badge
+                key={i}
+                variant={isLowestPrice ? "default" : "outline"}
+                className={`text-[10px] sm:text-sm px-2.5 py-1 rounded-full ${
+                  isLowestPrice
+                    ? "bg-primary text-primary-foreground border-primary/60"
+                    : "bg-muted/70 border-border/60"
+                }`}
+              >
+                <span className="font-medium">{variant.label}</span>
+                <span className="mx-1 opacity-60">•</span>
+                <span className="font-bold">{formatPoints(variant.points)}</span>
+              </Badge>
+            );
+          })}
         </div>
-
-        {/* Subtle bottom accent */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </a>
     </div>
   );

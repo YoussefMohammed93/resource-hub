@@ -334,9 +334,16 @@ section[id] {
     max-width: 1800px !important;
   }
   .credit-sites-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(9, minmax(0, 1fr)) !important;
   }
   .credit-sites-grid-container {
     max-width: 1700px !important;
+  }
+}
+
+/* Make credit sites grid 6 columns on xl screens and up (>=1280px) */
+@media (min-width: 1280px) {
+  .credit-sites-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
