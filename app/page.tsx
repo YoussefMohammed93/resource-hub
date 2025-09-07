@@ -429,8 +429,12 @@ const CreditSiteCard = ({ site }: { site: CreditSite }) => {
         : String(n);
     const unit =
       i18n.language === "ar"
-        ? (n === 1 ? "نقطة" : "نقاط")
-        : (n === 1 ? "credit" : "credits");
+        ? n === 1
+          ? "نقطة"
+          : "نقاط"
+        : n === 1
+          ? "credit"
+          : "credits";
     return `${numStr} ${unit}`;
   };
 
@@ -466,7 +470,7 @@ const CreditSiteCard = ({ site }: { site: CreditSite }) => {
   ].includes(site.id);
 
   return (
-    <div className="group relative bg-background border border-border/60 rounded-xl hover:border-primary/40 hover:shadow-md transition-all cursor-pointer overflow-hidden min-h-[230px]">
+    <div className="group relative bg-muted/50 border border-border/60 rounded-xl hover:border-primary/40 hover:shadow-md transition-all cursor-pointer overflow-hidden min-h-[230px]">
       <a
         href={site.url}
         target="_blank"
@@ -476,7 +480,7 @@ const CreditSiteCard = ({ site }: { site: CreditSite }) => {
       >
         {/* Big icon */}
         <div className="flex-shrink-0">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted/40 border border-border/40 flex items-center justify-center">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-background dark:bg-muted border border-border/40 flex items-center justify-center">
             <img
               src={iconUrl}
               alt={`${site.name} favicon`}
@@ -487,7 +491,10 @@ const CreditSiteCard = ({ site }: { site: CreditSite }) => {
               className={`${isCustomIcon ? "w-14 h-14 sm:w-20 sm:h-20" : "w-16 h-16 sm:w-20 sm:h-20"} object-contain`}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                if (target.src !== `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`) {
+                if (
+                  target.src !==
+                  `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`
+                ) {
                   target.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
                   target.className = "w-18 h-18 sm:w-20 sm:h-20 object-contain";
                 }
@@ -517,7 +524,9 @@ const CreditSiteCard = ({ site }: { site: CreditSite }) => {
               >
                 <span className="font-medium">{variant.label}</span>
                 <span className="mx-1 opacity-60">•</span>
-                <span className="font-bold">{formatPoints(variant.points)}</span>
+                <span className="font-bold">
+                  {formatPoints(variant.points)}
+                </span>
               </Badge>
             );
           })}
@@ -1613,9 +1622,27 @@ export default function HomePage() {
                   {creditSites
                     .slice()
                     .sort((a, b) => {
+                      const priorityOrder = [
+                        "shutterstock",
+                        "istockphoto",
+                        "yellowimages",
+                        "alamy",
+                        "freepik",
+                        "envato-elements",
+                        "adobe-stock",
+                        "vectorstock",
+                        "pngtree",
+                      ];
+                      const indexMap = new Map(priorityOrder.map((id, i) => [id, i]));
+                      const pa = indexMap.get(a.id);
+                      const pb = indexMap.get(b.id);
+                      if (pa !== undefined && pb !== undefined) return pa - pb;
+                      if (pa !== undefined) return -1;
+                      if (pb !== undefined) return 1;
                       const minA = Math.min(...a.variants.map((v) => v.points));
                       const minB = Math.min(...b.variants.map((v) => v.points));
-                      return minA - minB;
+                      const diff = minA - minB;
+                      return diff !== 0 ? diff : a.name.localeCompare(b.name);
                     })
                     .map((site: CreditSite) => (
                       <CreditSiteCard key={site.id} site={site} />
