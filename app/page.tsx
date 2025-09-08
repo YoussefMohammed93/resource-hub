@@ -87,6 +87,8 @@ import { useMobileMenuAnimations } from "@/hooks/use-mobile-menu-animations";
 import { useEnhancedHeaderEffects } from "@/hooks/use-enhanced-header-effects";
 import { useHeaderAnimations } from "@/hooks/use-header-animations";
 import { useHeroAnimations } from "@/hooks/use-hero-animations";
+import { useSupportedPlatformsAnimations } from "@/hooks/use-supported-platforms-animations";
+import { FloatingDotsAnimation } from "@/components/floating-dots-animation";
 
 // StatisticCard component for animated counters
 interface StatisticCardProps {
@@ -474,7 +476,7 @@ const CreditSiteCard = ({ site }: { site: CreditSite }) => {
   ].includes(site.id);
 
   return (
-    <div className="group relative bg-muted/50 border border-border/60 rounded-xl hover:border-primary/40 hover:shadow-md transition-all cursor-pointer overflow-hidden min-h-[230px]">
+    <div className="group relative bg-muted/80 border border-border/60 rounded-xl hover:border-primary/40 hover:shadow-md transition-all cursor-pointer overflow-hidden min-h-[230px]">
       <a
         href={site.url}
         target="_blank"
@@ -599,6 +601,16 @@ export default function HomePage() {
     addFloatingIconRef,
     ctaButtonsRef,
   } = useHeroAnimations({ enabled: !isLoading });
+
+  // Supported platforms animations (run only when not loading)
+  const {
+    sectionRef: platformsSectionRef,
+    headerRef: platformsHeaderRef,
+    titleRef: platformsTitleRef,
+    descriptionRef: platformsDescriptionRef,
+    gridContainerRef: platformsGridContainerRef,
+    gridRef: platformsGridRef,
+  } = useSupportedPlatformsAnimations({ enabled: !isLoading });
 
   // URL validation regex patterns
   const urlRegex =
@@ -1706,28 +1718,49 @@ export default function HomePage() {
         <SupportedPlatformsSkeleton />
       ) : (
         <section
+          ref={platformsSectionRef}
           id="platforms"
           className="py-16 lg:py-20 lg:pb-28 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden"
         >
+          {/* Floating Dots Background Animation */}
+          <FloatingDotsAnimation
+            dotCount={350}
+            dotSize={3}
+            animationDuration={20}
+          />
+
           <div className="px-5 relative z-10">
             {/* Section Header */}
-            <div className="text-center mb-12 lg:mb-16">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4 leading-tight font-sans">
+            <div
+              ref={platformsHeaderRef}
+              className="text-center mb-12 lg:mb-16"
+            >
+              <h2
+                ref={platformsTitleRef}
+                className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4 leading-tight font-sans"
+              >
                 {t("supportedPlatforms.title")}{" "}
                 <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                   {t("supportedPlatforms.titleHighlight")}
                 </span>
               </h2>
               <p
+                ref={platformsDescriptionRef}
                 className={`text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed ${isRTL && "font-medium"}`}
               >
                 {t("supportedPlatforms.description")}
               </p>
             </div>
             {/* Credit-based Platforms Grid (sorted ascending by min points) */}
-            <div className="credit-sites-grid-container max-w-[1220px] mx-auto border border-primary/80 dark:border-primary/30 p-5 rounded-xl shadow-2xs">
+            <div
+              ref={platformsGridContainerRef}
+              className="credit-sites-grid-container max-w-[1220px] mx-auto border border-primary/80 dark:border-primary/30 p-5 rounded-xl shadow-2xs"
+            >
               <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 scrollbar-thumb-rounded-full">
-                <div className="credit-sites-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 py-2 sm:gap-4 w-full">
+                <div
+                  ref={platformsGridRef}
+                  className="credit-sites-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 py-2 sm:gap-4 w-full"
+                >
                   {creditSites
                     .slice()
                     .sort((a, b) => {
