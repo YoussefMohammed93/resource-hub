@@ -600,6 +600,13 @@ export default function HomePage() {
   const statsDescriptionRef = useRef<HTMLParagraphElement>(null);
   const statsCardsContainerRef = useRef<HTMLDivElement>(null);
 
+  // GSAP Animation refs for features section
+  const featuresSectionRef = useRef<HTMLElement>(null);
+  const featuresTitleRef = useRef<HTMLHeadingElement>(null);
+  const featuresHighlightRef = useRef<HTMLSpanElement>(null);
+  const featuresDescriptionRef = useRef<HTMLParagraphElement>(null);
+  const featuresGridRef = useRef<HTMLDivElement>(null);
+
   // Header animations (run only when not loading)
   const { headerRef, logoRef, navRef, controlsRef, mobileButtonRef } =
     useHeaderAnimations(!isLoading);
@@ -1522,6 +1529,162 @@ export default function HomePage() {
         });
       }
     }, statisticsSectionRef);
+
+    return () => ctx.revert();
+  }, [isLoading]);
+
+  // GSAP Features Section Animations
+  useEffect(() => {
+    if (isLoading || !featuresSectionRef.current) return;
+
+    // Register GSAP plugins
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Set initial states for title and description
+      gsap.set([featuresTitleRef.current, featuresHighlightRef.current], {
+        y: 40,
+        opacity: 0,
+      });
+
+      gsap.set(featuresDescriptionRef.current, {
+        y: 30,
+        opacity: 0,
+      });
+
+      // Set initial state for feature cards
+      if (featuresGridRef.current) {
+        const featureCards = featuresGridRef.current.querySelectorAll(".group");
+        gsap.set(featureCards, {
+          y: 60,
+          opacity: 0,
+          scale: 0.9,
+        });
+      }
+
+      // Main timeline for features section entrance
+      const mainTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: featuresSectionRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      // Animate title first with faster, smoother animations
+      mainTl
+        .to(
+          featuresTitleRef.current,
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            ease: "back.out(1.7)",
+          },
+          0
+        )
+        .to(
+          featuresHighlightRef.current,
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            ease: "back.out(1.7)",
+          },
+          0.05
+        )
+        .to(
+          featuresDescriptionRef.current,
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            ease: "power4.out",
+          },
+          0.2
+        );
+
+      // Animate feature cards with staggered entrance
+      if (featuresGridRef.current) {
+        const featureCards = featuresGridRef.current.querySelectorAll(".group");
+
+        mainTl.to(
+          featureCards,
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            ease: "back.out(1.7)",
+            stagger: {
+              amount: 0.4,
+              from: "start",
+            },
+          },
+          0.4
+        );
+
+        // Add hover animations for feature cards
+        featureCards.forEach((card) => {
+          const icon = card.querySelector(".w-14.h-14");
+          const overlay = card.querySelector(".absolute.inset-0");
+
+          if (icon && overlay) {
+            const hoverTl = gsap.timeline({ paused: true });
+
+            hoverTl
+              .to(
+                icon,
+                {
+                  scale: 1.2,
+                  rotation: 8,
+                  duration: 0.3,
+                  ease: "back.out(2.5)",
+                },
+                0
+              )
+              .to(
+                overlay,
+                {
+                  opacity: 1,
+                  duration: 0.3,
+                  ease: "power3.out",
+                },
+                0
+              );
+
+            card.addEventListener("mouseenter", () => hoverTl.play());
+            card.addEventListener("mouseleave", () => hoverTl.reverse());
+          }
+        });
+
+        // Add continuous floating animation for icons
+        featureCards.forEach((card, index) => {
+          const icon = card.querySelector(".w-14.h-14");
+          if (icon) {
+            gsap.to(icon, {
+              y: -8,
+              duration: 1.5 + index * 0.2,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+              delay: index * 0.15,
+            });
+
+            // Add subtle rotation animation
+            gsap.to(icon, {
+              rotation: 3,
+              duration: 2.5 + index * 0.3,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+              delay: index * 0.1,
+            });
+          }
+        });
+      }
+    }, featuresSectionRef);
 
     return () => ctx.revert();
   }, [isLoading]);
@@ -3265,26 +3428,44 @@ export default function HomePage() {
         <FeaturesSkeleton />
       ) : (
         <section
+          ref={featuresSectionRef}
           id="features"
           className="py-16 lg:py-20 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden"
         >
+          {/* Floating Circles Background Animation */}
+          <FloatingDotsAnimation
+            className="absolute inset-0 z-0"
+            dotCount={120}
+            dotSize={4}
+            animationDuration={15}
+          />
           <div className="container mx-auto max-w-7xl px-5 relative z-10">
             {/* Section Header */}
             <div className="text-center mb-12 lg:mb-16">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans">
+              <h2
+                ref={featuresTitleRef}
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans"
+              >
                 {t("features.title")}{" "}
-                <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                <span
+                  ref={featuresHighlightRef}
+                  className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
+                >
                   {t("features.titleHighlight")}
                 </span>
               </h2>
               <p
+                ref={featuresDescriptionRef}
                 className={`text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed ${isRTL && "font-medium"}`}
               >
                 {t("features.description")}
               </p>
             </div>
             {/* Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div
+              ref={featuresGridRef}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+            >
               {/* Feature 1 - High Quality Resources */}
               <div className="group bg-card border border-border rounded-2xl p-6 lg:p-8 transition-all duration-500 hover:border-primary/30 relative overflow-hidden">
                 {/* Hover effect overlay - diagonal sweep */}
@@ -3398,7 +3579,7 @@ export default function HomePage() {
           </div>
         </section>
       )}
-      
+
       {/* FAQ Section */}
       <FAQSection />
       {/* Footer */}
