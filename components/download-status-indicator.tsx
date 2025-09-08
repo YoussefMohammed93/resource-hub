@@ -45,9 +45,7 @@ export function DownloadStatusIndicator({
   const [downloadingTasks, setDownloadingTasks] = useState<Set<string>>(
     new Set()
   );
-  const [, setRecentlyDownloadedTasks] = useState<
-    Set<string>
-  >(new Set());
+  const [, setRecentlyDownloadedTasks] = useState<Set<string>>(new Set());
   const [notificationCounter, setNotificationCounter] = useState(0);
   // Track the order in which the user initiated downloads (most recent first)
   const [recentOrder, setRecentOrder] = useState<string[]>([]);
@@ -321,7 +319,7 @@ export function DownloadStatusIndicator({
         >
           <FileDown
             className={cn(
-              "!h-5 !w-5 transition-colors text-muted-foreground duration-300",
+              "!h-3.5 !w-3.5 sm:!h-5 sm:!w-5 transition-colors text-muted-foreground duration-300",
               showAttentionAnimation && "text-primary"
             )}
           />

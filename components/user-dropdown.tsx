@@ -70,7 +70,7 @@ export function UserDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div
-          className={`flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-muted/75 rounded-lg px-2 py-1 transition-colors ${isRTL ? "flex-row" : ""}`}
+          className={`flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-muted/75 rounded-lg px-2 py-1 transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
         >
           <Avatar className="w-7 h-7 sm:w-8 sm:h-8">
             <AvatarImage

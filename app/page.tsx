@@ -83,6 +83,9 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { Badge } from "@/components/ui/badge";
+import { useMobileMenuAnimations } from "@/hooks/use-mobile-menu-animations";
+import { useEnhancedHeaderEffects } from "@/hooks/use-enhanced-header-effects";
+import { useHeaderAnimations } from "@/hooks/use-header-animations";
 
 // StatisticCard component for animated counters
 interface StatisticCardProps {
@@ -562,6 +565,15 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Header animations (run only when not loading)
+  const { headerRef, logoRef, navRef, controlsRef, mobileButtonRef } = useHeaderAnimations(!isLoading);
+  
+  // Mobile menu animations
+  const { overlayRef, menuRef, addToRefs } = useMobileMenuAnimations(isMobileMenuOpen);
+  
+  // Enhanced header effects (run only when not loading)
+  useEnhancedHeaderEffects(headerRef, !isLoading);
+
   // URL validation regex patterns
   const urlRegex =
     /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/ \w \.-]*)*\/?$/i;
@@ -947,44 +959,53 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background font-sans">
       {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <header 
+        ref={headerRef}
+        className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50"
+      >
+        {/* Header particle effects container */}
+        <div className="header-particles"></div>
+        
         <div className="container mx-auto max-w-7xl px-4 sm:px-5">
           <div className="flex items-center justify-between h-16">
             {/* Logo and Mobile Menu Button */}
             <div className="flex items-center gap-1 sm:gap-2">
               {/* Mobile Menu Button */}
               <button
+                ref={mobileButtonRef}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="cursor-pointer md:hidden p-2 hover:bg-muted rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
                 aria-label="Toggle navigation menu"
               >
                 <Menu className="w-5 h-5 text-muted-foreground" />
               </button>
-              <Link
-                href="/"
-                aria-label={t("header.logo")}
-                className="flex items-center"
-              >
-                <div className="relative w-44 sm:w-48 h-12">
-                  <Image
-                    src="/logo-black.png"
-                    alt={t("header.logo")}
-                    fill
-                    className="block dark:hidden"
-                    priority
-                  />
-                  <Image
-                    src="/logo-white.png"
-                    alt={t("header.logo")}
-                    fill
-                    className="hidden dark:block"
-                    priority
-                  />
-                </div>
-              </Link>
+              <div ref={logoRef}>
+                <Link
+                  href="/"
+                  aria-label={t("header.logo")}
+                  className="flex items-center"
+                >
+                  <div className="relative w-44 sm:w-48 h-12">
+                    <Image
+                      src="/logo-black.png"
+                      alt={t("header.logo")}
+                      fill
+                      className="block dark:hidden"
+                      priority
+                    />
+                    <Image
+                      src="/logo-white.png"
+                      alt={t("header.logo")}
+                      fill
+                      className="hidden dark:block"
+                      priority
+                    />
+                  </div>
+                </Link>
+              </div>
             </div>
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav ref={navRef} className="hidden md:flex items-center gap-1">
               <Button
                 variant="ghost"
                 onClick={() => handleSmoothScroll("home")}
@@ -1022,20 +1043,24 @@ export default function HomePage() {
               </Button>
             </nav>
             {/* Header Controls */}
-            <HeaderControls />
+            <div ref={controlsRef}>
+              <HeaderControls enabled={!isLoading} />
+            </div>
           </div>
         </div>
       </header>
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
+          ref={overlayRef}
           className="fixed inset-0 bg-black/50 z-50 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
       {/* Mobile Navigation Menu */}
       <aside
-        className={`fixed left-0 top-0 w-72 h-screen bg-background border-r border-border z-50 transition-transform duration-300 ease-in-out md:hidden ${
+        ref={menuRef}
+        className={`fixed left-0 top-0 w-72 h-screen bg-background border-r border-border z-50 md:hidden transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -1043,42 +1068,52 @@ export default function HomePage() {
           <div className="space-y-6">
             {/* Navigation Links */}
             <div className="space-y-1">
-              <button
-                onClick={() => handleSmoothScroll("home")}
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
-              >
-                <span className="text-base">{t("header.navigation.home")}</span>
-              </button>
-              <button
-                onClick={() => handleSmoothScroll("platforms")}
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
-              >
-                <span className="text-base">
-                  {t("header.navigation.platforms")}
-                </span>
-              </button>
-              <button
-                onClick={() => handleSmoothScroll("pricing")}
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
-              >
-                <span className="text-base">
-                  {t("header.navigation.pricing")}
-                </span>
-              </button>
-              <button
-                onClick={() => handleSmoothScroll("features")}
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
-              >
-                <span className="text-base">
-                  {t("header.navigation.features")}
-                </span>
-              </button>
-              <button
-                onClick={() => handleSmoothScroll("faq")}
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
-              >
-                <span className="text-base">{t("header.navigation.faq")}</span>
-              </button>
+              <div ref={addToRefs}>
+                <button
+                  onClick={() => handleSmoothScroll("home")}
+                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+                >
+                  <span className="text-base">{t("header.navigation.home")}</span>
+                </button>
+              </div>
+              <div ref={addToRefs}>
+                <button
+                  onClick={() => handleSmoothScroll("platforms")}
+                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+                >
+                  <span className="text-base">
+                    {t("header.navigation.platforms")}
+                  </span>
+                </button>
+              </div>
+              <div ref={addToRefs}>
+                <button
+                  onClick={() => handleSmoothScroll("pricing")}
+                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+                >
+                  <span className="text-base">
+                    {t("header.navigation.pricing")}
+                  </span>
+                </button>
+              </div>
+              <div ref={addToRefs}>
+                <button
+                  onClick={() => handleSmoothScroll("features")}
+                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+                >
+                  <span className="text-base">
+                    {t("header.navigation.features")}
+                  </span>
+                </button>
+              </div>
+              <div ref={addToRefs}>
+                <button
+                  onClick={() => handleSmoothScroll("faq")}
+                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+                >
+                  <span className="text-base">{t("header.navigation.faq")}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -8,40 +8,59 @@ import { UserDropdown } from "@/components/user-dropdown";
 import { ThemeToggleButton } from "@/components/theme-toggle-button";
 import { LanguageToggleButton } from "@/components/language-toggle-button";
 import { DownloadStatusIndicator } from "@/components/download-status-indicator";
+import { useHeaderControlsAnimations } from "@/hooks/use-header-controls-animations";
 
-export function HeaderControls() {
+type HeaderControlsProps = {
+  enabled?: boolean;
+};
+
+export function HeaderControls({ enabled = true }: HeaderControlsProps) {
   const { isRTL } = useLanguage();
   const { isAuthenticated, isLoading } = useAuth();
+  
+  const {
+    controlsContainerRef,
+    themeButtonRef,
+    languageButtonRef,
+    downloadIndicatorRef,
+    mobileControlsRef,
+    authControlsRef,
+  } = useHeaderControlsAnimations(enabled); // Enable animations with stagger
 
   return (
     <div
-      className={`flex items-center gap-1 sm:gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+      ref={controlsContainerRef}
+      className={`flex items-center gap-1 sm:gap-2 ${isRTL ? "flex-row" : ""}`}
     >
       {/* Theme Toggle Button */}
-      <div className="hidden xs:block">
+      <div ref={themeButtonRef} className="hidden xs:block">
         <ThemeToggleButton />
       </div>
       {/* Language Toggle Button */}
-      <div className="hidden xs:block">
+      <div ref={languageButtonRef} className="hidden xs:block">
         <LanguageToggleButton />
       </div>
       {/* Download Status Indicator */}
-      <DownloadStatusIndicator />
+      <div ref={downloadIndicatorRef}>
+        <DownloadStatusIndicator />
+      </div>
       {/* Mobile Controls - Show only on very small screens */}
-      <div className="flex items-center gap-1 xs:hidden">
+      <div ref={mobileControlsRef} className="flex items-center gap-1 xs:hidden">
         <ThemeToggleButton />
         <LanguageToggleButton />
       </div>
       {/* Authentication Controls */}
-      {isLoading ? (
-        <div className="flex items-center justify-center w-8 h-8">
-          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-        </div>
-      ) : isAuthenticated ? (
-        <UserDropdown />
-      ) : (
-        <AuthButtons />
-      )}
+      <div ref={authControlsRef}>
+        {isLoading ? (
+          <div className="flex items-center justify-center w-8 h-8">
+            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : isAuthenticated ? (
+          <UserDropdown />
+        ) : (
+          <AuthButtons />
+        )}
+      </div>
     </div>
   );
 }
