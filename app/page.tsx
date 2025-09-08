@@ -68,6 +68,7 @@ import {
 } from "@/components/home-page-skeletons";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
+import { usePricingAnimations } from "@/hooks/use-pricing-animations";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/i18n-provider";
 import { HeaderControls } from "@/components/header-controls";
@@ -578,6 +579,13 @@ export default function HomePage() {
 
   // Enhanced header effects (run only when not loading)
   useEnhancedHeaderEffects(headerRef, !isLoading);
+
+  // Pricing animations
+  const pricingAnimations = usePricingAnimations({
+    isLoading: isLoadingPricing,
+    hasError: !!pricingError,
+    cardsCount: pricingPlans.length,
+  });
 
   // Hero animations (run only when not loading)
   const {
@@ -1799,18 +1807,121 @@ export default function HomePage() {
       )}
       {/* Pricing Section */}
       <section
+        ref={pricingAnimations.sectionRef}
         id="pricing"
         className="py-16 bg-gradient-to-br from-secondary/10 via-secondary/20 to-secondary/10 relative overflow-hidden"
       >
+        {/* Floating Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Top Left Dots Grid */}
+          <svg
+            className={`absolute top-16 ${isRTL ? "right-8" : "left-8"} w-36 h-28 opacity-20`}
+            viewBox="0 0 160 120"
+            fill="none"
+          >
+            {Array.from({ length: 6 }, (_, row) =>
+              Array.from({ length: 8 }, (_, col) => (
+                <circle
+                  key={`pricing-dots-${row}-${col}`}
+                  cx={12 + col * 18}
+                  cy={12 + row * 18}
+                  r="2.5"
+                  fill="currentColor"
+                  className="text-primary animate-pulse"
+                  style={{
+                    animationDelay: `${(row + col) * 0.2}s`,
+                    animationDuration: "3s",
+                  }}
+                />
+              ))
+            )}
+          </svg>
+
+          {/* Top Right Floating Credit Icon */}
+          <div
+            className={`hidden lg:block absolute top-24 ${isRTL ? "left-16" : "right-16"} animate-float`}
+          >
+            <div className="w-14 h-14 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
+              <Coins className="w-7 h-7 text-primary" />
+            </div>
+          </div>
+
+          {/* Middle Left Package Icon */}
+          <div
+            className={`hidden md:block absolute top-1/2 ${isRTL ? "right-4" : "left-4"} -translate-y-1/2 animate-bounce-slow`}
+          >
+            <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
+              <Package className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+
+          {/* Middle Right Timer Icon */}
+          <div
+            className={`hidden lg:block absolute top-1/3 ${isRTL ? "left-8" : "right-8"} animate-float`}
+            style={{ animationDelay: "1s" }}
+          >
+            <div className="w-11 h-11 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
+              <Timer className="w-5 h-5 text-primary" />
+            </div>
+          </div>
+
+          {/* Bottom Left Crown Icon */}
+          <div
+            className={`hidden md:block absolute bottom-32 ${isRTL ? "right-12" : "left-12"} animate-bounce-slow`}
+            style={{ animationDelay: "0.5s" }}
+          >
+            <div className="w-13 h-13 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
+              <Crown className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+
+          {/* Bottom Right Dots Grid */}
+          <svg
+            className={`absolute bottom-16 ${isRTL ? "left-12" : "right-12"} w-32 h-24 opacity-15`}
+            viewBox="0 0 140 100"
+            fill="none"
+          >
+            {Array.from({ length: 5 }, (_, row) =>
+              Array.from({ length: 7 }, (_, col) => (
+                <circle
+                  key={`pricing-bottom-dots-${row}-${col}`}
+                  cx={10 + col * 18}
+                  cy={10 + row * 16}
+                  r="2"
+                  fill="currentColor"
+                  className="text-primary animate-pulse"
+                  style={{
+                    animationDelay: `${(row + col) * 0.3}s`,
+                    animationDuration: "4s",
+                  }}
+                />
+              ))
+            )}
+          </svg>
+
+          {/* Bottom Center Zap Icon */}
+          <div
+            className={`hidden lg:block absolute bottom-24 left-1/2 -translate-x-1/2 animate-float`}
+            style={{ animationDelay: "1.5s" }}
+          >
+            <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
+              <Zap className="w-5 h-5 text-primary" />
+            </div>
+          </div>
+        </div>
+
         <div className="px-5 relative z-10">
           <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-              {t("pricing.title")}{" "}
-              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+            <h2 ref={pricingAnimations.titleRef} className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
+                {t("pricing.title")}
+              </span>{" "}
+              <span className="bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent">
                 {t("pricing.titleHighlight")}
               </span>
             </h2>
             <p
+              ref={pricingAnimations.descriptionRef}
               className={`text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed ${isRTL && "font-medium"}`}
             >
               {t("pricing.description")}
@@ -1818,10 +1929,14 @@ export default function HomePage() {
           </div>
           {/* Loading State */}
           {isLoadingPricing ? (
-            <div className="grid mx-auto max-w-[1700px] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
+            <div 
+              ref={pricingAnimations.cardsContainerRef}
+              className="grid mx-auto max-w-[1700px] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5"
+            >
               {[...Array(4)].map((_, index) => (
                 <div
                   key={`pricing-skeleton-${index}`}
+                  data-skeleton
                   className="group relative dark:bg-card bg-background backdrop-blur-sm shadow-xs border border-border/50 rounded-2xl p-6 lg:p-8 transition-all duration-300 flex flex-col"
                 >
                   <div className="space-y-4">
@@ -1868,7 +1983,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : pricingError ? (
-            <div className="text-center py-12">
+            <div data-error className="text-center py-12">
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center">
                   <AlertCircle className="w-8 h-8 text-destructive" />
@@ -1942,21 +2057,20 @@ export default function HomePage() {
                 return (
                   <div
                     key={plan.id || index}
-                    className="group relative dark:bg-card bg-background backdrop-blur-sm shadow-xs border border-border/50 rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:bg-background/80 hover:border-primary/30 flex flex-col"
+                    ref={(el) => pricingAnimations.setCardRef(el, index)}
+                    className="group relative dark:bg-card bg-background backdrop-blur-sm shadow-xs border border-border/50 hover:border-primary/50 rounded-2xl p-6 lg:p-8 flex flex-col transition-colors duration-200"
                   >
-                    {/* Hover effect overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-primary/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative z-10 flex flex-col h-full space-y-6">
+                    <div className="pricing-card-content relative z-10 flex flex-col h-full space-y-6">
                       {/* Plan Header */}
                       <div className="space-y-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-14">
-                            <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                            <div className="pricing-card-icon w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
                               <PlanIcon className="w-6 h-6 text-primary" />
                             </div>
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                            <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-200">
                               {plan.name}
                             </h3>
                             <p
@@ -2128,7 +2242,7 @@ export default function HomePage() {
                       {/* CTA Button - Now at bottom */}
                       <div className="mt-auto">
                         <Button
-                          className="w-full py-6 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl"
+                          className="pricing-card-button w-full py-6 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-colors duration-200"
                           asChild
                         >
                           <a
@@ -2152,7 +2266,7 @@ export default function HomePage() {
             </div>
           )}
           {/* Additional Info */}
-          <div className="pt-14 text-center">
+          <div ref={pricingAnimations.additionalInfoRef} className="pt-14 text-center">
             <p
               className={`text-sm text-muted-foreground mb-4 ${isRTL && "!text-lg"}`}
             >
