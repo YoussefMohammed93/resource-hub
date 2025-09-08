@@ -11,13 +11,150 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/components/i18n-provider";
 import Image from "next/image";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Register GSAP plugins
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function Footer() {
   const { t } = useTranslation("common");
   const { isRTL } = useLanguage();
+  
+  // Refs for animations
+  const footerRef = useRef<HTMLElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const contactInfoRef = useRef<HTMLDivElement>(null);
+  const quickLinksRef = useRef<HTMLDivElement>(null);
+  const resourcesRef = useRef<HTMLDivElement>(null);
+  const supportRef = useRef<HTMLDivElement>(null);
+  const socialSectionRef = useRef<HTMLDivElement>(null);
+  const copyrightRef = useRef<HTMLDivElement>(null);
+
+  // Animation setup
+  useEffect(() => {
+    if (!footerRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Set initial states - only opacity and y position, no scale/transform
+      gsap.set(logoRef.current, { opacity: 0, y: 30 });
+      gsap.set(descriptionRef.current, { opacity: 0, y: 20 });
+      gsap.set(contactInfoRef.current, { opacity: 0, y: 25 });
+      gsap.set(".footer-section", { opacity: 0, y: 40 });
+      gsap.set(".footer-link", { opacity: 0, y: 15 });
+      gsap.set(".social-icon", { opacity: 0, y: 20 });
+      gsap.set(copyrightRef.current, { opacity: 0, y: 15 });
+
+      // Logo animation
+      gsap.to(logoRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Description animation
+      gsap.to(descriptionRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        delay: 0.2,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Contact info animation
+      gsap.to(contactInfoRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        delay: 0.4,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Footer sections staggered animation
+      gsap.to(".footer-section", {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        stagger: 0.15,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Footer links staggered animation
+      gsap.to(".footer-link", {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.05,
+        ease: "power1.out",
+        delay: 0.3,
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 75%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Social icons animation
+      gsap.to(".social-icon", {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "back.out(1.7)",
+        scrollTrigger: {
+          trigger: socialSectionRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Copyright animation
+      gsap.to(copyrightRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        delay: 0.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: socialSectionRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+
+    }, footerRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <footer className="bg-foreground dark:bg-muted border-t border-border py-16 lg:py-20 relative overflow-hidden">
+    <footer ref={footerRef} className="bg-foreground dark:bg-muted border-t border-border py-16 lg:py-20 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-20 dark:opacity-10"></div>
       <div className="container mx-auto max-w-7xl px-5 relative z-10">
@@ -25,7 +162,7 @@ export default function Footer() {
           {/* Company Info */}
           <div className="lg:col-span-1 space-y-6">
             <div className="space-y-4">
-              <div className="flex items-center space-x-3">
+              <div ref={logoRef} className="flex items-center space-x-3">
                 <Link
                   href="/"
                   aria-label={t("header.logo")}
@@ -50,13 +187,14 @@ export default function Footer() {
                 </Link>
               </div>
               <p
+                ref={descriptionRef}
                 className={`text-background/80 dark:text-muted-foreground leading-relaxed text-sm lg:text-base ${isRTL ? "font-tajawal font-medium" : "font-sans"}`}
               >
                 {t("footer.description")}
               </p>
             </div>
             {/* Contact Info */}
-            <div className="space-y-3">
+            <div ref={contactInfoRef} className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-primary flex-shrink-0" />
                 <span
@@ -76,7 +214,7 @@ export default function Footer() {
             </div>
           </div>
           {/* Quick Links */}
-          <div className="space-y-6">
+          <div ref={quickLinksRef} className="space-y-6 footer-section">
             <h3
               className={`text-lg font-semibold text-background dark:text-foreground ${isRTL ? "font-tajawal" : "font-sans"}`}
             >
@@ -92,7 +230,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-200 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
+                    className={`footer-link text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-200 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
                   >
                     {link.name}
                   </Link>
@@ -101,7 +239,7 @@ export default function Footer() {
             </ul>
           </div>
           {/* Resources */}
-          <div className="space-y-6">
+          <div ref={resourcesRef} className="space-y-6 footer-section">
             <h3
               className={`text-lg font-semibold text-background dark:text-foreground ${isRTL ? "font-tajawal" : "font-sans"}`}
             >
@@ -123,7 +261,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-200 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
+                    className={`footer-link text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-200 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
                   >
                     {link.name}
                   </Link>
@@ -132,7 +270,7 @@ export default function Footer() {
             </ul>
           </div>
           {/* Support & Legal */}
-          <div className="space-y-6">
+          <div ref={supportRef} className="space-y-6 footer-section">
             <h3
               className={`text-lg font-semibold text-background dark:text-foreground ${isRTL ? "font-tajawal" : "font-sans"}`}
             >
@@ -152,7 +290,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-200 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
+                    className={`footer-link text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-200 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
                   >
                     {link.name}
                   </Link>
@@ -162,7 +300,7 @@ export default function Footer() {
           </div>
         </div>
         {/* Social Media & Bottom Section */}
-        <div className="mt-12 pt-8 border-t border-background/10 dark:border-border">
+        <div ref={socialSectionRef} className="mt-12 pt-8 border-t border-background/10 dark:border-border">
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
             {/* Social Media Links */}
             <div className="flex items-center space-x-4">
@@ -204,7 +342,7 @@ export default function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-9 h-9 bg-muted/15 dark:bg-background/20 hover:bg-primary/10 border border-transparent hover:border-primary/30 rounded-lg flex items-center justify-center transition-all duration-300 group"
+                    className="social-icon w-9 h-9 bg-muted/15 dark:bg-background/20 hover:bg-primary/10 border border-transparent hover:border-primary/30 rounded-lg flex items-center justify-center transition-all duration-300 group"
                     aria-label={social.label}
                   >
                     <social.icon className="w-4 h-4 text-background/70 dark:text-muted-foreground group-hover:text-primary transition-colors" />
@@ -214,6 +352,7 @@ export default function Footer() {
             </div>
             {/* Copyright */}
             <div
+              ref={copyrightRef}
               className={`flex items-center space-x-2 text-background/80 dark:text-muted-foreground text-sm ${isRTL ? "font-tajawal" : "font-sans"}`}
             >
               <span>

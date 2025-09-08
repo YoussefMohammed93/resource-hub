@@ -19,6 +19,14 @@ import {
   Music,
   Ban,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Register GSAP plugins
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // FAQ Skeleton Component
 function FAQSkeleton() {
@@ -53,6 +61,134 @@ function FAQSkeleton() {
 export default function FAQSection() {
   const { t } = useTranslation("common");
   const { isRTL, isLoading } = useLanguage();
+  
+  // Refs for animations
+  const sectionRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const accordionRef = useRef<HTMLDivElement>(null);
+
+  // Animation setup
+  useEffect(() => {
+    if (isLoading || !sectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Set initial states
+      gsap.set(titleRef.current, { y: 50, opacity: 0 });
+      gsap.set(descriptionRef.current, { y: 30, opacity: 0 });
+      gsap.set(".faq-item", { y: 40, opacity: 0 });
+      gsap.set(".floating-icon", { scale: 0, rotation: -180, opacity: 0 });
+      gsap.set(".decorative-pattern", { scale: 0, opacity: 0 });
+
+      // Title animation
+      gsap.to(titleRef.current, {
+        y: 0,
+        opacity: 1,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: titleRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Description animation
+      gsap.to(descriptionRef.current, {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        delay: 0.2,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: descriptionRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // FAQ items staggered animation
+      gsap.to(".faq-item", {
+        y: 0,
+        opacity: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: accordionRef.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Floating icons animation
+      gsap.to(".floating-icon", {
+        scale: 1,
+        rotation: 0,
+        opacity: 1,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: "back.out(1.7)",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 90%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Decorative patterns animation
+      gsap.to(".decorative-pattern", {
+        scale: 1,
+        opacity: 1,
+        duration: 1,
+        stagger: 0.2,
+        ease: "elastic.out(1, 0.5)",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Continuous floating animation for icons
+      gsap.to(".floating-icon", {
+        y: "-10px",
+        duration: 2,
+        ease: "power1.inOut",
+        yoyo: true,
+        repeat: -1,
+        stagger: {
+          each: 0.3,
+          from: "random"
+        }
+      });
+
+      // Continuous rotation for some decorative elements
+      gsap.to(".rotate-continuous", {
+        rotation: 360,
+        duration: 20,
+        ease: "none",
+        repeat: -1
+      });
+
+      // Pulse animation for dots
+      gsap.to(".pulse-dot", {
+        scale: 1.2,
+        opacity: 0.8,
+        duration: 1.5,
+        ease: "power2.inOut",
+        yoyo: true,
+        repeat: -1,
+        stagger: {
+          each: 0.2,
+          from: "random"
+        }
+      });
+
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [isLoading]);
 
   // Show loading skeleton while language data is loading
   if (isLoading) {
@@ -61,6 +197,7 @@ export default function FAQSection() {
 
   return (
     <section
+      ref={sectionRef}
       id="faq"
       className="py-16 lg:py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 relative overflow-hidden"
     >
@@ -70,27 +207,27 @@ export default function FAQSection() {
       {/* Floating Decorative Elements */}
       {/* Top Left/Right Corner */}
       <div
-        className={`absolute top-20 ${isRTL ? "right-8" : "left-8"} opacity-40`}
+        className={`absolute top-20 ${isRTL ? "right-8" : "left-8"} opacity-40 floating-icon`}
       >
-        <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center animate-float">
+        <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
           <HelpCircle className="w-6 h-6 text-primary" />
         </div>
       </div>
 
       {/* Top Center Right/Left */}
       <div
-        className={`absolute top-32 ${isRTL ? "left-1/4" : "right-1/4"} opacity-30`}
+        className={`absolute top-32 ${isRTL ? "left-1/4" : "right-1/4"} opacity-30 floating-icon`}
       >
-        <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-bounce-slow">
+        <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
           <Sparkles className="w-5 h-5 text-primary" />
         </div>
       </div>
 
       {/* Bottom Right/Left Corner */}
       <div
-        className={`absolute bottom-20 ${isRTL ? "left-12" : "right-12"} opacity-35`}
+        className={`absolute bottom-20 ${isRTL ? "left-12" : "right-12"} opacity-35 floating-icon`}
       >
-        <div className="w-14 h-14 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center animate-float-delayed">
+        <div className="w-14 h-14 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
           <Download className="w-7 h-7 text-primary" />
         </div>
       </div>
@@ -98,36 +235,36 @@ export default function FAQSection() {
       {/* Additional Decorative Elements */}
       {/* Top Center */}
       <div
-        className={`absolute top-16 ${isRTL ? "right-1/3" : "left-1/3"} opacity-25`}
+        className={`absolute top-16 ${isRTL ? "right-1/3" : "left-1/3"} opacity-25 floating-icon`}
       >
-        <div className="w-8 h-8 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
+        <div className="w-8 h-8 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
           <Shield className="w-4 h-4 text-primary" />
         </div>
       </div>
 
       {/* Middle Left/Right */}
       <div
-        className={`absolute top-1/2 ${isRTL ? "right-4" : "left-4"} opacity-20`}
+        className={`absolute top-1/2 ${isRTL ? "right-4" : "left-4"} opacity-20 floating-icon`}
       >
-        <div className="w-6 h-6 bg-primary/10 border border-primary/10 rounded-full flex items-center justify-center animate-bounce-slow">
+        <div className="w-6 h-6 bg-primary/10 border border-primary/10 rounded-full flex items-center justify-center">
           <Users className="w-3 h-3 text-primary" />
         </div>
       </div>
 
       {/* Middle Right/Left */}
       <div
-        className={`absolute top-1/2 ${isRTL ? "left-8" : "right-8"} opacity-30`}
+        className={`absolute top-1/2 ${isRTL ? "left-8" : "right-8"} opacity-30 floating-icon`}
       >
-        <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center animate-float-delayed">
+        <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
           <Zap className="w-5 h-5 text-primary" />
         </div>
       </div>
 
       {/* Bottom Left/Right */}
       <div
-        className={`absolute bottom-32 ${isRTL ? "right-1/4" : "left-1/4"} opacity-25`}
+        className={`absolute bottom-32 ${isRTL ? "right-1/4" : "left-1/4"} opacity-25 floating-icon`}
       >
-        <div className="w-8 h-8 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
+        <div className="w-8 h-8 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
           <HelpCircle className="w-4 h-4 text-primary" />
         </div>
       </div>
@@ -135,7 +272,7 @@ export default function FAQSection() {
       {/* Dot Patterns */}
       {/* Top Right/Left Dots Pattern */}
       <div
-        className={`absolute top-24 ${isRTL ? "left-1/5" : "right-1/5"} opacity-20`}
+        className={`absolute top-24 ${isRTL ? "left-1/5" : "right-1/5"} opacity-20 decorative-pattern rotate-continuous`}
       >
         <svg
           width="60"
@@ -152,7 +289,7 @@ export default function FAQSection() {
                 cy={8 + row * 12}
                 r="2"
                 fill="currentColor"
-                className="animate-pulse-slow"
+                className="pulse-dot"
                 style={{
                   animationDelay: `${(row + col) * 0.2}s`,
                   opacity: Math.random() * 0.5 + 0.3,
@@ -165,7 +302,7 @@ export default function FAQSection() {
 
       {/* Bottom Center Dots Pattern */}
       <div
-        className={`absolute bottom-16 ${isRTL ? "right-1/3" : "left-1/3"} opacity-15`}
+        className={`absolute bottom-16 ${isRTL ? "right-1/3" : "left-1/3"} opacity-15 decorative-pattern`}
       >
         <svg
           width="80"
@@ -182,7 +319,7 @@ export default function FAQSection() {
                 cy={8 + row * 12}
                 r="1.5"
                 fill="currentColor"
-                className="animate-pulse-slow"
+                className="pulse-dot"
                 style={{
                   animationDelay: `${(row + col) * 0.15}s`,
                   opacity: Math.random() * 0.4 + 0.2,
@@ -195,7 +332,7 @@ export default function FAQSection() {
 
       {/* Diamond Pattern - Top */}
       <div
-        className={`absolute top-40 ${isRTL ? "left-1/6" : "right-1/6"} opacity-20`}
+        className={`absolute top-40 ${isRTL ? "left-1/6" : "right-1/6"} opacity-20 decorative-pattern`}
       >
         <svg
           width="50"
@@ -214,7 +351,7 @@ export default function FAQSection() {
                 height="3"
                 transform={`rotate(45 ${9.5 + col * 14} ${9.5 + row * 14})`}
                 fill="currentColor"
-                className="animate-pulse-slow"
+                className="pulse-dot"
                 style={{
                   animationDelay: `${(row + col) * 0.25}s`,
                   opacity: Math.random() * 0.4 + 0.3,
@@ -227,7 +364,7 @@ export default function FAQSection() {
 
       {/* Square Pattern - Middle */}
       <div
-        className={`absolute top-1/3 ${isRTL ? "right-1/6" : "left-1/6"} opacity-15`}
+        className={`absolute top-1/3 ${isRTL ? "right-1/6" : "left-1/6"} opacity-15 decorative-pattern`}
       >
         <svg
           width="40"
@@ -245,7 +382,7 @@ export default function FAQSection() {
                 width="2.5"
                 height="2.5"
                 fill="currentColor"
-                className="animate-pulse-slow"
+                className="pulse-dot"
                 style={{
                   animationDelay: `${(row + col) * 0.18}s`,
                   opacity: Math.random() * 0.3 + 0.2,
@@ -259,13 +396,17 @@ export default function FAQSection() {
       <div className="container mx-auto max-w-4xl px-4 sm:px-5 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-12 lg:mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans">
+          <h2 
+            ref={titleRef}
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans"
+          >
             {t("faq.title")}{" "}
             <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               {t("faq.titleHighlight")}
             </span>
           </h2>
           <p
+            ref={descriptionRef}
             className={`text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed ${isRTL && "font-medium"}`}
           >
             {t("faq.description")}
@@ -273,11 +414,11 @@ export default function FAQSection() {
         </div>
 
         {/* FAQ Accordion */}
-        <div className="space-y-4">
+        <div ref={accordionRef} className="space-y-4">
           <Accordion type="single" collapsible className="w-full space-y-5">
             {/* Question 1: What is Resource Hub? */}
-            <AccordionItem value="what-is-resource-hub" className="border-none">
-              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden">
+            <AccordionItem value="what-is-resource-hub" className="border-none faq-item">
+              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden hover:shadow-lg hover:scale-[1.02]">
                 <AccordionTrigger className="px-6 py-6 hover:no-underline cursor-pointer">
                   <div className="flex items-center gap-4 text-left">
                     <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
@@ -303,8 +444,8 @@ export default function FAQSection() {
             </AccordionItem>
 
             {/* Question 2: How do credits work? */}
-            <AccordionItem value="how-credits-work" className="border-none">
-              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden">
+            <AccordionItem value="how-credits-work" className="border-none faq-item">
+              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden hover:shadow-lg hover:scale-[1.02]">
                 <AccordionTrigger className="px-6 py-6 hover:no-underline cursor-pointer">
                   <div className="flex items-center gap-4 text-left">
                     <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
@@ -330,8 +471,8 @@ export default function FAQSection() {
             </AccordionItem>
 
             {/* Question 3: Which platforms are supported? */}
-            <AccordionItem value="supported-platforms" className="border-none">
-              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden">
+            <AccordionItem value="supported-platforms" className="border-none faq-item">
+              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden hover:shadow-lg hover:scale-[1.02]">
                 <AccordionTrigger className="px-6 py-6 hover:no-underline cursor-pointer">
                   <div className="flex items-center gap-4 text-left">
                     <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
@@ -357,8 +498,8 @@ export default function FAQSection() {
             </AccordionItem>
 
             {/* Question 4: How to download resources? */}
-            <AccordionItem value="how-to-download" className="border-none">
-              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden">
+            <AccordionItem value="how-to-download" className="border-none faq-item">
+              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden hover:shadow-lg hover:scale-[1.02]">
                 <AccordionTrigger className="px-6 py-6 hover:no-underline cursor-pointer">
                   <div className="flex items-center gap-4 text-left">
                     <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
@@ -384,8 +525,8 @@ export default function FAQSection() {
             </AccordionItem>
 
             {/* Question 5: Is it safe and legal? */}
-            <AccordionItem value="safety-legal" className="border-none">
-              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden">
+            <AccordionItem value="safety-legal" className="border-none faq-item">
+              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden hover:shadow-lg hover:scale-[1.02]">
                 <AccordionTrigger className="px-6 py-6 hover:no-underline cursor-pointer">
                   <div className="flex items-center gap-4 text-left">
                     <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
@@ -411,8 +552,8 @@ export default function FAQSection() {
             </AccordionItem>
 
             {/* Question 6: Music Download Restrictions */}
-            <AccordionItem value="music-restrictions" className="border-none">
-              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden">
+            <AccordionItem value="music-restrictions" className="border-none faq-item">
+              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl hover:bg-card/90 transition-all duration-300 overflow-hidden hover:shadow-lg hover:scale-[1.02]">
                 <AccordionTrigger className="px-6 py-6 hover:no-underline cursor-pointer">
                   <div className="flex items-center gap-4 text-left">
                     <div className="relative w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center shrink-0">
