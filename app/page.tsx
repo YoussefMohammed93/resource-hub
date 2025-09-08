@@ -34,6 +34,9 @@ import {
   Target,
 } from "lucide-react";
 
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 import Link from "next/link";
 import Image from "next/image";
 
@@ -52,7 +55,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Footer from "@/components/footer";
 import FAQSection from "@/components/faq-section";
 import {
@@ -569,6 +572,17 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
+  // GSAP Animation refs for testimonials section
+  const testimonialsRef = useRef<HTMLElement>(null);
+  const testimonialsTitleRef = useRef<HTMLHeadingElement>(null);
+  const testimonialsHighlightRef = useRef<HTMLSpanElement>(null);
+  const testimonialsDescRef = useRef<HTMLParagraphElement>(null);
+  const dotsGridTopRef = useRef<SVGSVGElement>(null);
+  const dotsGridBottomRef = useRef<SVGSVGElement>(null);
+  const starIconRef = useRef<HTMLDivElement>(null);
+  const heartIconRef = useRef<HTMLDivElement>(null);
+  const carouselContainerRef = useRef<HTMLDivElement>(null);
+
   // Header animations (run only when not loading)
   const { headerRef, logoRef, navRef, controlsRef, mobileButtonRef } =
     useHeaderAnimations(!isLoading);
@@ -973,6 +987,190 @@ export default function HomePage() {
       carouselApi.off("select", onSelect);
     };
   }, [carouselApi]);
+
+  // GSAP Testimonials Animations
+  useEffect(() => {
+    if (isLoading || !testimonialsRef.current) return;
+
+    // Register GSAP plugins
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Set initial states
+      gsap.set([testimonialsTitleRef.current, testimonialsHighlightRef.current, testimonialsDescRef.current], {
+        opacity: 0,
+        y: 50
+      });
+
+      // Prepare clipPath for title reveal (typewriter-like)
+      if (testimonialsTitleRef.current) {
+        gsap.set(testimonialsTitleRef.current, {
+          clipPath: "inset(0% 100% 0% 0%)"
+        });
+      }
+
+      gsap.set([dotsGridTopRef.current, dotsGridBottomRef.current], {
+        opacity: 0,
+        scale: 0.8
+      });
+
+      gsap.set([starIconRef.current, heartIconRef.current], {
+        opacity: 0,
+        scale: 0,
+        rotation: -180
+      });
+
+      gsap.set(".testimonial-card", {
+        opacity: 0,
+        y: 100,
+        scale: 0.9
+      });
+
+      // Main timeline for scroll-triggered animations
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: testimonialsRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // Animate title with faster reveal effect (preserves gradient)
+      if (testimonialsTitleRef.current) {
+        tl.to(testimonialsTitleRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.3,
+          ease: "power3.out"
+        })
+        .to(testimonialsTitleRef.current, {
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: 0.8,
+          ease: "power2.inOut"
+        }, "-=0.1");
+      }
+
+      // Animate highlight span
+      tl.to(testimonialsHighlightRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        ease: "power3.out"
+      }, "-=0.6");
+
+      // Animate description
+      tl.to(testimonialsDescRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        ease: "power3.out"
+      }, "-=0.2");
+
+      // Animate background elements
+      tl.to([dotsGridTopRef.current, dotsGridBottomRef.current], {
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        ease: "back.out(1.2)",
+        stagger: 0.1
+      }, "-=0.4");
+
+      tl.to([starIconRef.current, heartIconRef.current], {
+        opacity: 1,
+        scale: 1,
+        rotation: 0,
+        duration: 0.7,
+        ease: "elastic.out(1, 0.3)",
+        stagger: 0.15
+      }, "-=0.3");
+
+      // Animate testimonial cards with faster stagger
+      tl.to(".testimonial-card", {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.5,
+        ease: "power3.out",
+        stagger: {
+          amount: 0.6,
+          from: "start"
+        }
+      }, "-=0.2");
+
+      // Faster continuous floating animations for icons
+      gsap.to(starIconRef.current, {
+        y: -8,
+        rotation: 3,
+        duration: 2,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true
+      });
+
+      gsap.to(heartIconRef.current, {
+        y: -6,
+        rotation: -2,
+        duration: 1.8,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+        delay: 0.3
+      });
+
+      // Faster animate dots with wave effect
+      gsap.to(".testimonial-dot", {
+        scale: 1.15,
+        opacity: 0.9,
+        duration: 1.5,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+        stagger: {
+          amount: 1.2,
+          from: "random"
+        }
+      });
+
+      gsap.to(".testimonial-bottom-dot", {
+        scale: 1.1,
+        opacity: 0.95,
+        duration: 1.8,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+        stagger: {
+          amount: 1.5,
+          from: "random"
+        }
+      });
+
+      // Gradient text hover animations for testimonial cards
+      gsap.utils.toArray(".testimonial-card").forEach((card: any) => {
+        const testimonialText = card.querySelector(".testimonial-text");
+        const authorName = card.querySelector(".author-name");
+        
+        if (testimonialText && authorName) {
+          const hoverTl = gsap.timeline({ paused: true });
+          
+          hoverTl.to([testimonialText, authorName], {
+            backgroundImage: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary))/0.7 100%)",
+            webkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+            duration: 0.3,
+            ease: "power2.out"
+          });
+
+          card.addEventListener("mouseenter", () => hoverTl.play());
+          card.addEventListener("mouseleave", () => hoverTl.reverse());
+        }
+      });
+
+    }, testimonialsRef);
+
+    return () => ctx.revert();
+  }, [isLoading]);
 
   // Auto-play functionality for mobile only
   useEffect(() => {
@@ -2300,11 +2498,12 @@ export default function HomePage() {
       {isLoading ? (
         <TestimonialsSkeleton />
       ) : (
-        <section className="py-16 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden">
+        <section ref={testimonialsRef} className="py-16 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden">
           {/* Floating Background Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {/* Top Left Dots Grid */}
             <svg
+              ref={dotsGridTopRef}
               className={`absolute top-20 ${isRTL ? "right-10" : "left-10"} w-32 h-24 opacity-20`}
               viewBox="0 0 140 100"
               fill="none"
@@ -2317,11 +2516,7 @@ export default function HomePage() {
                     cy={10 + row * 16}
                     r="2"
                     fill="currentColor"
-                    className="text-primary animate-pulse"
-                    style={{
-                      animationDelay: `${(row + col) * 0.3}s`,
-                      animationDuration: "4s",
-                    }}
+                    className="text-primary testimonial-dot"
                   />
                 ))
               )}
@@ -2329,7 +2524,8 @@ export default function HomePage() {
 
             {/* Top Right Star Icon */}
             <div
-              className={`hidden lg:block absolute top-32 ${isRTL ? "left-20" : "right-20"} animate-float`}
+              ref={starIconRef}
+              className={`hidden lg:block absolute top-32 ${isRTL ? "left-20" : "right-20"}`}
             >
               <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
                 <Star className="w-6 h-6 text-primary" />
@@ -2338,7 +2534,8 @@ export default function HomePage() {
 
             {/* Bottom Left Heart Icon */}
             <div
-              className={`hidden md:block absolute bottom-32 ${isRTL ? "right-16" : "left-16"} animate-bounce-slow`}
+              ref={heartIconRef}
+              className={`hidden md:block absolute bottom-32 ${isRTL ? "right-16" : "left-16"}`}
             >
               <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
                 <Heart className="w-5 h-5 text-primary" />
@@ -2347,6 +2544,7 @@ export default function HomePage() {
 
             {/* Bottom Right Dots Grid */}
             <svg
+              ref={dotsGridBottomRef}
               className={`absolute bottom-20 ${isRTL ? "left-16" : "right-16"} w-28 h-20 opacity-15`}
               viewBox="0 0 120 80"
               fill="none"
@@ -2359,11 +2557,7 @@ export default function HomePage() {
                     cy={8 + row * 16}
                     r="1.5"
                     fill="currentColor"
-                    className="text-primary animate-pulse"
-                    style={{
-                      animationDelay: `${(row + col) * 0.4}s`,
-                      animationDuration: "5s",
-                    }}
+                    className="text-primary testimonial-bottom-dot"
                   />
                 ))
               )}
@@ -2373,13 +2567,18 @@ export default function HomePage() {
           <div className="container mx-auto max-w-[1600px] px-5 relative z-10">
             {/* Section Header */}
             <div className="text-center mb-8">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans">
-                {t("testimonials.title")}{" "}
-                <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <h2 ref={testimonialsTitleRef} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans">
+                <span
+                  className="inline-block bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
+                >
+                  {t("testimonials.title")}
+                </span>{" "}
+                <span ref={testimonialsHighlightRef} className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                   {t("testimonials.titleHighlight")}
                 </span>
               </h2>
               <p
+                ref={testimonialsDescRef}
                 className={`text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed ${isRTL && "font-medium"}`}
               >
                 {t("testimonials.description")}
@@ -2387,7 +2586,7 @@ export default function HomePage() {
             </div>
 
             {/* Testimonials Carousel */}
-            <div className="relative max-w-[1400px] mx-auto py-2">
+            <div ref={carouselContainerRef} className="relative max-w-[1400px] mx-auto py-2">
               <Carousel
                 setApi={setCarouselApi}
                 opts={{
@@ -2405,7 +2604,7 @@ export default function HomePage() {
                       key={index}
                       className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
                     >
-                      <div className="bg-card dark:bg-secondary border border-border rounded-2xl p-4 lg:p-6 transition-all duration-300 hover:shadow-sm hover:border-primary/50 h-full">
+                      <div className="testimonial-card bg-card dark:bg-secondary border border-border rounded-2xl p-4 lg:p-6 transition-all duration-300 hover:shadow-sm hover:border-primary/50 h-full">
                         {/* Author Info at Top */}
                         <div
                           className={`flex items-center justify-between mb-4`}
@@ -2415,7 +2614,7 @@ export default function HomePage() {
                               <User className="w-6 h-6 text-primary" />
                             </div>
                             <div className="flex-1">
-                              <h4 className="font-semibold text-foreground text-sm">
+                              <h4 className="author-name font-semibold text-foreground text-sm transition-all duration-300">
                                 {testimonial.name}
                               </h4>
                               <p className="text-xs text-muted-foreground">
@@ -2439,7 +2638,7 @@ export default function HomePage() {
 
                         {/* Testimonial Content */}
                         <p
-                          className={`text-muted-foreground leading-relaxed text-sm sm:text-base ${isRTL && "font-medium"}`}
+                          className={`testimonial-text text-muted-foreground leading-relaxed text-sm sm:text-base transition-all duration-300 ${isRTL && "font-medium"}`}
                         >
                           <q> {testimonial.content} </q>
                         </p>
