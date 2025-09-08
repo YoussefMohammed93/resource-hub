@@ -125,7 +125,7 @@ function StatisticCard({
   return (
     <div
       ref={elementRef}
-      className="group bg-card border border-border rounded-2xl p-6 lg:p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-lg relative overflow-hidden flex flex-col items-center justify-center min-h-[200px]"
+      className="statistic-card group bg-card border border-border rounded-2xl p-6 lg:p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-lg relative overflow-hidden flex flex-col items-center justify-center min-h-[200px]"
     >
       {/* Hover effect overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl transform scale-0 group-hover:scale-100 transition-transform duration-500 ease-out"></div>
@@ -583,6 +583,23 @@ export default function HomePage() {
   const heartIconRef = useRef<HTMLDivElement>(null);
   const carouselContainerRef = useRef<HTMLDivElement>(null);
 
+  // GSAP Animation refs for statistics section
+  const statisticsSectionRef = useRef<HTMLElement>(null);
+  const statsDotsTopLeftRef = useRef<SVGSVGElement>(null);
+  const statsDotsBottomRightRef = useRef<SVGSVGElement>(null);
+  const statsDotsTopRightRef = useRef<SVGSVGElement>(null);
+  const statsDotsBottomLeftRef = useRef<SVGSVGElement>(null);
+  const statsChartIconRef = useRef<HTMLDivElement>(null);
+  const statsDownloadIconRef = useRef<HTMLDivElement>(null);
+  const statsHeartIconRef = useRef<HTMLDivElement>(null);
+  const statsGlobeIconRef = useRef<HTMLDivElement>(null);
+  const statsTargetIconRef = useRef<HTMLDivElement>(null);
+  const statsPackageIconRef = useRef<HTMLDivElement>(null);
+  const statsFloatingElementsRef = useRef<HTMLDivElement>(null);
+  const statsTitleRef = useRef<HTMLHeadingElement>(null);
+  const statsDescriptionRef = useRef<HTMLParagraphElement>(null);
+  const statsCardsContainerRef = useRef<HTMLDivElement>(null);
+
   // Header animations (run only when not loading)
   const { headerRef, logoRef, navRef, controlsRef, mobileButtonRef } =
     useHeaderAnimations(!isLoading);
@@ -997,33 +1014,40 @@ export default function HomePage() {
 
     const ctx = gsap.context(() => {
       // Set initial states
-      gsap.set([testimonialsTitleRef.current, testimonialsHighlightRef.current, testimonialsDescRef.current], {
-        opacity: 0,
-        y: 50
-      });
+      gsap.set(
+        [
+          testimonialsTitleRef.current,
+          testimonialsHighlightRef.current,
+          testimonialsDescRef.current,
+        ],
+        {
+          opacity: 0,
+          y: 50,
+        }
+      );
 
       // Prepare clipPath for title reveal (typewriter-like)
       if (testimonialsTitleRef.current) {
         gsap.set(testimonialsTitleRef.current, {
-          clipPath: "inset(0% 100% 0% 0%)"
+          clipPath: "inset(0% 100% 0% 0%)",
         });
       }
 
       gsap.set([dotsGridTopRef.current, dotsGridBottomRef.current], {
         opacity: 0,
-        scale: 0.8
+        scale: 0.8,
       });
 
       gsap.set([starIconRef.current, heartIconRef.current], {
         opacity: 0,
         scale: 0,
-        rotation: -180
+        rotation: -180,
       });
 
       gsap.set(".testimonial-card", {
         opacity: 0,
         y: 100,
-        scale: 0.9
+        scale: 0.9,
       });
 
       // Main timeline for scroll-triggered animations
@@ -1032,8 +1056,8 @@ export default function HomePage() {
           trigger: testimonialsRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          toggleActions: "play none none reverse"
-        }
+          toggleActions: "play none none reverse",
+        },
       });
 
       // Animate title with faster reveal effect (preserves gradient)
@@ -1042,61 +1066,84 @@ export default function HomePage() {
           opacity: 1,
           y: 0,
           duration: 0.3,
-          ease: "power3.out"
-        })
-        .to(testimonialsTitleRef.current, {
-          clipPath: "inset(0% 0% 0% 0%)",
-          duration: 0.8,
-          ease: "power2.inOut"
-        }, "-=0.1");
+          ease: "power3.out",
+        }).to(
+          testimonialsTitleRef.current,
+          {
+            clipPath: "inset(0% 0% 0% 0%)",
+            duration: 0.8,
+            ease: "power2.inOut",
+          },
+          "-=0.1"
+        );
       }
 
       // Animate highlight span
-      tl.to(testimonialsHighlightRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.4,
-        ease: "power3.out"
-      }, "-=0.6");
+      tl.to(
+        testimonialsHighlightRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+        "-=0.6"
+      );
 
       // Animate description
-      tl.to(testimonialsDescRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.4,
-        ease: "power3.out"
-      }, "-=0.2");
+      tl.to(
+        testimonialsDescRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+        "-=0.2"
+      );
 
       // Animate background elements
-      tl.to([dotsGridTopRef.current, dotsGridBottomRef.current], {
-        opacity: 1,
-        scale: 1,
-        duration: 0.6,
-        ease: "back.out(1.2)",
-        stagger: 0.1
-      }, "-=0.4");
+      tl.to(
+        [dotsGridTopRef.current, dotsGridBottomRef.current],
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(1.2)",
+          stagger: 0.1,
+        },
+        "-=0.4"
+      );
 
-      tl.to([starIconRef.current, heartIconRef.current], {
-        opacity: 1,
-        scale: 1,
-        rotation: 0,
-        duration: 0.7,
-        ease: "elastic.out(1, 0.3)",
-        stagger: 0.15
-      }, "-=0.3");
+      tl.to(
+        [starIconRef.current, heartIconRef.current],
+        {
+          opacity: 1,
+          scale: 1,
+          rotation: 0,
+          duration: 0.7,
+          ease: "elastic.out(1, 0.3)",
+          stagger: 0.15,
+        },
+        "-=0.3"
+      );
 
       // Animate testimonial cards with faster stagger
-      tl.to(".testimonial-card", {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.5,
-        ease: "power3.out",
-        stagger: {
-          amount: 0.6,
-          from: "start"
-        }
-      }, "-=0.2");
+      tl.to(
+        ".testimonial-card",
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.5,
+          ease: "power3.out",
+          stagger: {
+            amount: 0.6,
+            from: "start",
+          },
+        },
+        "-=0.2"
+      );
 
       // Faster continuous floating animations for icons
       gsap.to(starIconRef.current, {
@@ -1105,7 +1152,7 @@ export default function HomePage() {
         duration: 2,
         ease: "sine.inOut",
         repeat: -1,
-        yoyo: true
+        yoyo: true,
       });
 
       gsap.to(heartIconRef.current, {
@@ -1115,7 +1162,7 @@ export default function HomePage() {
         ease: "sine.inOut",
         repeat: -1,
         yoyo: true,
-        delay: 0.3
+        delay: 0.3,
       });
 
       // Faster animate dots with wave effect
@@ -1128,8 +1175,8 @@ export default function HomePage() {
         yoyo: true,
         stagger: {
           amount: 1.2,
-          from: "random"
-        }
+          from: "random",
+        },
       });
 
       gsap.to(".testimonial-bottom-dot", {
@@ -1141,32 +1188,32 @@ export default function HomePage() {
         yoyo: true,
         stagger: {
           amount: 1.5,
-          from: "random"
-        }
+          from: "random",
+        },
       });
 
       // Gradient text hover animations for testimonial cards
       gsap.utils.toArray(".testimonial-card").forEach((card: any) => {
         const testimonialText = card.querySelector(".testimonial-text");
         const authorName = card.querySelector(".author-name");
-        
+
         if (testimonialText && authorName) {
           const hoverTl = gsap.timeline({ paused: true });
-          
+
           hoverTl.to([testimonialText, authorName], {
-            backgroundImage: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary))/0.7 100%)",
+            backgroundImage:
+              "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary))/0.7 100%)",
             webkitBackgroundClip: "text",
             backgroundClip: "text",
             color: "transparent",
             duration: 0.3,
-            ease: "power2.out"
+            ease: "power2.out",
           });
 
           card.addEventListener("mouseenter", () => hoverTl.play());
           card.addEventListener("mouseleave", () => hoverTl.reverse());
         }
       });
-
     }, testimonialsRef);
 
     return () => ctx.revert();
@@ -1182,6 +1229,302 @@ export default function HomePage() {
 
     return () => clearInterval(autoPlay);
   }, [carouselApi, isMobile]);
+
+  // GSAP Statistics Section Animations
+  useEffect(() => {
+    if (isLoading || !statisticsSectionRef.current) return;
+
+    // Register GSAP plugins
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Set initial states for all animated elements
+      gsap.set(
+        [
+          statsChartIconRef.current,
+          statsDownloadIconRef.current,
+          statsHeartIconRef.current,
+          statsGlobeIconRef.current,
+          statsTargetIconRef.current,
+          statsPackageIconRef.current,
+        ],
+        {
+          scale: 0,
+          rotation: -180,
+          opacity: 0,
+        }
+      );
+
+      // Set initial states for dot grids
+      gsap.set(
+        [
+          statsDotsTopLeftRef.current,
+          statsDotsBottomRightRef.current,
+          statsDotsTopRightRef.current,
+          statsDotsBottomLeftRef.current,
+        ],
+        {
+          opacity: 0,
+          scale: 0.5,
+        }
+      );
+
+      // Set initial states for title and description
+      gsap.set([statsTitleRef.current, statsDescriptionRef.current], {
+        y: 50,
+        opacity: 0,
+      });
+
+      // Set initial state for cards container
+      gsap.set(statsCardsContainerRef.current, {
+        y: 80,
+        opacity: 0,
+      });
+
+      // Main timeline for statistics section entrance
+      const mainTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: statisticsSectionRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      // Animate title and description first
+      mainTl
+        .to(
+          statsTitleRef.current,
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+          },
+          0
+        )
+        .to(
+          statsDescriptionRef.current,
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            ease: "power3.out",
+          },
+          0.2
+        );
+
+      // Animate statistics cards with individual staggered entrance
+      if (statsCardsContainerRef.current) {
+        const cards =
+          statsCardsContainerRef.current.querySelectorAll(".statistic-card");
+
+        // Set initial state for individual cards
+        gsap.set(cards, {
+          opacity: 0,
+          scale: 0.9,
+        });
+
+        // Animate cards container first
+        mainTl
+          .to(
+            statsCardsContainerRef.current,
+            {
+              opacity: 1,
+              duration: 0.1,
+            },
+            0.4
+          )
+          // Then animate individual cards with stagger
+          .to(
+            cards,
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 1,
+              ease: "power2.out",
+              stagger: {
+                amount: 0.6,
+                from: "start",
+              },
+            },
+            0.5
+          );
+      }
+
+      // Animate floating icons with staggered entrance
+      mainTl.to(
+        [
+          statsChartIconRef.current,
+          statsDownloadIconRef.current,
+          statsHeartIconRef.current,
+          statsGlobeIconRef.current,
+          statsTargetIconRef.current,
+          statsPackageIconRef.current,
+        ],
+        {
+          scale: 1,
+          rotation: 0,
+          opacity: 1,
+          duration: 1.2,
+          ease: "back.out(1.7)",
+          stagger: 0.15,
+        },
+        0.6
+      );
+
+      // Animate dot grids with staggered entrance
+      mainTl.to(
+        [
+          statsDotsTopLeftRef.current,
+          statsDotsBottomRightRef.current,
+          statsDotsTopRightRef.current,
+          statsDotsBottomLeftRef.current,
+        ],
+        {
+          opacity: 0.5,
+          scale: 1,
+          duration: 0.8,
+          ease: "power2.out",
+          stagger: 0.1,
+        },
+        0.5
+      );
+
+      // Continuous floating animations for icons
+      const floatingIcons = [
+        { ref: statsChartIconRef.current, y: -15, duration: 3, delay: 0 },
+        {
+          ref: statsDownloadIconRef.current,
+          y: -12,
+          duration: 2.5,
+          delay: 0.5,
+        },
+        { ref: statsHeartIconRef.current, y: -10, duration: 2.8, delay: 1 },
+        { ref: statsGlobeIconRef.current, y: -14, duration: 3.2, delay: 1.5 },
+        { ref: statsTargetIconRef.current, y: -11, duration: 2.7, delay: 2 },
+        { ref: statsPackageIconRef.current, y: -13, duration: 3.1, delay: 2.5 },
+      ];
+
+      floatingIcons.forEach(({ ref, y, duration, delay }) => {
+        if (ref) {
+          gsap.to(ref, {
+            y: y,
+            duration: duration,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+            delay: delay,
+          });
+        }
+      });
+
+      // Rotation animations for icons
+      const rotatingIcons = [
+        { ref: statsChartIconRef.current, rotation: 5, duration: 4 },
+        { ref: statsGlobeIconRef.current, rotation: -3, duration: 5 },
+        { ref: statsTargetIconRef.current, rotation: 4, duration: 3.5 },
+      ];
+
+      rotatingIcons.forEach(({ ref, rotation, duration }) => {
+        if (ref) {
+          gsap.to(ref, {
+            rotation: rotation,
+            duration: duration,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+          });
+        }
+      });
+
+      // Animate individual dots in grids with wave effect
+      const animateDotsGrid = (
+        gridRef: React.RefObject<SVGSVGElement | null>
+      ) => {
+        if (!gridRef.current) return;
+
+        const dots = gridRef.current.querySelectorAll("circle");
+
+        gsap.fromTo(
+          dots,
+          {
+            scale: 0.5,
+            opacity: 0.3,
+          },
+          {
+            scale: 1.2,
+            opacity: 0.8,
+            duration: 0.6,
+            ease: "power2.out",
+            stagger: {
+              amount: 2,
+              grid: "auto",
+              from: "random",
+            },
+            repeat: -1,
+            yoyo: true,
+            repeatDelay: 3,
+          }
+        );
+      };
+
+      // Apply wave animations to all dot grids
+      [
+        statsDotsTopLeftRef,
+        statsDotsBottomRightRef,
+        statsDotsTopRightRef,
+        statsDotsBottomLeftRef,
+      ].forEach((gridRef) => {
+        setTimeout(() => animateDotsGrid(gridRef), Math.random() * 2000);
+      });
+
+      // Pulse animation for icons on hover
+      const icons = [
+        statsChartIconRef.current,
+        statsDownloadIconRef.current,
+        statsHeartIconRef.current,
+        statsGlobeIconRef.current,
+        statsTargetIconRef.current,
+        statsPackageIconRef.current,
+      ];
+
+      icons.forEach((icon) => {
+        if (icon) {
+          const hoverTl = gsap.timeline({ paused: true });
+          hoverTl.to(icon, {
+            scale: 1.15,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+
+          icon.addEventListener("mouseenter", () => hoverTl.play());
+          icon.addEventListener("mouseleave", () => hoverTl.reverse());
+        }
+      });
+
+      // Add hover animations for statistics cards
+      if (statsCardsContainerRef.current) {
+        const cards =
+          statsCardsContainerRef.current.querySelectorAll(".statistic-card");
+
+        cards.forEach((card) => {
+          const cardHoverTl = gsap.timeline({ paused: true });
+
+          cardHoverTl.to(card, {
+            boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+            duration: 0.3,
+            ease: "power2.out",
+          });
+
+          card.addEventListener("mouseenter", () => cardHoverTl.play());
+          card.addEventListener("mouseleave", () => cardHoverTl.reverse());
+        });
+      }
+    }, statisticsSectionRef);
+
+    return () => ctx.revert();
+  }, [isLoading]);
 
   // Show loading skeletons while language data is loading
   if (isLoading) {
@@ -2110,7 +2453,10 @@ export default function HomePage() {
 
         <div className="px-5 relative z-10">
           <div className="text-center mb-12">
-            <h2 ref={pricingAnimations.titleRef} className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <h2
+              ref={pricingAnimations.titleRef}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
+            >
               <span className="bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
                 {t("pricing.title")}
               </span>{" "}
@@ -2127,7 +2473,7 @@ export default function HomePage() {
           </div>
           {/* Loading State */}
           {isLoadingPricing ? (
-            <div 
+            <div
               ref={pricingAnimations.cardsContainerRef}
               className="grid mx-auto max-w-[1700px] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5"
             >
@@ -2464,7 +2810,10 @@ export default function HomePage() {
             </div>
           )}
           {/* Additional Info */}
-          <div ref={pricingAnimations.additionalInfoRef} className="pt-14 text-center">
+          <div
+            ref={pricingAnimations.additionalInfoRef}
+            className="pt-14 text-center"
+          >
             <p
               className={`text-sm text-muted-foreground mb-4 ${isRTL && "!text-lg"}`}
             >
@@ -2498,7 +2847,10 @@ export default function HomePage() {
       {isLoading ? (
         <TestimonialsSkeleton />
       ) : (
-        <section ref={testimonialsRef} className="py-16 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden">
+        <section
+          ref={testimonialsRef}
+          className="py-16 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden"
+        >
           {/* Floating Background Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {/* Top Left Dots Grid */}
@@ -2567,13 +2919,17 @@ export default function HomePage() {
           <div className="container mx-auto max-w-[1600px] px-5 relative z-10">
             {/* Section Header */}
             <div className="text-center mb-8">
-              <h2 ref={testimonialsTitleRef} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans">
-                <span
-                  className="inline-block bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
-                >
+              <h2
+                ref={testimonialsTitleRef}
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans"
+              >
+                <span className="inline-block bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                   {t("testimonials.title")}
                 </span>{" "}
-                <span ref={testimonialsHighlightRef} className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                <span
+                  ref={testimonialsHighlightRef}
+                  className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
+                >
                   {t("testimonials.titleHighlight")}
                 </span>
               </h2>
@@ -2586,7 +2942,10 @@ export default function HomePage() {
             </div>
 
             {/* Testimonials Carousel */}
-            <div ref={carouselContainerRef} className="relative max-w-[1400px] mx-auto py-2">
+            <div
+              ref={carouselContainerRef}
+              className="relative max-w-[1400px] mx-auto py-2"
+            >
               <Carousel
                 setApi={setCarouselApi}
                 opts={{
@@ -2683,12 +3042,19 @@ export default function HomePage() {
         <StatisticsSkeleton />
       ) : (
         <div className="bg-gradient-to-br from-secondary/10 via-secondary/20 to-secondary/10">
-          <section className="py-16 lg:py-20 relative overflow-hidden">
+          <section
+            ref={statisticsSectionRef}
+            className="py-16 lg:py-20 relative overflow-hidden"
+          >
             {/* Floating Background Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div
+              ref={statsFloatingElementsRef}
+              className="absolute inset-0 overflow-hidden pointer-events-none"
+            >
               {/* Top Left Dots Grid */}
               <svg
-                className={`hidden md:block absolute top-16 ${isRTL ? "right-8" : "left-8"} w-28 h-20 opacity-50`}
+                ref={statsDotsTopLeftRef}
+                className={`hidden md:block absolute top-16 ${isRTL ? "right-8" : "left-8"} w-28 h-20`}
                 viewBox="0 0 120 80"
                 fill="none"
               >
@@ -2700,11 +3066,7 @@ export default function HomePage() {
                       cy={8 + row * 16}
                       r="1.5"
                       fill="currentColor"
-                      className="text-primary animate-pulse"
-                      style={{
-                        animationDelay: `${(row + col) * 0.2}s`,
-                        animationDuration: "3s",
-                      }}
+                      className="text-primary"
                     />
                   ))
                 )}
@@ -2712,7 +3074,8 @@ export default function HomePage() {
 
               {/* Top Right Chart Icon */}
               <div
-                className={`hidden lg:block absolute top-24 ${isRTL ? "left-16" : "right-16"} animate-float`}
+                ref={statsChartIconRef}
+                className={`hidden lg:block absolute top-24 ${isRTL ? "left-16" : "right-16"}`}
               >
                 <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-primary" />
@@ -2721,7 +3084,8 @@ export default function HomePage() {
 
               {/* Top Center Download Icon */}
               <div
-                className={`hidden xl:block absolute top-4 left-1/2 transform -translate-x-1/2 animate-bounce-slow`}
+                ref={statsDownloadIconRef}
+                className={`hidden xl:block absolute top-4 left-1/2 transform -translate-x-1/2`}
               >
                 <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
                   <Download className="w-5 h-5 text-primary" />
@@ -2730,7 +3094,8 @@ export default function HomePage() {
 
               {/* Middle Left Heart Icon */}
               <div
-                className={`hidden lg:block absolute top-1/2 ${isRTL ? "right-4" : "left-4"} transform -translate-y-1/2 animate-pulse-slow`}
+                ref={statsHeartIconRef}
+                className={`hidden lg:block absolute top-1/2 ${isRTL ? "right-4" : "left-4"} transform -translate-y-1/2`}
               >
                 <div className="w-8 h-8 bg-primary/10 border border-primary/10 rounded-full flex items-center justify-center">
                   <Heart className="w-4 h-4 text-primary" />
@@ -2739,7 +3104,8 @@ export default function HomePage() {
 
               {/* Middle Right Globe Icon */}
               <div
-                className={`hidden lg:block absolute top-1/2 ${isRTL ? "left-4" : "right-4"} transform -translate-y-1/2 animate-float`}
+                ref={statsGlobeIconRef}
+                className={`hidden lg:block absolute top-1/2 ${isRTL ? "left-4" : "right-4"} transform -translate-y-1/2`}
               >
                 <div className="w-8 h-8 bg-primary/10 border border-primary/10 rounded-full flex items-center justify-center">
                   <Globe className="w-4 h-4 text-primary" />
@@ -2748,7 +3114,8 @@ export default function HomePage() {
 
               {/* Bottom Left Target Icon */}
               <div
-                className={`hidden md:block absolute bottom-24 ${isRTL ? "right-12" : "left-12"} animate-bounce-slow`}
+                ref={statsTargetIconRef}
+                className={`hidden md:block absolute bottom-24 ${isRTL ? "right-12" : "left-12"}`}
               >
                 <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
                   <Target className="w-5 h-5 text-primary" />
@@ -2757,7 +3124,8 @@ export default function HomePage() {
 
               {/* Bottom Center Package Icon */}
               <div
-                className={`hidden xl:block absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-pulse-slow`}
+                ref={statsPackageIconRef}
+                className={`hidden xl:block absolute bottom-8 left-1/2 transform -translate-x-1/2`}
               >
                 <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
                   <Package className="w-4 h-4 text-primary" />
@@ -2766,7 +3134,8 @@ export default function HomePage() {
 
               {/* Bottom Right Dots Grid */}
               <svg
-                className={`hidden md:block absolute bottom-16 ${isRTL ? "left-20" : "right-20"} w-32 h-24 opacity-50`}
+                ref={statsDotsBottomRightRef}
+                className={`hidden md:block absolute bottom-16 ${isRTL ? "left-20" : "right-20"} w-32 h-24`}
                 viewBox="0 0 140 100"
                 fill="none"
               >
@@ -2778,11 +3147,7 @@ export default function HomePage() {
                       cy={10 + row * 16}
                       r="2"
                       fill="currentColor"
-                      className="text-primary animate-pulse"
-                      style={{
-                        animationDelay: `${(row + col) * 0.3}s`,
-                        animationDuration: "4s",
-                      }}
+                      className="text-primary"
                     />
                   ))
                 )}
@@ -2790,7 +3155,8 @@ export default function HomePage() {
 
               {/* Additional Decorative Dots - Top Right Corner */}
               <svg
-                className={`hidden md:block absolute top-8 ${isRTL ? "left-32" : "right-32"} w-20 h-16 opacity-50`}
+                ref={statsDotsTopRightRef}
+                className={`hidden md:block absolute top-8 ${isRTL ? "left-32" : "right-32"} w-20 h-16`}
                 viewBox="0 0 80 64"
                 fill="none"
               >
@@ -2802,11 +3168,7 @@ export default function HomePage() {
                       cy={8 + row * 16}
                       r="1"
                       fill="currentColor"
-                      className="text-primary animate-pulse"
-                      style={{
-                        animationDelay: `${(row + col) * 0.4}s`,
-                        animationDuration: "5s",
-                      }}
+                      className="text-primary"
                     />
                   ))
                 )}
@@ -2814,7 +3176,8 @@ export default function HomePage() {
 
               {/* Additional Decorative Dots - Bottom Left Corner */}
               <svg
-                className={`hidden md:block absolute bottom-8 ${isRTL ? "right-32" : "left-32"} w-24 h-18 opacity-50`}
+                ref={statsDotsBottomLeftRef}
+                className={`hidden md:block absolute bottom-8 ${isRTL ? "right-32" : "left-32"} w-24 h-18`}
                 viewBox="0 0 96 72"
                 fill="none"
               >
@@ -2826,11 +3189,7 @@ export default function HomePage() {
                       cy={8 + row * 18}
                       r="1.5"
                       fill="currentColor"
-                      className="text-primary animate-pulse"
-                      style={{
-                        animationDelay: `${(row + col) * 0.5}s`,
-                        animationDuration: "6s",
-                      }}
+                      className="text-primary"
                     />
                   ))
                 )}
@@ -2839,20 +3198,29 @@ export default function HomePage() {
 
             <div className="container mx-auto max-w-[1400px] px-5 relative z-10">
               {/* Section Header */}
-              <div className="text-center mb-12 lg:mb-16">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans">
+              <div className="text-center">
+                <h2
+                  ref={statsTitleRef}
+                  className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans"
+                >
                   {t("statistics.title")}{" "}
                   <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                     {t("statistics.titleHighlight")}
                   </span>
                 </h2>
-                <p className="text-base md:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto px-2 sm:px-0">
+                <p
+                  ref={statsDescriptionRef}
+                  className="text-base md:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto px-2 sm:px-0"
+                >
                   {t("statistics.description")}
                 </p>
               </div>
 
               {/* Statistics Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+              <div
+                ref={statsCardsContainerRef}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 pb-32"
+              >
                 {Object.entries(
                   t("testimonials.stats", { returnObjects: true }) as Record<
                     string,
@@ -3030,6 +3398,7 @@ export default function HomePage() {
           </div>
         </section>
       )}
+      
       {/* FAQ Section */}
       <FAQSection />
       {/* Footer */}
