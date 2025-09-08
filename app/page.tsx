@@ -86,6 +86,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMobileMenuAnimations } from "@/hooks/use-mobile-menu-animations";
 import { useEnhancedHeaderEffects } from "@/hooks/use-enhanced-header-effects";
 import { useHeaderAnimations } from "@/hooks/use-header-animations";
+import { useHeroAnimations } from "@/hooks/use-hero-animations";
 
 // StatisticCard component for animated counters
 interface StatisticCardProps {
@@ -566,13 +567,38 @@ export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
 
   // Header animations (run only when not loading)
-  const { headerRef, logoRef, navRef, controlsRef, mobileButtonRef } = useHeaderAnimations(!isLoading);
-  
+  const { headerRef, logoRef, navRef, controlsRef, mobileButtonRef } =
+    useHeaderAnimations(!isLoading);
+
   // Mobile menu animations
-  const { overlayRef, menuRef, addToRefs } = useMobileMenuAnimations(isMobileMenuOpen);
-  
+  const { overlayRef, menuRef, addToRefs } =
+    useMobileMenuAnimations(isMobileMenuOpen);
+
   // Enhanced header effects (run only when not loading)
   useEnhancedHeaderEffects(headerRef, !isLoading);
+
+  // Hero animations (run only when not loading)
+  const {
+    heroSectionRef,
+    titleRef,
+    titleHighlightRef,
+    descriptionRef,
+    searchContainerRef,
+    mobileSearchTypeRef,
+    mobileSearchInputRef,
+    mobileSearchButtonRef,
+    desktopSearchBarRef,
+    errorDisplayRef,
+    backgroundPatternRef,
+    gridDotsRef,
+    squareGridRef,
+    diamondGridRef,
+    topCenterDotsRef,
+    topRightIconRef,
+    topRightSquaresRef,
+    addFloatingIconRef,
+    ctaButtonsRef,
+  } = useHeroAnimations({ enabled: !isLoading });
 
   // URL validation regex patterns
   const urlRegex =
@@ -959,13 +985,13 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background font-sans">
       {/* Header */}
-      <header 
+      <header
         ref={headerRef}
-        className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50"
+        className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 h-16 min-h-[4rem] max-h-[4rem]"
       >
         {/* Header particle effects container */}
         <div className="header-particles"></div>
-        
+
         <div className="container mx-auto max-w-7xl px-4 sm:px-5">
           <div className="flex items-center justify-between h-16">
             {/* Logo and Mobile Menu Button */}
@@ -1073,7 +1099,9 @@ export default function HomePage() {
                   onClick={() => handleSmoothScroll("home")}
                   className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
                 >
-                  <span className="text-base">{t("header.navigation.home")}</span>
+                  <span className="text-base">
+                    {t("header.navigation.home")}
+                  </span>
                 </button>
               </div>
               <div ref={addToRefs}>
@@ -1111,7 +1139,9 @@ export default function HomePage() {
                   onClick={() => handleSmoothScroll("faq")}
                   className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
                 >
-                  <span className="text-base">{t("header.navigation.faq")}</span>
+                  <span className="text-base">
+                    {t("header.navigation.faq")}
+                  </span>
                 </button>
               </div>
             </div>
@@ -1120,13 +1150,18 @@ export default function HomePage() {
       </aside>
       {/* Hero Section */}
       <section
+        ref={heroSectionRef}
         id="home"
         className="relative min-h-screen bg-gradient-to-br from-primary/20 via-primary/5 to-primary/20 py-12 md:pb-20 md:pt-8 overflow-hidden"
       >
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-35 dark:opacity-100"></div>
+        <div
+          ref={backgroundPatternRef}
+          className="absolute inset-0 bg-grid-pattern opacity-35 dark:opacity-100"
+        ></div>
         {/* Shape 1 - Grid Dots Pattern (like your reference image) */}
         <div
+          ref={gridDotsRef}
           className={`absolute bottom-32 ${isRTL ? "right-5/12" : "left-5/12"} transform -translate-x-1/2 md:bottom-40`}
         >
           <svg
@@ -1156,7 +1191,10 @@ export default function HomePage() {
           </svg>
         </div>
         {/* Shape 2 - Square Grid Pattern (Left Side) */}
-        <div className="hidden md:block absolute top-1/3 left-4 md:left-8">
+        <div
+          ref={squareGridRef}
+          className="hidden md:block absolute top-1/3 left-4 md:left-8"
+        >
           <svg
             width="100"
             height="120"
@@ -1185,7 +1223,10 @@ export default function HomePage() {
           </svg>
         </div>
         {/* Shape 3 - Diamond Grid Pattern (Bottom Right) */}
-        <div className="absolute bottom-20 right-12 md:bottom-32 md:right-20">
+        <div
+          ref={diamondGridRef}
+          className="absolute bottom-20 right-12 md:bottom-32 md:right-20"
+        >
           <svg
             width="90"
             height="90"
@@ -1216,6 +1257,7 @@ export default function HomePage() {
         </div>
         {/* Shape 4 - Top Center Left Dots */}
         <div
+          ref={topCenterDotsRef}
           className={`absolute top-12 ${isRTL ? "right-1/3 md:right-2/5" : "left-1/3 md:left-2/5"} md:top-16 opacity-30`}
         >
           <svg
@@ -1246,6 +1288,7 @@ export default function HomePage() {
         </div>
         {/* Shape 5 - Top Center Right Floating Icon */}
         <div
+          ref={topRightIconRef}
           className={`hidden md:block absolute top-8 ${isRTL ? "left-1/3 md:left-2/12" : "right-1/3 md:right-4/5"} md:top-12`}
         >
           <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
@@ -1254,6 +1297,7 @@ export default function HomePage() {
         </div>
         {/* Shape 6 - Top Center Right Small Squares */}
         <div
+          ref={topRightSquaresRef}
           className={`absolute top-16 ${isRTL ? "left-1/4 md:left-1/3" : "right-1/4 md:right-1/3"} md:top-20 opacity-35`}
         >
           <svg
@@ -1287,6 +1331,7 @@ export default function HomePage() {
         {/* Additional Floating Icons - 9 more decorative elements */}
         {/* Icon 1 - Top Left Corner */}
         <div
+          ref={addFloatingIconRef}
           className={`hidden lg:block absolute top-20 ${isRTL ? "right-8" : "left-8"}`}
         >
           <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
@@ -1296,6 +1341,7 @@ export default function HomePage() {
 
         {/* Icon 2 - Top Right Corner */}
         <div
+          ref={addFloatingIconRef}
           className={`hidden lg:block absolute top-24 ${isRTL ? "left-12" : "right-12"}`}
         >
           <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-bounce-slow">
@@ -1305,6 +1351,7 @@ export default function HomePage() {
 
         {/* Icon 3 - Middle Left */}
         <div
+          ref={addFloatingIconRef}
           className={`hidden md:block absolute top-1/2 ${isRTL ? "right-4" : "left-4"} transform -translate-y-1/2`}
         >
           <div className="w-11 h-11 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float-delayed">
@@ -1314,6 +1361,7 @@ export default function HomePage() {
 
         {/* Icon 4 - Middle Right */}
         <div
+          ref={addFloatingIconRef}
           className={`hidden md:block absolute top-1/2 ${isRTL ? "left-6" : "right-6"} transform -translate-y-1/2`}
         >
           <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
@@ -1323,6 +1371,7 @@ export default function HomePage() {
 
         {/* Icon 5 - Bottom Left */}
         <div
+          ref={addFloatingIconRef}
           className={`hidden md:block absolute bottom-24 ${isRTL ? "right-16" : "left-16"}`}
         >
           <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-bounce-slow">
@@ -1332,6 +1381,7 @@ export default function HomePage() {
 
         {/* Icon 6 - Bottom Right */}
         <div
+          ref={addFloatingIconRef}
           className={`hidden md:block absolute bottom-28 ${isRTL ? "left-20" : "right-20"}`}
         >
           <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float-delayed">
@@ -1341,6 +1391,7 @@ export default function HomePage() {
 
         {/* Icon 7 - Top Center */}
         <div
+          ref={addFloatingIconRef}
           className={`hidden lg:block absolute top-16 ${isRTL ? "right-5/6" : "left-5/6"} transform -translate-x-1/2`}
         >
           <div className="w-8 h-8 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
@@ -1350,6 +1401,7 @@ export default function HomePage() {
 
         {/* Icon 8 - Bottom Center Left */}
         <div
+          ref={addFloatingIconRef}
           className={`hidden md:block absolute bottom-16 ${isRTL ? "right-1/3" : "left-1/3"}`}
         >
           <div className="w-11 h-11 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-bounce-slow">
@@ -1359,6 +1411,7 @@ export default function HomePage() {
 
         {/* Icon 9 - Bottom Center Right */}
         <div
+          ref={addFloatingIconRef}
           className={`hidden md:block absolute bottom-20 ${isRTL ? "left-1/4" : "right-1/4"}`}
         >
           <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float-delayed">
@@ -1370,22 +1423,31 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center min-h-[85vh] sm:min-h-[80vh] text-center space-y-6 sm:space-y-8 lg:space-y-12 py-8 sm:py-0">
             {/* Centered Content */}
             <div className="space-y-4 sm:space-y-6 max-w-4xl px-2 sm:px-0">
-              <h1 className="text-4xl md:text-4xl 2xl:text-6xl font-bold tracking-tight text-foreground font-sans leading-tight sm:leading-tight">
+              <h1
+                ref={titleRef}
+                className="text-4xl md:text-4xl 2xl:text-6xl font-bold tracking-tight font-sans leading-tight sm:leading-tight bg-gradient-to-r from-yellow-500 via-primary to-amber-600 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_200%]"
+              >
                 {t("hero.title")}{" "}
-                <span className="text-primary block sm:inline">
+                <span ref={titleHighlightRef} className="inline">
                   {t("hero.titleHighlight")}
                 </span>
               </h1>
-              <p className="text-base 2xl:text-xl text-muted-foreground leading-relaxed max-w-4xl mx-auto px-2 sm:px-0">
+              <p
+                ref={descriptionRef}
+                className="text-base 2xl:text-xl text-muted-foreground leading-relaxed max-w-4xl mx-auto px-2 sm:px-0"
+              >
                 {t("hero.description")}
               </p>
             </div>
             {/* Centered Search Bar */}
-            <div className="w-full max-w-5xl px-4 sm:px-0">
+            <div
+              ref={searchContainerRef}
+              className="w-full max-w-5xl px-4 sm:px-0"
+            >
               {/* Mobile Layout */}
               <div className="sm:hidden space-y-4">
                 {/* Search Type Dropdown for Mobile */}
-                <div className="w-full">
+                <div ref={mobileSearchTypeRef} className="w-full">
                   <Select value={searchType} onValueChange={setSearchType}>
                     <SelectTrigger className="w-full !h-14 text-base border-2 border-border focus:border-primary rounded-xl bg-background/80 backdrop-blur-sm">
                       <SelectValue
@@ -1428,7 +1490,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Search Input */}
-                <div className="relative">
+                <div ref={mobileSearchInputRef} className="relative">
                   <Search
                     className={`absolute ${isRTL ? "right-4" : "left-4"} top-1/2 transform -translate-y-1/2 stroke-2 text-muted-foreground w-5 h-5`}
                   />
@@ -1463,7 +1525,10 @@ export default function HomePage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col gap-3">
+                <div
+                  ref={mobileSearchButtonRef}
+                  className="flex flex-col gap-3"
+                >
                   <Button
                     onClick={handleSearch}
                     disabled={isSearching || !searchQuery.trim()}
@@ -1484,7 +1549,10 @@ export default function HomePage() {
                 </div>
               </div>
               {/* Desktop Layout */}
-              <div className="hidden sm:flex items-center gap-5">
+              <div
+                ref={desktopSearchBarRef}
+                className="hidden sm:flex items-center gap-5"
+              >
                 <div className="w-full relative flex items-center">
                   {/* Search Type Dropdown */}
                   <div
@@ -1587,7 +1655,10 @@ export default function HomePage() {
 
               {/* Error Display for Desktop */}
               {searchError && (
-                <div className="w-full max-w-4xl px-4 sm:px-0">
+                <div
+                  ref={errorDisplayRef}
+                  className="w-full max-w-4xl px-4 sm:px-0"
+                >
                   <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                     <p className="text-sm text-red-600 dark:text-red-400 text-center">
                       {searchError}
@@ -1598,7 +1669,10 @@ export default function HomePage() {
             </div>
 
             {/* CTA Buttons - Centered */}
-            <div className="pt-24 sm:pt-16 md:pt-0 flex flex-col sm:flex-row gap-4 justify-center px-4 sm:px-0 w-full max-w-md sm:max-w-none">
+            <div
+              ref={ctaButtonsRef}
+              className="pt-24 sm:pt-16 md:pt-0 flex flex-col sm:flex-row gap-4 justify-center px-4 sm:px-0 w-full max-w-md sm:max-w-none"
+            >
               <Button
                 size="lg"
                 className="!px-5 2xl:px-8 py-5 2xl:py-7 text-base 2xl:text-lg font-semibold border-2 border-primary min-h-[3.5rem] touch-manipulation w-full sm:w-auto"
@@ -1668,7 +1742,9 @@ export default function HomePage() {
                         "vectorstock",
                         "pngtree",
                       ];
-                      const indexMap = new Map(priorityOrder.map((id, i) => [id, i]));
+                      const indexMap = new Map(
+                        priorityOrder.map((id, i) => [id, i])
+                      );
                       const pa = indexMap.get(a.id);
                       const pb = indexMap.get(b.id);
                       if (pa !== undefined && pb !== undefined) return pa - pb;
