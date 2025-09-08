@@ -9,7 +9,6 @@ import {
   Eye,
   PhoneCall,
   Menu,
-  Cat,
   Check,
   Zap,
   Crown,
@@ -17,7 +16,6 @@ import {
   Timer,
   Coins,
   ExternalLink,
-  Shield,
   Download,
   Sparkles,
   Users,
@@ -32,6 +30,7 @@ import {
   User,
   TrendingUp,
   Target,
+  Shield,
 } from "lucide-react";
 
 import { gsap } from "gsap";
@@ -417,6 +416,7 @@ const creditSites: CreditSite[] = [
     url: "https://yellowimages.com",
     variants: [{ label: "All", points: 22 }],
   },
+
   {
     id: "alamy",
     name: "Alamy",
@@ -425,12 +425,35 @@ const creditSites: CreditSite[] = [
   },
 ];
 
+// Helper to get high-quality icon URL for specific sites with poor favicons
+const getSiteIconUrl = (siteId: string, url: string) => {
+  const iconMap: Record<string, string> = {
+    "adobe-stock":
+      "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/adobe.svg",
+    pikbest: "https://logo.clearbit.com/pikbest.com",
+    creativefabrica: "https://logo.clearbit.com/creativefabrica.com",
+    storyblocks: "https://logo.clearbit.com/storyblocks.com",
+    craftwork: "https://logo.clearbit.com/craftwork.design",
+    vecteezy: "https://logo.clearbit.com/vecteezy.com",
+    lovepik: "https://logo.clearbit.com/lovepik.com",
+    pngtree: "https://logo.clearbit.com/pngtree.com",
+    uplabs: "https://logo.clearbit.com/uplabs.com",
+    graphicscrate: "https://logo.clearbit.com/graphics.crate.com",
+  };
+
+  return (
+    iconMap[siteId] ||
+    `https://www.google.com/s2/favicons?domain=${encodeURIComponent(url)}&sz=128`
+  );
+};
+
 // Card for credit site
 const CreditSiteCard = ({ site }: { site: CreditSite }) => {
   const { i18n } = useTranslation("common");
   const minPoints = Math.min(...site.variants.map((v) => v.points));
+
+  // Show integers without decimals, fractions with comma for Arabic
   const formatPoints = (n: number) => {
-    // Show integers without decimals, fractions with comma for Arabic
     const isInt = Number.isInteger(n);
     const numStr = isInt
       ? String(n)
@@ -448,29 +471,7 @@ const CreditSiteCard = ({ site }: { site: CreditSite }) => {
     return `${numStr} ${unit}`;
   };
 
-  // Get high-quality icon URL for specific sites with poor favicons
-  const getIconUrl = (siteId: string, url: string) => {
-    const iconMap: Record<string, string> = {
-      "adobe-stock":
-        "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/adobe.svg",
-      pikbest: "https://logo.clearbit.com/pikbest.com",
-      creativefabrica: "https://logo.clearbit.com/creativefabrica.com",
-      storyblocks: "https://logo.clearbit.com/storyblocks.com",
-      craftwork: "https://logo.clearbit.com/craftwork.design",
-      vecteezy: "https://logo.clearbit.com/vecteezy.com",
-      lovepik: "https://logo.clearbit.com/lovepik.com",
-      pngtree: "https://logo.clearbit.com/pngtree.com",
-      uplabs: "https://logo.clearbit.com/uplabs.com",
-      graphicscrate: "https://logo.clearbit.com/graphics.crate.com",
-    };
-
-    return (
-      iconMap[siteId] ||
-      `https://www.google.com/s2/favicons?domain=${encodeURIComponent(url)}&sz=128`
-    );
-  };
-
-  const iconUrl = getIconUrl(site.id, site.url);
+  const iconUrl = getSiteIconUrl(site.id, site.url);
   const isCustomIcon = [
     "adobe-stock",
     "pikbest",
@@ -642,7 +643,6 @@ export default function HomePage() {
     squareGridRef,
     diamondGridRef,
     topCenterDotsRef,
-    topRightIconRef,
     topRightSquaresRef,
     addFloatingIconRef,
     ctaButtonsRef,
@@ -657,6 +657,93 @@ export default function HomePage() {
     gridContainerRef: platformsGridContainerRef,
     gridRef: platformsGridRef,
   } = useSupportedPlatformsAnimations({ enabled: !isLoading });
+
+  // Pre-defined positions for up to 20 floating site icons in the hero section
+  const heroIconPositions = isRTL
+    ? [
+        "top-20 right-6",
+        "top-28 right-16",
+        "top-36 right-1/4",
+        "top-16 right-1/3",
+        "top-1/2 right-8 -translate-y-1/2",
+        "top-1/3 right-5",
+        "top-2/3 right-10",
+        "top-1/4 right-1/6",
+        "bottom-28 right-8",
+        "bottom-24 right-1/5",
+        "bottom-20 right-1/3",
+        "bottom-16 right-12",
+        "top-24 right-1/2 -translate-x-1/2",
+        "top-40 right-1/2 -translate-x-1/2",
+        "bottom-32 right-1/2 -translate-x-1/2",
+        "top-24 left-1/4",
+        "top-1/2 left-10 -translate-y-1/2",
+        "bottom-24 left-16",
+        "top-1/3 left-12",
+        "bottom-1/3 left-8",
+        // Extra positions for >=1600px screens
+        "top-10 right-10",
+        "top-14 right-1/5",
+        "top-44 right-1/6",
+        "top-1/6 right-12",
+        "top-1/2 right-20 -translate-y-1/2",
+        "top-2/5 right-1/5",
+        "top-3/5 right-1/4",
+        "top-1/4 left-8",
+        "bottom-10 right-10",
+        "bottom-14 right-1/6",
+        "bottom-20 right-24",
+        "bottom-28 right-1/4",
+        "bottom-36 right-8",
+        "top-28 left-8",
+        "top-36 left-16",
+        "top-44 left-1/5",
+        "bottom-40 left-1/6",
+        "bottom-24 left-24",
+        "bottom-16 left-10",
+      ]
+    : [
+        "top-20 left-6",
+        "top-28 left-16",
+        "top-36 left-1/4",
+        "top-16 left-1/3",
+        "top-1/2 left-8 -translate-y-1/2",
+        "top-1/3 left-5",
+        "top-2/3 left-10",
+        "top-1/4 left-1/6",
+        "bottom-28 left-8",
+        "bottom-24 left-1/5",
+        "bottom-20 left-1/3",
+        "bottom-16 left-12",
+        "top-24 left-1/2 -translate-x-1/2",
+        "top-40 left-1/2 -translate-x-1/2",
+        "bottom-32 left-1/2 -translate-x-1/2",
+        "top-24 right-1/4",
+        "top-1/2 right-10 -translate-y-1/2",
+        "bottom-24 right-16",
+        "top-1/3 right-12",
+        "bottom-1/3 right-8",
+        // Extra positions for >=1600px screens
+        "top-10 left-10",
+        "top-14 left-1/5",
+        "top-44 left-1/6",
+        "top-1/6 left-12",
+        "top-1/2 left-20 -translate-y-1/2",
+        "top-2/5 left-1/5",
+        "top-3/5 left-1/4",
+        "top-1/4 right-8",
+        "bottom-10 left-10",
+        "bottom-14 left-1/6",
+        "bottom-20 left-24",
+        "bottom-28 left-1/4",
+        "bottom-36 left-8",
+        "top-28 right-8",
+        "top-36 right-16",
+        "top-44 right-1/5",
+        "bottom-40 right-1/6",
+        "bottom-24 right-24",
+        "bottom-16 right-10",
+      ];
 
   // URL validation regex patterns
   const urlRegex =
@@ -2010,15 +2097,6 @@ export default function HomePage() {
             )}
           </svg>
         </div>
-        {/* Shape 5 - Top Center Right Floating Icon */}
-        <div
-          ref={topRightIconRef}
-          className={`hidden md:block absolute top-8 ${isRTL ? "left-1/3 md:left-2/12" : "right-1/3 md:right-4/5"} md:top-12`}
-        >
-          <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
-            <Shield className="w-5 h-5 text-primary" />
-          </div>
-        </div>
         {/* Shape 6 - Top Center Right Small Squares */}
         <div
           ref={topRightSquaresRef}
@@ -2052,95 +2130,55 @@ export default function HomePage() {
           </svg>
         </div>
 
-        {/* Additional Floating Icons - 9 more decorative elements */}
-        {/* Icon 1 - Top Left Corner */}
-        <div
-          ref={addFloatingIconRef}
-          className={`hidden lg:block absolute top-20 ${isRTL ? "right-8" : "left-8"}`}
-        >
-          <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
-            <Zap className="w-6 h-6 text-primary" />
-          </div>
-        </div>
-
-        {/* Icon 2 - Top Right Corner */}
-        <div
-          ref={addFloatingIconRef}
-          className={`hidden lg:block absolute top-24 ${isRTL ? "left-12" : "right-12"}`}
-        >
-          <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-bounce-slow">
-            <Crown className="w-5 h-5 text-primary" />
-          </div>
-        </div>
-
-        {/* Icon 3 - Middle Left */}
-        <div
-          ref={addFloatingIconRef}
-          className={`hidden md:block absolute top-1/2 ${isRTL ? "right-4" : "left-4"} transform -translate-y-1/2`}
-        >
-          <div className="w-11 h-11 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float-delayed">
-            <Users className="w-5 h-5 text-primary" />
-          </div>
-        </div>
-
-        {/* Icon 4 - Middle Right */}
-        <div
-          ref={addFloatingIconRef}
-          className={`hidden md:block absolute top-1/2 ${isRTL ? "left-6" : "right-6"} transform -translate-y-1/2`}
-        >
-          <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
-            <Timer className="w-4 h-4 text-primary" />
-          </div>
-        </div>
-
-        {/* Icon 5 - Bottom Left */}
-        <div
-          ref={addFloatingIconRef}
-          className={`hidden md:block absolute bottom-24 ${isRTL ? "right-16" : "left-16"}`}
-        >
-          <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-bounce-slow">
-            <Coins className="w-5 h-5 text-primary" />
-          </div>
-        </div>
-
-        {/* Icon 6 - Bottom Right */}
-        <div
-          ref={addFloatingIconRef}
-          className={`hidden md:block absolute bottom-28 ${isRTL ? "left-20" : "right-20"}`}
-        >
-          <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float-delayed">
-            <Check className="w-6 h-6 text-primary" />
-          </div>
-        </div>
-
-        {/* Icon 7 - Top Center */}
-        <div
-          ref={addFloatingIconRef}
-          className={`hidden lg:block absolute top-16 ${isRTL ? "right-5/6" : "left-5/6"} transform -translate-x-1/2`}
-        >
-          <div className="w-8 h-8 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float">
-            <ExternalLink className="w-4 h-4 text-primary" />
-          </div>
-        </div>
-
-        {/* Icon 8 - Bottom Center Left */}
-        <div
-          ref={addFloatingIconRef}
-          className={`hidden md:block absolute bottom-16 ${isRTL ? "right-1/3" : "left-1/3"}`}
-        >
-          <div className="w-11 h-11 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-bounce-slow">
-            <Cat className="w-5 h-5 text-primary" />
-          </div>
-        </div>
-
-        {/* Icon 9 - Bottom Center Right */}
-        <div
-          ref={addFloatingIconRef}
-          className={`hidden md:block absolute bottom-20 ${isRTL ? "left-1/4" : "right-1/4"}`}
-        >
-          <div className="w-9 h-9 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center animate-float-delayed">
-            <Sparkles className="w-4 h-4 text-primary" />
-          </div>
+        {/* Floating platform icons - render all, control visibility by CSS */}
+        <div className="hero-floating-icons">
+          {creditSites.map((site, idx) => {
+            const iconUrl = getSiteIconUrl(site.id, site.url);
+            const pos = heroIconPositions[idx % heroIconPositions.length];
+            const sizes = [
+              "w-8 h-8", // small
+              "w-9 h-9",
+              "w-10 h-10",
+              "w-11 h-11",
+              "w-12 h-12", // large
+            ];
+            const containerSize = sizes[idx % sizes.length];
+            const animation =
+              idx % 3 === 0
+                ? "animate-float"
+                : idx % 3 === 1
+                  ? "animate-bounce-slow"
+                  : "animate-float-delayed";
+            return (
+              <div
+                key={site.id}
+                ref={addFloatingIconRef}
+                className={`hero-floating-icon hidden md:block absolute ${pos}`}
+                title={site.name}
+              >
+                <div
+                  className={`${containerSize} bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center ${animation}`}
+                >
+                  <img
+                    src={iconUrl}
+                    alt={`${site.name} icon`}
+                    width={48}
+                    height={48}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-2/3 h-2/3 object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                      if (target.src !== fallback) {
+                        target.src = fallback;
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-5 relative z-10">
@@ -2149,7 +2187,7 @@ export default function HomePage() {
             <div className="space-y-4 sm:space-y-6 max-w-4xl px-2 sm:px-0">
               <h1
                 ref={titleRef}
-                className="text-4xl md:text-4xl 2xl:text-6xl font-bold tracking-tight font-sans leading-tight sm:leading-tight bg-gradient-to-r from-yellow-500 via-primary to-amber-600 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_200%]"
+                className="text-4xl md:text-4xl 2xl:text-6xl font-bold tracking-tight font-sans leading-tight sm:leading-tight bg-gradient-to-r from-yellow-400 dark:from-yellow-300 via-primary to-amber-600 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_200%]"
               >
                 {t("hero.title")}{" "}
                 <span ref={titleHighlightRef} className="inline">

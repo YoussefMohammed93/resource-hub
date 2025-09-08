@@ -12,7 +12,7 @@ interface FloatingDotsAnimationProps {
 
 export function FloatingDotsAnimation({
   className = "",
-  dotCount = 350,
+  dotCount = 500,
   dotSize = 3,
   animationDuration = 20,
 }: FloatingDotsAnimationProps) {

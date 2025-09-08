@@ -321,6 +321,21 @@ section[id] {
   }
 }
 
+/* Control hero floating icons visibility via CSS */
+@media (min-width: 768px) {
+  /* On md and up, show only first 20 icons by default */
+  .hero-floating-icons .hero-floating-icon:nth-child(n + 21) {
+    display: none !important;
+  }
+}
+
+/* At >=1600px, show all icons */
+@media (min-width: 1600px) {
+  .hero-floating-icons .hero-floating-icon {
+    display: block !important;
+  }
+}
+
 /* Line clamp utilities */
 .line-clamp-1 {
   overflow: hidden;
