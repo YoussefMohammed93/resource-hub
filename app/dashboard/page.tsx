@@ -135,7 +135,7 @@ interface PricingPlan {
 
 export default function DashboardPage() {
   const { t } = useTranslation("common");
-  const { isRTL, isLoading } = useLanguage();
+  const { language, isRTL, isLoading } = useLanguage();
   const { user, isAuthenticated } = useAuth();
 
   const [selectedPlan, setSelectedPlan] = useState<string>("");
@@ -2331,15 +2331,17 @@ export default function DashboardPage() {
                 className="flex items-center"
               >
                 <div className="relative w-44 sm:w-48 h-12">
+                  {/* Light mode logos */}
                   <Image
-                    src="/logo-black.png"
+                    src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
                     alt={t("header.logo")}
                     fill
                     className="block dark:hidden"
                     priority
                   />
+                  {/* Dark mode logos */}
                   <Image
-                    src="/logo-white.png"
+                    src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
                     alt={t("header.logo")}
                     fill
                     className="hidden dark:block"

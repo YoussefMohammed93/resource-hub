@@ -25,7 +25,7 @@ export function useHeaderControlsAnimations(enabled: boolean = true) {
     if (!container) return;
 
     // Create timeline for header controls
-    const tl = gsap.timeline({ delay: 1.2 });
+    const tl = gsap.timeline({ delay: 0.6 });
 
     // Get all elements that exist
     const elements = [themeButton, languageButton, downloadIndicator, mobileControls, authControls].filter(Boolean);
@@ -47,10 +47,10 @@ export function useHeaderControlsAnimations(enabled: boolean = true) {
           y: 0,
           opacity: 1,
           scale: 1,
-          duration: 0.5,
+          duration: 0.25,
           ease: "power3.out",
         },
-        1.2 + (index * 0.1) // Absolute timing with stagger
+        0.6 + (index * 0.05) // Absolute timing with stagger
       );
     });
 

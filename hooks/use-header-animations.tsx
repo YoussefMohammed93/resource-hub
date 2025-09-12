@@ -29,7 +29,7 @@ export function useHeaderAnimations(enabled: boolean = true) {
     hasRunRef.current = true;
 
     // Create main timeline
-    const tl = gsap.timeline({ delay: 0.2 });
+    const tl = gsap.timeline({ delay: 0.1 });
 
     // Set initial states - elements start from above and invisible
     const headerElements = [logo, nav, controls, mobileButton].filter(Boolean);
@@ -51,7 +51,7 @@ export function useHeaderAnimations(enabled: boolean = true) {
       {
         y: 0,
         opacity: 1,
-        duration: 0.8,
+        duration: 0.4,
         ease: "power3.out",
       }
     );
@@ -64,10 +64,10 @@ export function useHeaderAnimations(enabled: boolean = true) {
           y: 0,
           opacity: 1,
           scale: 1,
-          duration: 0.6,
+          duration: 0.3,
           ease: "back.out(1.7)",
         },
-        "-=0.4"
+        "-=0.2"
       );
     }
 
@@ -79,10 +79,10 @@ export function useHeaderAnimations(enabled: boolean = true) {
           y: 0,
           opacity: 1,
           scale: 1,
-          duration: 0.5,
+          duration: 0.25,
           ease: "power2.out",
         },
-        "-=0.5"
+        "-=0.25"
       );
     }
 
@@ -109,10 +109,10 @@ export function useHeaderAnimations(enabled: boolean = true) {
           y: 0,
           opacity: 1,
           scale: 1,
-          duration: 0.5,
+          duration: 0.25,
           ease: "power3.out",
         },
-        "-=0.3"
+        "-=0.15"
       )
         // Label for precise absolute stagger start
         .add("navButtons");
@@ -122,7 +122,7 @@ export function useHeaderAnimations(enabled: boolean = true) {
         if (button) {
           tl.fromTo(
             button,
-            0.7, // duration required by Timeline.fromTo signature
+            0.35, // duration required by Timeline.fromTo signature
             {
               y: -48,
               opacity: 0,
@@ -136,7 +136,7 @@ export function useHeaderAnimations(enabled: boolean = true) {
               ease: "expo.out",
               onComplete: () => { gsap.set(button, { willChange: "auto" }); },
             },
-            `navButtons+=${index * 0.1}`
+            `navButtons+=${index * 0.05}`
           );
         }
       });
@@ -150,10 +150,10 @@ export function useHeaderAnimations(enabled: boolean = true) {
           y: 0,
           opacity: 1,
           scale: 1,
-          duration: 0.5,
+          duration: 0.25,
           ease: "power2.out",
         },
-        "-=0.2"
+        "-=0.1"
       );
     }
 

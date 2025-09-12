@@ -46,9 +46,9 @@ export function useEnhancedHeaderEffects(targetRef: RefObject<HTMLElement | null
           {
             opacity: 0.6,
             scale: 1,
-            duration: 1,
+            duration: 0.5,
             ease: "power2.out",
-            delay: Math.random() * 2,
+            delay: Math.random() * 1,
           }
         );
 
@@ -56,20 +56,20 @@ export function useEnhancedHeaderEffects(targetRef: RefObject<HTMLElement | null
         gsap.to(particle, {
           y: -20,
           x: Math.random() * 40 - 20,
-          duration: 3 + Math.random() * 2,
+          duration: 1.5 + Math.random() * 1,
           ease: "power1.inOut",
           yoyo: true,
           repeat: -1,
-          delay: Math.random() * 2,
+          delay: Math.random() * 1,
         });
 
         gsap.to(particle, {
           scale: 1.5,
-          duration: 2 + Math.random() * 1,
+          duration: 1 + Math.random() * 0.5,
           ease: "power2.inOut",
           yoyo: true,
           repeat: -1,
-          delay: Math.random() * 1,
+          delay: Math.random() * 0.5,
         });
       }
     };
@@ -82,7 +82,7 @@ export function useEnhancedHeaderEffects(targetRef: RefObject<HTMLElement | null
       if (isDesktop()) {
         createParticles();
       }
-    }, 2000); // Start after initial animations complete
+    }, 1000); // Start after initial animations complete
 
     // Handle responsive changes
     const onResize = () => {

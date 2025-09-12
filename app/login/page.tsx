@@ -77,7 +77,7 @@ const validateEmail = (email: string) => {
 
 export default function LoginPage() {
   const { t } = useTranslation("common");
-  const { isRTL, isLoading } = useLanguage();
+  const { language, isRTL, isLoading } = useLanguage();
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -569,15 +569,17 @@ export default function LoginPage() {
           <div className="flex items-center justify-between">
           <Link href="/" aria-label={t("header.logo")} className="flex items-center">
               <div className="relative w-44 sm:w-48 h-12">
-              <Image
-                  src="/logo-black.png"
+                {/* Light mode logos */}
+                <Image
+                  src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
                   alt={t("header.logo")}
                   fill
                   className="block dark:hidden"
                   priority
                 />
+                {/* Dark mode logos */}
                 <Image
-                  src="/logo-white.png"
+                  src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
                   alt={t("header.logo")}
                   fill
                   className="hidden dark:block"

@@ -315,7 +315,7 @@ function ServicePageSkeleton() {
 
 export default function ServicePage({ params }: ServicePageProps) {
   const { t } = useTranslation("common");
-  const { isRTL, isLoading } = useLanguage();
+  const { language, isRTL, isLoading } = useLanguage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [subscriptionPeriod, setSubscriptionPeriod] = useState("1year");
@@ -381,15 +381,17 @@ export default function ServicePage({ params }: ServicePageProps) {
                   className="flex items-center"
                 >
                   <div className="relative w-44 sm:w-48 h-12">
+                    {/* Light mode logos */}
                     <Image
-                      src="/logo-black.png"
+                      src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
                       alt={t("header.logo")}
                       fill
                       className="block dark:hidden"
                       priority
                     />
+                    {/* Dark mode logos */}
                     <Image
-                      src="/logo-white.png"
+                      src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
                       alt={t("header.logo")}
                       fill
                       className="hidden dark:block"
@@ -461,15 +463,17 @@ export default function ServicePage({ params }: ServicePageProps) {
                 className="flex items-center"
               >
                 <div className="relative w-44 sm:w-48 h-12">
+                  {/* Light mode logos */}
                   <Image
-                    src="/logo-black.png"
+                    src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
                     alt={t("header.logo")}
                     fill
                     className="block dark:hidden"
                     priority
                   />
+                  {/* Dark mode logos */}
                   <Image
-                    src="/logo-white.png"
+                    src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
                     alt={t("header.logo")}
                     fill
                     className="hidden dark:block"

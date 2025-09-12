@@ -96,6 +96,7 @@ import { useMobileMenuAnimations } from "@/hooks/use-mobile-menu-animations";
 import { useEnhancedHeaderEffects } from "@/hooks/use-enhanced-header-effects";
 import { useHeaderAnimations } from "@/hooks/use-header-animations";
 import { useHeroAnimations } from "@/hooks/use-hero-animations";
+import { useTestimonialsAnimations } from "@/hooks/use-testimonials-animations";
 import { FloatingDotsAnimation } from "@/components/floating-dots-animation";
 
 // StatisticCard component for animated counters
@@ -454,7 +455,7 @@ const getSiteIconUrl = (siteId: string, url: string) => {
 
 export default function HomePage() {
   const { t } = useTranslation("common");
-  const { isRTL, isLoading } = useLanguage();
+  const { language, isRTL, isLoading } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchType, setSearchType] = useState("all");
@@ -487,7 +488,6 @@ export default function HomePage() {
   const dotsGridBottomRef = useRef<SVGSVGElement>(null);
   const starIconRef = useRef<HTMLDivElement>(null);
   const heartIconRef = useRef<HTMLDivElement>(null);
-  const carouselContainerRef = useRef<HTMLDivElement>(null);
 
   // GSAP Animation refs for statistics section
   const statisticsSectionRef = useRef<HTMLElement>(null);
@@ -549,6 +549,19 @@ export default function HomePage() {
     topRightSquaresRef,
     ctaButtonsRef,
   } = useHeroAnimations({ enabled: !isLoading });
+
+  // Testimonials animations (run only when not loading)
+  const {
+    testimonialsRef: testimonialsAnimRef,
+    testimonialsTitleRef: testimonialsTitleAnimRef,
+    testimonialsHighlightRef: testimonialsHighlightAnimRef,
+    testimonialsDescRef: testimonialsDescAnimRef,
+    carouselContainerRef: carouselContainerAnimRef,
+    dotsGridTopRef: dotsGridTopAnimRef,
+    dotsGridBottomRef: dotsGridBottomAnimRef,
+    starIconRef: starIconAnimRef,
+    heartIconRef: heartIconAnimRef,
+  } = useTestimonialsAnimations(!isLoading);
 
   // URL validation regex patterns
   const urlRegex =
@@ -1643,15 +1656,17 @@ export default function HomePage() {
                   className="flex items-center"
                 >
                   <div className="relative w-44 sm:w-48 h-12">
+                    {/* Light mode logos */}
                     <Image
-                      src="/logo-black.png"
+                      src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
                       alt={t("header.logo")}
                       fill
                       className="block dark:hidden"
                       priority
                     />
+                    {/* Dark mode logos */}
                     <Image
-                      src="/logo-white.png"
+                      src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
                       alt={t("header.logo")}
                       fill
                       className="hidden dark:block"
@@ -1808,7 +1823,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.1}s`,
+                    animationDelay: `${(row + col) * 0.05}s`,
                     opacity: Math.random() * 0.5 + 0.3,
                   }}
                 />
@@ -1840,7 +1855,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.08}s`,
+                    animationDelay: `${(row + col) * 0.04}s`,
                     opacity: Math.random() * 0.5 + 0.25,
                   }}
                 />
@@ -1873,7 +1888,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.15}s`,
+                    animationDelay: `${(row + col) * 0.075}s`,
                     opacity: Math.random() * 0.4 + 0.4,
                   }}
                 />
@@ -1904,7 +1919,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.2}s`,
+                    animationDelay: `${(row + col) * 0.1}s`,
                     opacity: Math.random() * 0.5 + 0.4,
                   }}
                 />
@@ -1936,7 +1951,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.15}s`,
+                    animationDelay: `${(row + col) * 0.075}s`,
                     opacity: Math.random() * 0.5 + 0.3,
                   }}
                 />
@@ -2960,14 +2975,14 @@ export default function HomePage() {
         <TestimonialsSkeleton />
       ) : (
         <section
-          ref={testimonialsRef}
+          ref={testimonialsAnimRef}
           className="py-16 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden"
         >
           {/* Floating Background Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {/* Top Left Dots Grid */}
             <svg
-              ref={dotsGridTopRef}
+              ref={dotsGridTopAnimRef}
               className={`absolute top-20 ${isRTL ? "right-10" : "left-10"} w-32 h-24 opacity-20`}
               viewBox="0 0 140 100"
               fill="none"
@@ -2988,7 +3003,7 @@ export default function HomePage() {
 
             {/* Top Right Star Icon */}
             <div
-              ref={starIconRef}
+              ref={starIconAnimRef}
               className={`hidden lg:block absolute top-32 ${isRTL ? "left-20" : "right-20"}`}
             >
               <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
@@ -2998,7 +3013,7 @@ export default function HomePage() {
 
             {/* Bottom Left Heart Icon */}
             <div
-              ref={heartIconRef}
+              ref={heartIconAnimRef}
               className={`hidden md:block absolute bottom-32 ${isRTL ? "right-16" : "left-16"}`}
             >
               <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
@@ -3008,7 +3023,7 @@ export default function HomePage() {
 
             {/* Bottom Right Dots Grid */}
             <svg
-              ref={dotsGridBottomRef}
+              ref={dotsGridBottomAnimRef}
               className={`absolute bottom-20 ${isRTL ? "left-16" : "right-16"} w-28 h-20 opacity-15`}
               viewBox="0 0 120 80"
               fill="none"
@@ -3032,21 +3047,21 @@ export default function HomePage() {
             {/* Section Header */}
             <div className="text-center mb-8">
               <h2
-                ref={testimonialsTitleRef}
+                ref={testimonialsTitleAnimRef}
                 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight font-sans"
               >
                 <span className="inline-block bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                   {t("testimonials.title")}
                 </span>{" "}
                 <span
-                  ref={testimonialsHighlightRef}
+                  ref={testimonialsHighlightAnimRef}
                   className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
                 >
                   {t("testimonials.titleHighlight")}
                 </span>
               </h2>
               <p
-                ref={testimonialsDescRef}
+                ref={testimonialsDescAnimRef}
                 className={`text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed ${isRTL && "font-medium"}`}
               >
                 {t("testimonials.description")}
@@ -3055,7 +3070,7 @@ export default function HomePage() {
 
             {/* Testimonials Carousel */}
             <div
-              ref={carouselContainerRef}
+              ref={carouselContainerAnimRef}
               className="relative max-w-[1400px] mx-auto py-2"
             >
               <Carousel
@@ -3075,7 +3090,7 @@ export default function HomePage() {
                       key={index}
                       className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
                     >
-                      <div className="testimonial-card bg-card dark:bg-secondary border border-border rounded-2xl p-4 lg:p-6 transition-all duration-300 hover:shadow-sm hover:border-primary/50 h-full">
+                      <div className="testimonial-card bg-card dark:bg-secondary border border-border rounded-2xl p-4 lg:p-6 transition-all duration-150 hover:shadow-sm hover:border-primary/50 h-full will-change-transform">
                         {/* Author Info at Top */}
                         <div
                           className={`flex items-center justify-between mb-4`}
@@ -3085,7 +3100,7 @@ export default function HomePage() {
                               <User className="w-6 h-6 text-primary" />
                             </div>
                             <div className="flex-1">
-                              <h4 className="author-name font-semibold text-foreground text-sm transition-all duration-300">
+                              <h4 className="author-name font-semibold text-foreground text-sm transition-all duration-150">
                                 {testimonial.name}
                               </h4>
                               <p className="text-xs text-muted-foreground">
@@ -3109,7 +3124,7 @@ export default function HomePage() {
 
                         {/* Testimonial Content */}
                         <p
-                          className={`testimonial-text text-muted-foreground leading-relaxed text-sm sm:text-base transition-all duration-300 ${isRTL && "font-medium"}`}
+                          className={`testimonial-text text-muted-foreground leading-relaxed text-sm sm:text-base transition-all duration-150 ${isRTL && "font-medium"}`}
                         >
                           <q> {testimonial.content} </q>
                         </p>
@@ -3120,10 +3135,10 @@ export default function HomePage() {
 
                 {/* Navigation Buttons - Hidden on mobile, visible on sm+ */}
                 <CarouselPrevious
-                  className={`hidden sm:flex ${isRTL ? "!-right-14 !left-auto" : "!-left-14 !right-auto"} bg-background border-border hover:bg-muted hover:border-primary/50 transition-colors`}
+                  className={`hidden sm:flex ${isRTL ? "!-right-14 !left-auto" : "!-left-14 !right-auto"} bg-background border-border hover:bg-muted hover:border-primary/50 transition-colors duration-150 will-change-transform`}
                 />
                 <CarouselNext
-                  className={`hidden sm:flex ${isRTL ? "!-left-14 !right-auto" : "!-right-14 !left-auto"} bg-background border-border hover:bg-muted hover:border-primary/50 transition-colors`}
+                  className={`hidden sm:flex ${isRTL ? "!-left-14 !right-auto" : "!-right-14 !left-auto"} bg-background border-border hover:bg-muted hover:border-primary/50 transition-colors duration-150 will-change-transform`}
                 />
               </Carousel>
 
@@ -3135,7 +3150,7 @@ export default function HomePage() {
                   <button
                     key={index}
                     onClick={() => carouselApi?.scrollTo(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    className={`w-2 h-2 rounded-full transition-all duration-150 ${
                       currentSlide === index
                         ? "bg-primary scale-125"
                         : "bg-primary/30 hover:bg-primary/50"
