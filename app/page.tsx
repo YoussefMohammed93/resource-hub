@@ -85,12 +85,10 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Badge } from "@/components/ui/badge";
 import { useMobileMenuAnimations } from "@/hooks/use-mobile-menu-animations";
 import { useEnhancedHeaderEffects } from "@/hooks/use-enhanced-header-effects";
 import { useHeaderAnimations } from "@/hooks/use-header-animations";
 import { useHeroAnimations } from "@/hooks/use-hero-animations";
-import { useSupportedPlatformsAnimations } from "@/hooks/use-supported-platforms-animations";
 import { FloatingDotsAnimation } from "@/components/floating-dots-animation";
 
 // StatisticCard component for animated counters
@@ -447,106 +445,6 @@ const getSiteIconUrl = (siteId: string, url: string) => {
   );
 };
 
-// Card for credit site
-const CreditSiteCard = ({ site }: { site: CreditSite }) => {
-  const { i18n } = useTranslation("common");
-  const minPoints = Math.min(...site.variants.map((v) => v.points));
-
-  // Show integers without decimals, fractions with comma for Arabic
-  const formatPoints = (n: number) => {
-    const isInt = Number.isInteger(n);
-    const numStr = isInt
-      ? String(n)
-      : i18n.language === "ar"
-        ? String(n).replace(".", ",")
-        : String(n);
-    const unit =
-      i18n.language === "ar"
-        ? n === 1
-          ? "نقطة"
-          : "نقاط"
-        : n === 1
-          ? "credit"
-          : "credits";
-    return `${numStr} ${unit}`;
-  };
-
-  const iconUrl = getSiteIconUrl(site.id, site.url);
-  const isCustomIcon = [
-    "adobe-stock",
-    "pikbest",
-    "creativefabrica",
-    "storyblocks",
-    "craftwork",
-  ].includes(site.id);
-
-  return (
-    <div className="group relative bg-muted/80 border border-border/60 rounded-xl hover:border-primary/40 hover:shadow-md transition-all cursor-pointer overflow-hidden min-h-[230px]">
-      <a
-        href={site.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative z-10 flex flex-col items-center justify-between gap-2 h-full p-4 pb-4 text-center"
-        title={site.name}
-      >
-        {/* Big icon */}
-        <div className="flex-shrink-0">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-background dark:bg-muted border border-border/40 flex items-center justify-center">
-            <img
-              src={iconUrl}
-              alt={`${site.name} favicon`}
-              width={96}
-              height={96}
-              loading="lazy"
-              decoding="async"
-              className={`${isCustomIcon ? "w-14 h-14 sm:w-20 sm:h-20" : "w-16 h-16 sm:w-20 sm:h-20"} object-contain`}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                if (
-                  target.src !==
-                  `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`
-                ) {
-                  target.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                  target.className = "w-18 h-18 sm:w-20 sm:h-20 object-contain";
-                }
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Name */}
-        <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-foreground group-hover:text-primary leading-tight w-full">
-          {site.name}
-        </h3>
-
-        {/* Badges */}
-        <div className="mt-1 flex flex-wrap justify-center gap-1.5 w-full">
-          {site.variants.map((variant, i) => {
-            const isLowestPrice = variant.points <= minPoints;
-            return (
-              <Badge
-                key={i}
-                variant={isLowestPrice ? "default" : "outline"}
-                className={`text-[10px] sm:text-sm px-2.5 py-1 rounded-full ${
-                  isLowestPrice
-                    ? "bg-primary text-primary-foreground border-primary/60"
-                    : "bg-muted/70 border-border/60"
-                }`}
-              >
-                <span className="font-medium">{variant.label}</span>
-                <span className="mx-1 opacity-60">•</span>
-                <span className="font-bold">
-                  {formatPoints(variant.points)}
-                </span>
-              </Badge>
-            );
-          })}
-        </div>
-      </a>
-    </div>
-  );
-};
-
 export default function HomePage() {
   const { t } = useTranslation("common");
   const { isRTL, isLoading } = useLanguage();
@@ -638,112 +536,12 @@ export default function HomePage() {
     mobileSearchButtonRef,
     desktopSearchBarRef,
     errorDisplayRef,
-    backgroundPatternRef,
-    gridDotsRef,
     squareGridRef,
     diamondGridRef,
     topCenterDotsRef,
     topRightSquaresRef,
-    addFloatingIconRef,
     ctaButtonsRef,
   } = useHeroAnimations({ enabled: !isLoading });
-
-  // Supported platforms animations (run only when not loading)
-  const {
-    sectionRef: platformsSectionRef,
-    headerRef: platformsHeaderRef,
-    titleRef: platformsTitleRef,
-    descriptionRef: platformsDescriptionRef,
-    gridContainerRef: platformsGridContainerRef,
-    gridRef: platformsGridRef,
-  } = useSupportedPlatformsAnimations({ enabled: !isLoading });
-
-  // Pre-defined positions for up to 20 floating site icons in the hero section
-  const heroIconPositions = isRTL
-    ? [
-        "top-20 right-6",
-        "top-28 right-16",
-        "top-36 right-1/4",
-        "top-16 right-1/3",
-        "top-1/2 right-8 -translate-y-1/2",
-        "top-1/3 right-5",
-        "top-2/3 right-10",
-        "top-1/4 right-1/6",
-        "bottom-28 right-8",
-        "bottom-24 right-1/5",
-        "bottom-20 right-1/3",
-        "bottom-16 right-12",
-        "top-24 right-1/2 -translate-x-1/2",
-        "top-40 right-1/2 -translate-x-1/2",
-        "bottom-32 right-1/2 -translate-x-1/2",
-        "top-24 left-1/4",
-        "top-1/2 left-10 -translate-y-1/2",
-        "bottom-24 left-16",
-        "top-1/3 left-12",
-        "bottom-1/3 left-8",
-        // Extra positions for >=1600px screens
-        "top-10 right-10",
-        "top-14 right-1/5",
-        "top-44 right-1/6",
-        "top-1/6 right-12",
-        "top-1/2 right-20 -translate-y-1/2",
-        "top-2/5 right-1/5",
-        "top-3/5 right-1/4",
-        "top-1/4 left-8",
-        "bottom-10 right-10",
-        "bottom-14 right-1/6",
-        "bottom-20 right-24",
-        "bottom-28 right-1/4",
-        "bottom-36 right-8",
-        "top-28 left-8",
-        "top-36 left-16",
-        "top-44 left-1/5",
-        "bottom-40 left-1/6",
-        "bottom-24 left-24",
-        "bottom-16 left-10",
-      ]
-    : [
-        "top-20 left-6",
-        "top-28 left-16",
-        "top-36 left-1/4",
-        "top-16 left-1/3",
-        "top-1/2 left-8 -translate-y-1/2",
-        "top-1/3 left-5",
-        "top-2/3 left-10",
-        "top-1/4 left-1/6",
-        "bottom-28 left-8",
-        "bottom-24 left-1/5",
-        "bottom-20 left-1/3",
-        "bottom-16 left-12",
-        "top-24 left-1/2 -translate-x-1/2",
-        "top-40 left-1/2 -translate-x-1/2",
-        "bottom-32 left-1/2 -translate-x-1/2",
-        "top-24 right-1/4",
-        "top-1/2 right-10 -translate-y-1/2",
-        "bottom-24 right-16",
-        "top-1/3 right-12",
-        "bottom-1/3 right-8",
-        // Extra positions for >=1600px screens
-        "top-10 left-10",
-        "top-14 left-1/5",
-        "top-44 left-1/6",
-        "top-1/6 left-12",
-        "top-1/2 left-20 -translate-y-1/2",
-        "top-2/5 left-1/5",
-        "top-3/5 left-1/4",
-        "top-1/4 right-8",
-        "bottom-10 left-10",
-        "bottom-14 left-1/6",
-        "bottom-20 left-24",
-        "bottom-28 left-1/4",
-        "bottom-36 left-8",
-        "top-28 right-8",
-        "top-36 right-16",
-        "top-44 right-1/5",
-        "bottom-40 right-1/6",
-        "bottom-24 right-24",
-        "bottom-16 right-10",
-      ];
 
   // URL validation regex patterns
   const urlRegex =
@@ -1965,14 +1763,9 @@ export default function HomePage() {
         id="home"
         className="relative min-h-screen bg-gradient-to-br from-primary/20 via-primary/5 to-primary/20 py-12 md:pb-20 md:pt-8 overflow-hidden"
       >
-        {/* Background Pattern */}
-        <div
-          ref={backgroundPatternRef}
-          className="absolute inset-0 bg-grid-pattern opacity-35 dark:opacity-100"
-        ></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-20 dark:opacity-100"></div>
         {/* Shape 1 - Grid Dots Pattern (like your reference image) */}
         <div
-          ref={gridDotsRef}
           className={`absolute bottom-32 ${isRTL ? "right-5/12" : "left-5/12"} transform -translate-x-1/2 md:bottom-40`}
         >
           <svg
@@ -2130,58 +1923,7 @@ export default function HomePage() {
           </svg>
         </div>
 
-        {/* Floating platform icons - render all, control visibility by CSS */}
-        <div className="hero-floating-icons">
-          {creditSites.map((site, idx) => {
-            const iconUrl = getSiteIconUrl(site.id, site.url);
-            const pos = heroIconPositions[idx % heroIconPositions.length];
-            const sizes = [
-              "w-8 h-8", // small
-              "w-9 h-9",
-              "w-10 h-10",
-              "w-11 h-11",
-              "w-12 h-12", // large
-            ];
-            const containerSize = sizes[idx % sizes.length];
-            const animation =
-              idx % 3 === 0
-                ? "animate-float"
-                : idx % 3 === 1
-                  ? "animate-bounce-slow"
-                  : "animate-float-delayed";
-            return (
-              <div
-                key={site.id}
-                ref={addFloatingIconRef}
-                className={`hero-floating-icon hidden md:block absolute ${pos}`}
-                title={site.name}
-              >
-                <div
-                  className={`${containerSize} bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center ${animation}`}
-                >
-                  <img
-                    src={iconUrl}
-                    alt={`${site.name} icon`}
-                    width={48}
-                    height={48}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-2/3 h-2/3 object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                      if (target.src !== fallback) {
-                        target.src = fallback;
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mx-auto max-w-7xl px-4 sm:px-5 relative z-10">
+        <div className="relative z-10">
           <div className="flex flex-col items-center justify-center min-h-[85vh] sm:min-h-[80vh] text-center space-y-6 sm:space-y-8 lg:space-y-12 py-8 sm:py-0">
             {/* Centered Content */}
             <div className="space-y-4 sm:space-y-6 max-w-4xl px-2 sm:px-0">
@@ -2433,7 +2175,7 @@ export default function HomePage() {
             {/* CTA Buttons - Centered */}
             <div
               ref={ctaButtonsRef}
-              className="pt-24 sm:pt-16 md:pt-0 flex flex-col sm:flex-row gap-4 justify-center px-4 sm:px-0 w-full max-w-md sm:max-w-none"
+              className="pt-16 sm:pt-12 flex flex-col sm:flex-row gap-4 justify-center px-4 sm:px-0 w-full max-w-md sm:max-w-none"
             >
               <Button
                 size="lg"
@@ -2453,6 +2195,254 @@ export default function HomePage() {
                 {t("hero.contactUs")}
               </Button>
             </div>
+
+            {/* Supported Platforms Infinite Scroll - Integrated */}
+            <div className="w-full mt-16 sm:mt-12">
+              <div className="text-center mb-8 px-4">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2 leading-tight font-sans">
+                  {t("supportedPlatforms.title")}{" "}
+                  <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                    {t("supportedPlatforms.titleHighlight")}
+                  </span>
+                </h2>
+              </div>
+
+              {/* First Row - Full Width */}
+              <div className="relative overflow-hidden mb-6 w-screen left-1/2 -translate-x-1/2">
+                <div
+                  className={`flex animate-scroll-left ${isRTL ? "flex-row-reverse" : ""}`}
+                >
+                  {/* All platforms - first half */}
+                  {creditSites
+                    .slice(0, Math.ceil(creditSites.length / 2))
+                    .map((site) => {
+                      const iconUrl = getSiteIconUrl(site.id, site.url);
+                      return (
+                        <div
+                          key={`row1-${site.id}`}
+                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                        >
+                          <div
+                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          >
+                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={iconUrl}
+                                alt={`${site.name} icon`}
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                  if (target.src !== fallback) {
+                                    target.src = fallback;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3
+                                className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {site.name}
+                              </h3>
+                              <div
+                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                              >
+                                {site.variants.map((variant, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                  >
+                                    {isRTL
+                                      ? `${variant.points} نقطة - ${variant.label}`
+                                      : `${variant.label}: ${variant.points} Credit`}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  {/* Duplicate for seamless loop */}
+                  {creditSites
+                    .slice(0, Math.ceil(creditSites.length / 2))
+                    .map((site) => {
+                      const iconUrl = getSiteIconUrl(site.id, site.url);
+                      return (
+                        <div
+                          key={`row1-dup-${site.id}`}
+                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                        >
+                          <div
+                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          >
+                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={iconUrl}
+                                alt={`${site.name} icon`}
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                  if (target.src !== fallback) {
+                                    target.src = fallback;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3
+                                className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {site.name}
+                              </h3>
+                              <div
+                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                              >
+                                {site.variants.map((variant, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                  >
+                                    {isRTL
+                                      ? `${variant.points} نقطة - ${variant.label}`
+                                      : `${variant.label}: ${variant.points} Credit`}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+
+              {/* Second Row - Full Width */}
+              <div className="relative overflow-hidden w-screen left-1/2 -translate-x-1/2">
+                <div
+                  className={`flex animate-scroll-right ${isRTL ? "flex-row-reverse" : ""}`}
+                >
+                  {/* All platforms - second half */}
+                  {creditSites
+                    .slice(Math.ceil(creditSites.length / 2))
+                    .map((site) => {
+                      const iconUrl = getSiteIconUrl(site.id, site.url);
+                      return (
+                        <div
+                          key={`row2-${site.id}`}
+                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                        >
+                          <div
+                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          >
+                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={iconUrl}
+                                alt={`${site.name} icon`}
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                  if (target.src !== fallback) {
+                                    target.src = fallback;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3
+                                className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {site.name}
+                              </h3>
+                              <div
+                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                              >
+                                {site.variants.map((variant, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                  >
+                                    {isRTL
+                                      ? `${variant.points} نقطة - ${variant.label}`
+                                      : `${variant.label}: ${variant.points} Credit`}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  {/* Duplicate for seamless loop */}
+                  {creditSites
+                    .slice(Math.ceil(creditSites.length / 2))
+                    .map((site) => {
+                      const iconUrl = getSiteIconUrl(site.id, site.url);
+                      return (
+                        <div
+                          key={`row2-dup-${site.id}`}
+                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                        >
+                          <div
+                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          >
+                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={iconUrl}
+                                alt={`${site.name} icon`}
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                  if (target.src !== fallback) {
+                                    target.src = fallback;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3
+                                className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {site.name}
+                              </h3>
+                              <div
+                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                              >
+                                {site.variants.map((variant, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                  >
+                                    {isRTL
+                                      ? `${variant.points} نقطة - ${variant.label}`
+                                      : `${variant.label}: ${variant.points} Credit`}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2463,90 +2453,6 @@ export default function HomePage() {
           downloadUrl={downloadUrl}
         />
       </section>
-      {/* Supported Platforms Section */}
-      {isLoading ? (
-        <SupportedPlatformsSkeleton />
-      ) : (
-        <section
-          ref={platformsSectionRef}
-          id="platforms"
-          className="py-16 lg:py-20 lg:pb-28 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden"
-        >
-          {/* Floating Dots Background Animation */}
-          <FloatingDotsAnimation
-            dotCount={350}
-            dotSize={3}
-            animationDuration={20}
-          />
-
-          <div className="px-5 relative z-10">
-            {/* Section Header */}
-            <div
-              ref={platformsHeaderRef}
-              className="text-center mb-12 lg:mb-16"
-            >
-              <h2
-                ref={platformsTitleRef}
-                className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4 leading-tight font-sans"
-              >
-                {t("supportedPlatforms.title")}{" "}
-                <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                  {t("supportedPlatforms.titleHighlight")}
-                </span>
-              </h2>
-              <p
-                ref={platformsDescriptionRef}
-                className={`text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed ${isRTL && "font-medium"}`}
-              >
-                {t("supportedPlatforms.description")}
-              </p>
-            </div>
-            {/* Credit-based Platforms Grid (sorted ascending by min points) */}
-            <div
-              ref={platformsGridContainerRef}
-              className="credit-sites-grid-container max-w-[1220px] mx-auto border border-primary/80 dark:border-primary/30 p-5 rounded-xl shadow-2xs"
-            >
-              <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 scrollbar-thumb-rounded-full">
-                <div
-                  ref={platformsGridRef}
-                  className="credit-sites-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 py-2 sm:gap-4 w-full"
-                >
-                  {creditSites
-                    .slice()
-                    .sort((a, b) => {
-                      const priorityOrder = [
-                        "shutterstock",
-                        "istockphoto",
-                        "yellowimages",
-                        "alamy",
-                        "freepik",
-                        "envato-elements",
-                        "adobe-stock",
-                        "vectorstock",
-                        "pngtree",
-                      ];
-                      const indexMap = new Map(
-                        priorityOrder.map((id, i) => [id, i])
-                      );
-                      const pa = indexMap.get(a.id);
-                      const pb = indexMap.get(b.id);
-                      if (pa !== undefined && pb !== undefined) return pa - pb;
-                      if (pa !== undefined) return -1;
-                      if (pb !== undefined) return 1;
-                      const minA = Math.min(...a.variants.map((v) => v.points));
-                      const minB = Math.min(...b.variants.map((v) => v.points));
-                      const diff = minA - minB;
-                      return diff !== 0 ? diff : a.name.localeCompare(b.name);
-                    })
-                    .map((site: CreditSite) => (
-                      <CreditSiteCard key={site.id} site={site} />
-                    ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
       {/* Pricing Section */}
       <section
         ref={pricingAnimations.sectionRef}
@@ -2789,16 +2695,6 @@ export default function HomePage() {
                         };
                   }) || [];
 
-                // Determine icon based on plan name or index
-                const PlanIcon =
-                  index === 0
-                    ? Zap
-                    : index === 1
-                      ? Crown
-                      : index === 2
-                        ? Globe
-                        : Package;
-
                 return (
                   <div
                     key={plan.id || index}
@@ -2808,22 +2704,15 @@ export default function HomePage() {
                     <div className="pricing-card-content relative z-10 flex flex-col h-full space-y-6">
                       {/* Plan Header */}
                       <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-14">
-                            <div className="pricing-card-icon w-12 h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
-                              <PlanIcon className="w-6 h-6 text-primary" />
-                            </div>
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-200">
-                              {plan.name}
-                            </h3>
-                            <p
-                              className={`text-sm text-muted-foreground ${isRTL && "!text-lg"}`}
-                            >
-                              {plan.description}
-                            </p>
-                          </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-200">
+                            {plan.name}
+                          </h3>
+                          <p
+                            className={`text-sm text-muted-foreground ${isRTL && "!text-lg"}`}
+                          >
+                            {plan.description}
+                          </p>
                         </div>
                       </div>
                       {/* Plan Features */}

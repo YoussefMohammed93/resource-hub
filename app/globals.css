@@ -158,8 +158,8 @@ section[id] {
 
   .bg-grid-pattern {
     background-image:
-      linear-gradient(rgba(10, 10, 10, 0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+      linear-gradient(rgba(10, 10, 10, 0.1) 1px, transparent 2px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 2px);
     background-size: 20px 20px;
   }
 
@@ -304,6 +304,15 @@ section[id] {
     scrollbar-color: hsl(var(--muted-foreground) / 0.4) transparent;
   }
 
+  /* Hide scrollbar but keep scroll functionality */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
   /* Animated gradient text effect */
   @keyframes gradient-x {
     0%,
@@ -318,6 +327,67 @@ section[id] {
   .animate-gradient-x {
     animation: gradient-x 4s ease infinite;
     background-size: 200% 200%;
+  }
+
+  /* Infinite scroll animations for platform cards */
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes scroll-right {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  .animate-scroll-left {
+    animation: scroll-left 15s linear infinite;
+  }
+
+  .animate-scroll-right {
+    animation: scroll-right 15s linear infinite;
+  }
+
+  /* Pause animation on hover */
+  .animate-scroll-left:hover,
+  .animate-scroll-right:hover {
+    animation-play-state: paused;
+  }
+
+  /* RTL-specific animations: same speed as LTR but proper directions */
+  @keyframes scroll-rtl-left-to-right {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+
+  @keyframes scroll-rtl-right-to-left {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* RTL-specific overrides - first row left to right, second row right to left */
+  [dir="rtl"] .animate-scroll-left {
+    animation: scroll-rtl-left-to-right 15s linear infinite;
+  }
+
+  [dir="rtl"] .animate-scroll-right {
+    animation: scroll-rtl-right-to-left 15s linear infinite;
   }
 }
 
@@ -389,6 +459,13 @@ section[id] {
   }
   .credit-sites-grid-container {
     max-width: 1700px !important;
+  }
+
+  /* Platform cards - show 8 cards per view on 1600px+ screens */
+  .platform-card {
+    width: 212px !important;
+    margin-left: 6px !important;
+    margin-right: 6px !important;
   }
 }
 
