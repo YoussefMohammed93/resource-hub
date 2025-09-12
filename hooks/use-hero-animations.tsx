@@ -4,9 +4,12 @@ import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Register ScrollTrigger plugin
+// Register ScrollTrigger plugin and configure GSAP
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
+  gsap.config({
+    nullTargetWarn: false,
+  });
 }
 
 interface UseHeroAnimationsProps {
@@ -71,29 +74,34 @@ export const useHeroAnimations = ({ enabled }: UseHeroAnimationsProps) => {
       ].filter(Boolean);
 
       // Set initial invisible state
-      gsap.set(allElements, {
-        opacity: 0,
-        y: 50,
-        scale: 0.8,
-        rotation: -5,
-      });
+      if (allElements.length > 0) {
+        gsap.set(allElements, {
+          opacity: 0,
+          y: 50,
+          scale: 0.8,
+          rotation: -5,
+        });
+      }
 
       // Set special initial states for floating elements
-      gsap.set(floatingIconsRefs.current, {
-        opacity: 0,
-        scale: 0,
-        rotation: 180,
-        y: -100,
-      });
+      const validFloatingIcons = floatingIconsRefs.current.filter(Boolean);
+      if (validFloatingIcons.length > 0) {
+        gsap.set(validFloatingIcons, {
+          opacity: 0,
+          scale: 0,
+          rotation: 180,
+          y: -100,
+        });
+      }
 
-      gsap.set(
-        [gridDotsRef.current, squareGridRef.current, diamondGridRef.current],
-        {
+      const gridElements = [gridDotsRef.current, squareGridRef.current, diamondGridRef.current].filter(Boolean);
+      if (gridElements.length > 0) {
+        gsap.set(gridElements, {
           opacity: 0,
           scale: 0.5,
           rotation: 45,
-        }
-      );
+        });
+      }
 
       // Create main timeline with faster animations
       const tl = gsap.timeline({
@@ -101,67 +109,77 @@ export const useHeroAnimations = ({ enabled }: UseHeroAnimationsProps) => {
       });
 
       // 1. Background pattern fade in
-      tl.to(backgroundPatternRef.current, {
-        opacity: 0.35,
-        duration: 0.4,
-        ease: "power2.out",
-      });
+      if (backgroundPatternRef.current) {
+        tl.to(backgroundPatternRef.current, {
+          opacity: 0.35,
+          duration: 0.4,
+          ease: "power2.out",
+        });
+      }
 
       // 2. Main title animation (no glow effect)
-      tl.to(
-        titleRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotation: 0,
-          duration: 0.6,
-          ease: "back.out(1.7)",
-        },
-        "-=0.2"
-      );
+      if (titleRef.current) {
+        tl.to(
+          titleRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            duration: 0.6,
+            ease: "back.out(1.7)",
+          },
+          "-=0.2"
+        );
+      }
 
       // 3. Title highlight (no glow effect)
-      tl.to(
-        titleHighlightRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotation: 0,
-          duration: 0.5,
-          ease: "elastic.out(1, 0.5)",
-        },
-        "-=0.4"
-      );
+      if (titleHighlightRef.current) {
+        tl.to(
+          titleHighlightRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            duration: 0.5,
+            ease: "elastic.out(1, 0.5)",
+          },
+          "-=0.4"
+        );
+      }
 
       // 4. Description
-      tl.to(
-        descriptionRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotation: 0,
-          duration: 0.4,
-          ease: "power3.out",
-        },
-        "-=0.3"
-      );
+      if (descriptionRef.current) {
+        tl.to(
+          descriptionRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            duration: 0.4,
+            ease: "power3.out",
+          },
+          "-=0.3"
+        );
+      }
 
       // 5. Search container
-      tl.to(
-        searchContainerRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotation: 0,
-          duration: 0.5,
-          ease: "back.out(1.7)",
-        },
-        "-=0.2"
-      );
+      if (searchContainerRef.current) {
+        tl.to(
+          searchContainerRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            duration: 0.5,
+            ease: "back.out(1.7)",
+          },
+          "-=0.2"
+        );
+      }
 
       // 6. Mobile search elements (staggered)
       if (mobileSearchTypeRef.current) {
@@ -226,72 +244,82 @@ export const useHeroAnimations = ({ enabled }: UseHeroAnimationsProps) => {
       }
 
       // 8. Decorative grid elements
-      tl.to(
-        [gridDotsRef.current, squareGridRef.current, diamondGridRef.current],
-        {
-          opacity: 1,
-          scale: 1,
-          rotation: 0,
-          duration: 0.5,
-          ease: "back.out(1.7)",
-          stagger: 0.05,
-        },
-        "-=0.4"
-      );
+      if (gridElements.length > 0) {
+        tl.to(
+          gridElements,
+          {
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 0.5,
+            ease: "back.out(1.7)",
+            stagger: 0.05,
+          },
+          "-=0.4"
+        );
+      }
 
       // 9. Top decorative elements
-      tl.to(
-        [
-          topCenterDotsRef.current,
-          topRightIconRef.current,
-          topRightSquaresRef.current,
-        ],
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotation: 0,
-          duration: 0.4,
-          ease: "back.out(1.7)",
-          stagger: 0.05,
-        },
-        "-=0.3"
-      );
+      const topElements = [
+        topCenterDotsRef.current,
+        topRightIconRef.current,
+        topRightSquaresRef.current,
+      ].filter(Boolean);
+      
+      if (topElements.length > 0) {
+        tl.to(
+          topElements,
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            duration: 0.4,
+            ease: "back.out(1.7)",
+            stagger: 0.05,
+          },
+          "-=0.3"
+        );
+      }
 
       // 10. Floating icons
-      tl.to(
-        floatingIconsRefs.current,
-        {
-          opacity: 1,
-          scale: 1,
-          rotation: 0,
-          y: 0,
-          duration: 0.5,
-          ease: "back.out(1.7)",
-          stagger: {
-            amount: 0.6,
-            from: "random",
+      if (validFloatingIcons.length > 0) {
+        tl.to(
+          validFloatingIcons,
+          {
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            y: 0,
+            duration: 0.5,
+            ease: "back.out(1.7)",
+            stagger: {
+              amount: 0.6,
+              from: "random",
+            },
           },
-        },
-        "-=0.4"
-      );
+          "-=0.4"
+        );
+      }
 
       // 11. CTA Buttons animation
-      tl.to(
-        ctaButtonsRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotation: 0,
-          duration: 0.5,
-          ease: "elastic.out(1, 0.8)",
-        },
-        "-=0.2"
-      );
+      if (ctaButtonsRef.current) {
+        tl.to(
+          ctaButtonsRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            duration: 0.5,
+            ease: "elastic.out(1, 0.8)",
+          },
+          "-=0.2"
+        );
+      }
 
       // Add continuous floating animations for icons (faster)
-      floatingIconsRefs.current.forEach((icon, index) => {
+      validFloatingIcons.forEach((icon, index) => {
         if (icon) {
           gsap.to(icon, {
             y: "random(-15, 15)",
@@ -307,11 +335,7 @@ export const useHeroAnimations = ({ enabled }: UseHeroAnimationsProps) => {
       });
 
       // Add subtle floating animation to grid patterns (faster)
-      [
-        gridDotsRef.current,
-        squareGridRef.current,
-        diamondGridRef.current,
-      ].forEach((element, index) => {
+      gridElements.forEach((element, index) => {
         if (element) {
           gsap.to(element, {
             y: "random(-10, 10)",

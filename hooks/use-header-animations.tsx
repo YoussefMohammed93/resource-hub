@@ -32,11 +32,14 @@ export function useHeaderAnimations(enabled: boolean = true) {
     const tl = gsap.timeline({ delay: 0.2 });
 
     // Set initial states - elements start from above and invisible
-    gsap.set([logo, nav, controls, mobileButton], {
-      y: -60,
-      opacity: 0,
-      scale: 0.8,
-    });
+    const headerElements = [logo, nav, controls, mobileButton].filter(Boolean);
+    if (headerElements.length > 0) {
+      gsap.set(headerElements, {
+        y: -60,
+        opacity: 0,
+        scale: 0.8,
+      });
+    }
 
     // Animate header background first
     tl.fromTo(
@@ -54,17 +57,19 @@ export function useHeaderAnimations(enabled: boolean = true) {
     );
 
     // Animate logo with bounce effect
-    tl.to(
-      logo,
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.6,
-        ease: "back.out(1.7)",
-      },
-      "-=0.4"
-    );
+    if (logo) {
+      tl.to(
+        logo,
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(1.7)",
+        },
+        "-=0.4"
+      );
+    }
 
     // Animate mobile button (if exists)
     if (mobileButton) {
@@ -87,13 +92,15 @@ export function useHeaderAnimations(enabled: boolean = true) {
 
       // Performance & depth hints
       gsap.set(nav, { transformPerspective: 600, transformOrigin: "50% 0%" });
-      gsap.set(navButtons, {
-        willChange: "transform, opacity",
-        y: -48,
-        opacity: 0,
-        skewY: 4,
-        force3D: true,
-      });
+      if (navButtons.length > 0) {
+        gsap.set(navButtons, {
+          willChange: "transform, opacity",
+          y: -48,
+          opacity: 0,
+          skewY: 4,
+          force3D: true,
+        });
+      }
 
       // Animate nav container first
       tl.to(
@@ -112,39 +119,43 @@ export function useHeaderAnimations(enabled: boolean = true) {
 
       // Then animate each button individually with smooth easing and light de-skew
       navButtons.forEach((button, index) => {
-        tl.fromTo(
-          button,
-          0.7, // duration required by Timeline.fromTo signature
-          {
-            y: -48,
-            opacity: 0,
-            skewY: 4,
-            force3D: true,
-          },
-          {
-            y: 0,
-            opacity: 1,
-            skewY: 0,
-            ease: "expo.out",
-            onComplete: () => { gsap.set(button, { willChange: "auto" }); },
-          },
-          `navButtons+=${index * 0.1}`
-        );
+        if (button) {
+          tl.fromTo(
+            button,
+            0.7, // duration required by Timeline.fromTo signature
+            {
+              y: -48,
+              opacity: 0,
+              skewY: 4,
+              force3D: true,
+            },
+            {
+              y: 0,
+              opacity: 1,
+              skewY: 0,
+              ease: "expo.out",
+              onComplete: () => { gsap.set(button, { willChange: "auto" }); },
+            },
+            `navButtons+=${index * 0.1}`
+          );
+        }
       });
     }
 
     // Animate controls last
-    tl.to(
-      controls,
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.5,
-        ease: "power2.out",
-      },
-      "-=0.2"
-    );
+    if (controls) {
+      tl.to(
+        controls,
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.5,
+          ease: "power2.out",
+        },
+        "-=0.2"
+      );
+    }
 
     // Animation complete - no hover effects needed
 

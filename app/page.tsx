@@ -36,6 +36,13 @@ import {
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+// Configure GSAP to handle null targets gracefully
+if (typeof window !== "undefined") {
+  gsap.config({
+    nullTargetWarn: false,
+  });
+}
+
 import Link from "next/link";
 import Image from "next/image";
 
@@ -905,18 +912,19 @@ export default function HomePage() {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      // Set initial states
-      gsap.set(
-        [
-          testimonialsTitleRef.current,
-          testimonialsHighlightRef.current,
-          testimonialsDescRef.current,
-        ],
-        {
+      // Filter out null elements before setting initial states
+      const titleElements = [
+        testimonialsTitleRef.current,
+        testimonialsHighlightRef.current,
+        testimonialsDescRef.current,
+      ].filter(Boolean);
+
+      if (titleElements.length > 0) {
+        gsap.set(titleElements, {
           opacity: 0,
           y: 50,
-        }
-      );
+        });
+      }
 
       // Prepare clipPath for title reveal (typewriter-like)
       if (testimonialsTitleRef.current) {
@@ -925,16 +933,22 @@ export default function HomePage() {
         });
       }
 
-      gsap.set([dotsGridTopRef.current, dotsGridBottomRef.current], {
-        opacity: 0,
-        scale: 0.8,
-      });
+      const dotsElements = [dotsGridTopRef.current, dotsGridBottomRef.current].filter(Boolean);
+      if (dotsElements.length > 0) {
+        gsap.set(dotsElements, {
+          opacity: 0,
+          scale: 0.8,
+        });
+      }
 
-      gsap.set([starIconRef.current, heartIconRef.current], {
-        opacity: 0,
-        scale: 0,
-        rotation: -180,
-      });
+      const iconElements = [starIconRef.current, heartIconRef.current].filter(Boolean);
+      if (iconElements.length > 0) {
+        gsap.set(iconElements, {
+          opacity: 0,
+          scale: 0,
+          rotation: -180,
+        });
+      }
 
       gsap.set(".testimonial-card", {
         opacity: 0,
@@ -995,30 +1009,34 @@ export default function HomePage() {
       );
 
       // Animate background elements
-      tl.to(
-        [dotsGridTopRef.current, dotsGridBottomRef.current],
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.6,
-          ease: "back.out(1.2)",
-          stagger: 0.1,
-        },
-        "-=0.4"
-      );
+      if (dotsElements.length > 0) {
+        tl.to(
+          dotsElements,
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            ease: "back.out(1.2)",
+            stagger: 0.1,
+          },
+          "-=0.4"
+        );
+      }
 
-      tl.to(
-        [starIconRef.current, heartIconRef.current],
-        {
-          opacity: 1,
-          scale: 1,
-          rotation: 0,
-          duration: 0.7,
-          ease: "elastic.out(1, 0.3)",
-          stagger: 0.15,
-        },
-        "-=0.3"
-      );
+      if (iconElements.length > 0) {
+        tl.to(
+          iconElements,
+          {
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 0.7,
+            ease: "elastic.out(1, 0.3)",
+            stagger: 0.15,
+          },
+          "-=0.3"
+        );
+      }
 
       // Animate testimonial cards with faster stagger
       tl.to(
@@ -1038,24 +1056,28 @@ export default function HomePage() {
       );
 
       // Faster continuous floating animations for icons
-      gsap.to(starIconRef.current, {
-        y: -8,
-        rotation: 3,
-        duration: 2,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-      });
+      if (starIconRef.current) {
+        gsap.to(starIconRef.current, {
+          y: -8,
+          rotation: 3,
+          duration: 2,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+        });
+      }
 
-      gsap.to(heartIconRef.current, {
-        y: -6,
-        rotation: -2,
-        duration: 1.8,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-        delay: 0.3,
-      });
+      if (heartIconRef.current) {
+        gsap.to(heartIconRef.current, {
+          y: -6,
+          rotation: -2,
+          duration: 1.8,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+          delay: 0.3,
+        });
+      }
 
       // Faster animate dots with wave effect
       gsap.to(".testimonial-dot", {
