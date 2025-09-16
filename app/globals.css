@@ -329,43 +329,97 @@ section[id] {
     background-size: 200% 200%;
   }
 
-  /* Infinite scroll animations for platform cards */
+  /* Desktop infinite scroll animations - show all cards */
   @keyframes scroll-left {
     0% {
       transform: translateX(0);
     }
     100% {
-      transform: translateX(-50%);
+      transform: translateX(calc(-280px * var(--card-count, 10)));
     }
   }
 
   @keyframes scroll-right {
     0% {
-      transform: translateX(-50%);
+      transform: translateX(calc(-280px * var(--card-count, 10)));
     }
     100% {
       transform: translateX(0);
     }
   }
 
+  /* Mobile-specific slower animations */
+  @keyframes scroll-left-mobile {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(calc(-280px * var(--card-count, 10)), 0, 0);
+    }
+  }
+
+  @keyframes scroll-right-mobile {
+    0% {
+      transform: translate3d(calc(-280px * var(--card-count, 10)), 0, 0);
+    }
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
   .animate-scroll-left {
-    animation: scroll-left 15s linear infinite;
+    animation: scroll-left 120s linear infinite;
   }
 
   .animate-scroll-right {
-    animation: scroll-right 15s linear infinite;
+    animation: scroll-right 120s linear infinite;
   }
 
-  /* Pause animation on hover */
+  /* Mobile-specific slower animations */
+  .animate-scroll-left-mobile {
+    animation: scroll-left-mobile 150s linear infinite;
+  }
+
+  .animate-scroll-right-mobile {
+    animation: scroll-right-mobile 150s linear infinite;
+  }
+
+  /* Apply desktop animations on larger screens */
+  @media (min-width: 640px) {
+    .animate-scroll-left-mobile {
+      animation: scroll-left 120s linear infinite;
+    }
+
+    .animate-scroll-right-mobile {
+      animation: scroll-right 120s linear infinite;
+    }
+  }
+
+  /* Pause animation on hover - container and individual cards */
   .animate-scroll-left:hover,
-  .animate-scroll-right:hover {
+  .animate-scroll-right:hover,
+  .animate-scroll-left-mobile:hover,
+  .animate-scroll-right-mobile:hover {
     animation-play-state: paused;
   }
 
-  /* RTL-specific animations: same speed as LTR but proper directions */
+  /* Pause animation when hovering over individual platform cards */
+  .platform-card:hover {
+    animation-play-state: paused;
+  }
+
+  /* Pause parent animation when any platform card is hovered */
+  .animate-scroll-left:has(.platform-card:hover),
+  .animate-scroll-right:has(.platform-card:hover),
+  .animate-scroll-left-mobile:has(.platform-card:hover),
+  .animate-scroll-right-mobile:has(.platform-card:hover) {
+    animation-play-state: paused;
+  }
+
+  /* RTL-specific animations: desktop */
   @keyframes scroll-rtl-left-to-right {
     0% {
-      transform: translateX(-50%);
+      transform: translateX(calc(-280px * var(--card-count, 10)));
     }
     100% {
       transform: translateX(0%);
@@ -377,17 +431,56 @@ section[id] {
       transform: translateX(0%);
     }
     100% {
-      transform: translateX(-50%);
+      transform: translateX(calc(-280px * var(--card-count, 10)));
+    }
+  }
+
+  /* RTL-specific animations: mobile */
+  @keyframes scroll-rtl-left-to-right-mobile {
+    0% {
+      transform: translate3d(calc(-280px * var(--card-count, 10)), 0, 0);
+    }
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes scroll-rtl-right-to-left-mobile {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(calc(-280px * var(--card-count, 10)), 0, 0);
     }
   }
 
   /* RTL-specific overrides - first row left to right, second row right to left */
   [dir="rtl"] .animate-scroll-left {
-    animation: scroll-rtl-left-to-right 15s linear infinite;
+    animation: scroll-rtl-left-to-right 120s linear infinite;
   }
 
   [dir="rtl"] .animate-scroll-right {
-    animation: scroll-rtl-right-to-left 15s linear infinite;
+    animation: scroll-rtl-right-to-left 120s linear infinite;
+  }
+
+  /* RTL mobile-specific animations */
+  [dir="rtl"] .animate-scroll-left-mobile {
+    animation: scroll-rtl-left-to-right-mobile 150s linear infinite;
+  }
+
+  [dir="rtl"] .animate-scroll-right-mobile {
+    animation: scroll-rtl-right-to-left-mobile 150s linear infinite;
+  }
+
+  /* RTL desktop animations on larger screens */
+  @media (min-width: 640px) {
+    [dir="rtl"] .animate-scroll-left-mobile {
+      animation: scroll-rtl-left-to-right 120s linear infinite;
+    }
+
+    [dir="rtl"] .animate-scroll-right-mobile {
+      animation: scroll-rtl-right-to-left 120s linear infinite;
+    }
   }
 }
 

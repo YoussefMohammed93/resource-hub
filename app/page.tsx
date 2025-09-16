@@ -946,7 +946,10 @@ export default function HomePage() {
         });
       }
 
-      const dotsElements = [dotsGridTopRef.current, dotsGridBottomRef.current].filter(Boolean);
+      const dotsElements = [
+        dotsGridTopRef.current,
+        dotsGridBottomRef.current,
+      ].filter(Boolean);
       if (dotsElements.length > 0) {
         gsap.set(dotsElements, {
           opacity: 0,
@@ -954,7 +957,9 @@ export default function HomePage() {
         });
       }
 
-      const iconElements = [starIconRef.current, heartIconRef.current].filter(Boolean);
+      const iconElements = [starIconRef.current, heartIconRef.current].filter(
+        Boolean
+      );
       if (iconElements.length > 0) {
         gsap.set(iconElements, {
           opacity: 0,
@@ -1658,7 +1663,11 @@ export default function HomePage() {
                   <div className="relative w-44 sm:w-48 h-12">
                     {/* Light mode logos */}
                     <Image
-                      src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
+                      src={
+                        language === "ar"
+                          ? "/logo-black-ar.png"
+                          : "/logo-black-en.png"
+                      }
                       alt={t("header.logo")}
                       fill
                       className="block dark:hidden"
@@ -1666,7 +1675,11 @@ export default function HomePage() {
                     />
                     {/* Dark mode logos */}
                     <Image
-                      src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
+                      src={
+                        language === "ar"
+                          ? "/logo-white-ar.png"
+                          : "/logo-white-en.png"
+                      }
                       alt={t("header.logo")}
                       fill
                       className="hidden dark:block"
@@ -2244,239 +2257,233 @@ export default function HomePage() {
                 </h2>
               </div>
 
-              {/* First Row - Full Width */}
+              {/* First Row - All Cards Scrolling Left */}
               <div className="relative overflow-hidden mb-6 w-screen left-1/2 -translate-x-1/2">
                 <div
-                  className={`flex animate-scroll-left ${isRTL ? "flex-row-reverse" : ""}`}
+                  className={`flex animate-scroll-left-mobile sm:animate-scroll-left ${isRTL ? "flex-row-reverse" : ""}`}
+                  style={{ '--card-count': creditSites.length } as React.CSSProperties}
                 >
-                  {/* All platforms - first half */}
-                  {creditSites
-                    .slice(0, Math.ceil(creditSites.length / 2))
-                    .map((site) => {
-                      const iconUrl = getSiteIconUrl(site.id, site.url);
-                      return (
+                  {/* All platforms - complete set */}
+                  {creditSites.map((site) => {
+                    const iconUrl = getSiteIconUrl(site.id, site.url);
+                    return (
+                      <div
+                        key={`row1-${site.id}`}
+                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                      >
                         <div
-                          key={`row1-${site.id}`}
-                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                          className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
                         >
-                          <div
-                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
-                          >
-                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <img
-                                src={iconUrl}
-                                alt={`${site.name} icon`}
-                                width={40}
-                                height={40}
-                                loading="lazy"
-                                className="w-10 h-10 object-contain"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                                  if (target.src !== fallback) {
-                                    target.src = fallback;
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3
-                                className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
-                              >
-                                {site.name}
-                              </h3>
-                              <div
-                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
-                              >
-                                {site.variants.map((variant, index) => (
-                                  <span
-                                    key={index}
-                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                                  >
-                                    {isRTL
-                                      ? `${variant.points} نقطة - ${variant.label}`
-                                      : `${variant.label}: ${variant.points} Credit`}
-                                  </span>
-                                ))}
-                              </div>
+                          <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <img
+                              src={iconUrl}
+                              alt={`${site.name} icon`}
+                              width={40}
+                              height={40}
+                              loading="lazy"
+                              className="w-10 h-10 object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                if (target.src !== fallback) {
+                                  target.src = fallback;
+                                }
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3
+                              className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                            >
+                              {site.name}
+                            </h3>
+                            <div
+                              className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                            >
+                              {site.variants.map((variant, index) => (
+                                <span
+                                  key={index}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                >
+                                  {isRTL
+                                    ? `${variant.points} نقطة - ${variant.label}`
+                                    : `${variant.label}: ${variant.points} Credit`}
+                                </span>
+                              ))}
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    );
+                  })}
                   {/* Duplicate for seamless loop */}
-                  {creditSites
-                    .slice(0, Math.ceil(creditSites.length / 2))
-                    .map((site) => {
-                      const iconUrl = getSiteIconUrl(site.id, site.url);
-                      return (
+                  {creditSites.map((site) => {
+                    const iconUrl = getSiteIconUrl(site.id, site.url);
+                    return (
+                      <div
+                        key={`row1-dup-${site.id}`}
+                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                      >
                         <div
-                          key={`row1-dup-${site.id}`}
-                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                          className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
                         >
-                          <div
-                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
-                          >
-                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <img
-                                src={iconUrl}
-                                alt={`${site.name} icon`}
-                                width={40}
-                                height={40}
-                                loading="lazy"
-                                className="w-10 h-10 object-contain"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                                  if (target.src !== fallback) {
-                                    target.src = fallback;
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3
-                                className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
-                              >
-                                {site.name}
-                              </h3>
-                              <div
-                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
-                              >
-                                {site.variants.map((variant, index) => (
-                                  <span
-                                    key={index}
-                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                                  >
-                                    {isRTL
-                                      ? `${variant.points} نقطة - ${variant.label}`
-                                      : `${variant.label}: ${variant.points} Credit`}
-                                  </span>
-                                ))}
-                              </div>
+                          <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <img
+                              src={iconUrl}
+                              alt={`${site.name} icon`}
+                              width={40}
+                              height={40}
+                              loading="lazy"
+                              className="w-10 h-10 object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                if (target.src !== fallback) {
+                                  target.src = fallback;
+                                }
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3
+                              className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                            >
+                              {site.name}
+                            </h3>
+                            <div
+                              className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                            >
+                              {site.variants.map((variant, index) => (
+                                <span
+                                  key={index}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                >
+                                  {isRTL
+                                    ? `${variant.points} نقطة - ${variant.label}`
+                                    : `${variant.label}: ${variant.points} Credit`}
+                                </span>
+                              ))}
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Second Row - Full Width */}
+              {/* Second Row - All Cards Scrolling Right */}
               <div className="relative overflow-hidden w-screen left-1/2 -translate-x-1/2">
                 <div
-                  className={`flex animate-scroll-right ${isRTL ? "flex-row-reverse" : ""}`}
+                  className={`flex animate-scroll-right-mobile sm:animate-scroll-right ${isRTL ? "flex-row-reverse" : ""}`}
+                  style={{ '--card-count': creditSites.length } as React.CSSProperties}
                 >
-                  {/* All platforms - second half */}
-                  {creditSites
-                    .slice(Math.ceil(creditSites.length / 2))
-                    .map((site) => {
-                      const iconUrl = getSiteIconUrl(site.id, site.url);
-                      return (
+                  {/* All platforms - complete set in reverse order for visual variety */}
+                  {[...creditSites].reverse().map((site) => {
+                    const iconUrl = getSiteIconUrl(site.id, site.url);
+                    return (
+                      <div
+                        key={`row2-${site.id}`}
+                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                      >
                         <div
-                          key={`row2-${site.id}`}
-                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                          className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
                         >
-                          <div
-                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
-                          >
-                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <img
-                                src={iconUrl}
-                                alt={`${site.name} icon`}
-                                width={40}
-                                height={40}
-                                loading="lazy"
-                                className="w-10 h-10 object-contain"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                                  if (target.src !== fallback) {
-                                    target.src = fallback;
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3
-                                className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
-                              >
-                                {site.name}
-                              </h3>
-                              <div
-                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
-                              >
-                                {site.variants.map((variant, index) => (
-                                  <span
-                                    key={index}
-                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                                  >
-                                    {isRTL
-                                      ? `${variant.points} نقطة - ${variant.label}`
-                                      : `${variant.label}: ${variant.points} Credit`}
-                                  </span>
-                                ))}
-                              </div>
+                          <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <img
+                              src={iconUrl}
+                              alt={`${site.name} icon`}
+                              width={40}
+                              height={40}
+                              loading="lazy"
+                              className="w-10 h-10 object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                if (target.src !== fallback) {
+                                  target.src = fallback;
+                                }
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3
+                              className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                            >
+                              {site.name}
+                            </h3>
+                            <div
+                              className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                            >
+                              {site.variants.map((variant, index) => (
+                                <span
+                                  key={index}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                >
+                                  {isRTL
+                                    ? `${variant.points} نقطة - ${variant.label}`
+                                    : `${variant.label}: ${variant.points} Credit`}
+                                </span>
+                              ))}
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    );
+                  })}
                   {/* Duplicate for seamless loop */}
-                  {creditSites
-                    .slice(Math.ceil(creditSites.length / 2))
-                    .map((site) => {
-                      const iconUrl = getSiteIconUrl(site.id, site.url);
-                      return (
+                  {[...creditSites].reverse().map((site) => {
+                    const iconUrl = getSiteIconUrl(site.id, site.url);
+                    return (
+                      <div
+                        key={`row2-dup-${site.id}`}
+                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                      >
                         <div
-                          key={`row2-dup-${site.id}`}
-                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                          className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
                         >
-                          <div
-                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
-                          >
-                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <img
-                                src={iconUrl}
-                                alt={`${site.name} icon`}
-                                width={40}
-                                height={40}
-                                loading="lazy"
-                                className="w-10 h-10 object-contain"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                                  if (target.src !== fallback) {
-                                    target.src = fallback;
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3
-                                className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
-                              >
-                                {site.name}
-                              </h3>
-                              <div
-                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
-                              >
-                                {site.variants.map((variant, index) => (
-                                  <span
-                                    key={index}
-                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                                  >
-                                    {isRTL
-                                      ? `${variant.points} نقطة - ${variant.label}`
-                                      : `${variant.label}: ${variant.points} Credit`}
-                                  </span>
-                                ))}
-                              </div>
+                          <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <img
+                              src={iconUrl}
+                              alt={`${site.name} icon`}
+                              width={40}
+                              height={40}
+                              loading="lazy"
+                              className="w-10 h-10 object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                if (target.src !== fallback) {
+                                  target.src = fallback;
+                                }
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3
+                              className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                            >
+                              {site.name}
+                            </h3>
+                            <div
+                              className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                            >
+                              {site.variants.map((variant, index) => (
+                                <span
+                                  key={index}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                >
+                                  {isRTL
+                                    ? `${variant.points} نقطة - ${variant.label}`
+                                    : `${variant.label}: ${variant.points} Credit`}
+                                </span>
+                              ))}
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -31,7 +31,6 @@ import {
   Coins,
   Link as LinkIcon,
   Settings,
-  Check,
   Menu,
   Loader2,
   Clock,
@@ -39,6 +38,7 @@ import {
   X,
   Cookie,
   Download,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -130,7 +130,6 @@ interface PricingPlan {
   daysValidity: number;
   contactUsUrl: string;
   supportedSites: string[];
-  features: string[];
 }
 
 export default function DashboardPage() {
@@ -245,6 +244,7 @@ export default function DashboardPage() {
   const [packageSupportedSites, setPackageSupportedSites] = useState<string[]>([
     "",
   ]);
+  const [packageRecommended, setPackageRecommended] = useState<boolean>(false);
   const [packageNameError, setPackageNameError] = useState<string>("");
   const [packageDescriptionError, setPackageDescriptionError] =
     useState<string>("");
@@ -1006,11 +1006,6 @@ export default function DashboardPage() {
                           .map((site) => site.trim())
                           .filter((site) => site.length > 0)
                       : [],
-              features: [
-                t("dashboard.packageManagement.features.accessToSites"),
-                t("dashboard.packageManagement.features.support"),
-                t("dashboard.packageManagement.features.adminManagement"),
-              ],
             };
           }
         );
@@ -1600,6 +1595,7 @@ export default function DashboardPage() {
         PlanDescription: packageDescription,
         ContactUsUrl: packageContactUrl.trim(), // Required field
         credits: packageCredits,
+        recommended: packageRecommended,
       };
 
       console.log(
@@ -1618,6 +1614,7 @@ export default function DashboardPage() {
         setPackageCredits("");
         setPackageContactUrl("");
         setPackageSupportedSites([""]);
+        setPackageRecommended(false);
 
         // Close dialog
         setIsAddPackageDialogOpen(false);
@@ -2131,11 +2128,6 @@ export default function DashboardPage() {
       daysValidity: 30,
       contactUsUrl: "",
       supportedSites: ["Site A", "Site B", "Site C"],
-      features: [
-        "dashboard.packageManagement.features.accessToSites",
-        "dashboard.packageManagement.features.support",
-        "dashboard.packageManagement.features.adminManagement",
-      ],
     },
     {
       id: 2,
@@ -2146,11 +2138,6 @@ export default function DashboardPage() {
       daysValidity: 15,
       contactUsUrl: "https://example.com/contact",
       supportedSites: ["Site A", "Site B"],
-      features: [
-        "dashboard.packageManagement.features.accessToSites",
-        "dashboard.packageManagement.features.support",
-        "dashboard.packageManagement.features.adminManagement",
-      ],
     },
   ]);
 
@@ -2333,7 +2320,11 @@ export default function DashboardPage() {
                 <div className="relative w-44 sm:w-48 h-12">
                   {/* Light mode logos */}
                   <Image
-                    src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
+                    src={
+                      language === "ar"
+                        ? "/logo-black-ar.png"
+                        : "/logo-black-en.png"
+                    }
                     alt={t("header.logo")}
                     fill
                     className="block dark:hidden"
@@ -2341,7 +2332,11 @@ export default function DashboardPage() {
                   />
                   {/* Dark mode logos */}
                   <Image
-                    src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
+                    src={
+                      language === "ar"
+                        ? "/logo-white-ar.png"
+                        : "/logo-white-en.png"
+                    }
                     alt={t("header.logo")}
                     fill
                     className="hidden dark:block"
@@ -5729,6 +5724,38 @@ export default function DashboardPage() {
                             </p>
                           )}
                         </div>
+                        {/* Recommended Package */}
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <input
+                              id="package-recommended"
+                              type="checkbox"
+                              checked={packageRecommended}
+                              onChange={(e) =>
+                                setPackageRecommended(e.target.checked)
+                              }
+                              className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
+                            />
+                            <Label
+                              htmlFor="package-recommended"
+                              className="text-sm font-medium text-foreground flex items-center cursor-pointer"
+                            >
+                              <Star className="w-4 h-4 mr-1" />
+                              {isRTL ? "خطة موصى بها" : "Recommended Plan"}
+                            </Label>
+                          </div>
+                          {packageRecommended && (
+                            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
+                              <p
+                                className={`text-sm text-amber-800 dark:text-amber-200 ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {isRTL
+                                  ? "⚠️ تحديد هذه الخطة كموصى بها سيؤدي إلى تطبيق تصميم مختلف للبطاقة مع أنماط CSS خاصة لجذب انتباه المستخدمين."
+                                  : "⚠️ Marking this plan as recommended will apply different card styling with special CSS styles to attract user attention."}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <DialogFooter>
                         <Button
@@ -6327,34 +6354,7 @@ export default function DashboardPage() {
                                     </div>
                                   </div>
                                 )}
-                              <div
-                                className={`flex items-center ${isRTL ? "space-x-reverse !space-x-2" : "space-x-2"} text-sm text-muted-foreground`}
-                              >
-                                <Check className="w-4 h-4 stroke-3" />
-                                <span>
-                                  {t("pricing.labels.featuresIncluded")}
-                                </span>
-                              </div>
-                              {/* Features */}
-                              <div className="space-y-3">
-                                <div className="space-y-3">
-                                  {(plan.features || []).map(
-                                    (feature, index) => (
-                                      <div
-                                        key={`${plan.id}-feature-${index}`}
-                                        className={`flex items-center ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"} px-3 py-2 rounded-lg bg-green-50 dark:bg-green-50/10 border border-green-100 dark:border-green-100/10`}
-                                      >
-                                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                          <Check className="w-4 h-4 text-white" />
-                                        </div>
-                                        <span className="text-foreground font-medium text-sm">
-                                          {t(feature)}
-                                        </span>
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-                              </div>
+                              {/* Features section removed as it's frontend-only */}
                             </div>
                             {/* Footer Section */}
                             <div className="p-4 sm:p-6 !pt-0 space-y-3 mt-auto">

@@ -689,7 +689,8 @@ export const userApi = {
 
     // Bypass local proxy: call direct backend with absolute URL so axios ignores baseURL
     const DIRECT_API_URL =
-      process.env.NEXT_PUBLIC_PRODUCTION_API_URL || "https://stockaty.virs.tech";
+      process.env.NEXT_PUBLIC_PRODUCTION_API_URL ||
+      "https://stockaty.virs.tech";
     return apiRequest<DownloadHistoryResponse>(
       `${DIRECT_API_URL}/v1/user/history`,
       "GET"
@@ -1368,6 +1369,7 @@ export interface PricingPlanInput {
   PlanDescription: string;
   ContactUsUrl: string; // Required field
   credits: string;
+  recommended?: boolean;
 }
 
 export interface PricingPlan {
@@ -1473,6 +1475,9 @@ export const pricingApi = {
       PlanDescription: data.PlanDescription,
       ContactUsUrl: data.ContactUsUrl, // Required field
       credits: data.credits,
+      ...(typeof data.recommended !== "undefined" && {
+        recommended: data.recommended,
+      }),
     };
 
     console.log(
