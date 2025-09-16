@@ -9,7 +9,6 @@ import {
   Eye,
   PhoneCall,
   Menu,
-  Check,
   Zap,
   Crown,
   Globe,
@@ -25,12 +24,12 @@ import {
   File,
   AlertCircle,
   Loader2,
-  Package,
   Heart,
   User,
   TrendingUp,
   Target,
   Shield,
+  Package,
 } from "lucide-react";
 
 import { gsap } from "gsap";
@@ -761,11 +760,13 @@ export default function HomePage() {
                     ? planObj.PlanDescription
                     : "",
               price:
-                typeof planObj.price === "string"
-                  ? planObj.price
-                  : typeof planObj.PlanPrice === "string"
-                    ? planObj.PlanPrice
-                    : "",
+                parseFloat(
+                  typeof planObj.price === "string"
+                    ? planObj.price
+                    : typeof planObj.PlanPrice === "string"
+                      ? planObj.PlanPrice
+                      : "0"
+                ) || 0,
               credits:
                 parseInt(
                   typeof planObj.credits === "string" ? planObj.credits : "0"
@@ -803,6 +804,7 @@ export default function HomePage() {
                 t("dashboard.packageManagement.features.support"),
                 t("dashboard.packageManagement.features.adminManagement"),
               ],
+              recommended: planObj.recommended === true,
             };
           }
         );
@@ -2261,7 +2263,11 @@ export default function HomePage() {
               <div className="relative overflow-hidden mb-6 w-screen left-1/2 -translate-x-1/2">
                 <div
                   className={`flex animate-scroll-left-mobile sm:animate-scroll-left ${isRTL ? "flex-row-reverse" : ""}`}
-                  style={{ '--card-count': creditSites.length } as React.CSSProperties}
+                  style={
+                    {
+                      "--card-count": creditSites.length,
+                    } as React.CSSProperties
+                  }
                 >
                   {/* All platforms - complete set */}
                   {creditSites.map((site) => {
@@ -2376,7 +2382,11 @@ export default function HomePage() {
               <div className="relative overflow-hidden w-screen left-1/2 -translate-x-1/2">
                 <div
                   className={`flex animate-scroll-right-mobile sm:animate-scroll-right ${isRTL ? "flex-row-reverse" : ""}`}
-                  style={{ '--card-count': creditSites.length } as React.CSSProperties}
+                  style={
+                    {
+                      "--card-count": creditSites.length,
+                    } as React.CSSProperties
+                  }
                 >
                   {/* All platforms - complete set in reverse order for visual variety */}
                   {[...creditSites].reverse().map((site) => {
@@ -2538,25 +2548,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Middle Left Package Icon */}
-          <div
-            className={`hidden md:block absolute top-1/2 ${isRTL ? "right-4" : "left-4"} -translate-y-1/2 animate-bounce-slow`}
-          >
-            <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
-              <Package className="w-6 h-6 text-primary" />
-            </div>
-          </div>
-
-          {/* Middle Right Timer Icon */}
-          <div
-            className={`hidden lg:block absolute top-1/3 ${isRTL ? "left-8" : "right-8"} animate-float`}
-            style={{ animationDelay: "1s" }}
-          >
-            <div className="w-11 h-11 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
-              <Timer className="w-5 h-5 text-primary" />
-            </div>
-          </div>
-
           {/* Bottom Left Crown Icon */}
           <div
             className={`hidden md:block absolute bottom-32 ${isRTL ? "right-12" : "left-12"} animate-bounce-slow`}
@@ -2646,29 +2637,13 @@ export default function HomePage() {
                       <div className="h-8 bg-muted rounded animate-pulse w-1/2"></div>
                       <div className="h-4 bg-muted rounded animate-pulse w-2/3"></div>
                     </div>
-                  </div>
-                  <div className="space-y-4 flex-1 mt-6">
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {[...Array(3)].map((_, i) => (
                         <div
                           key={i}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="h-4 bg-muted rounded animate-pulse w-1/3"></div>
-                          <div className="h-4 bg-muted rounded animate-pulse w-1/4"></div>
-                        </div>
+                          className="h-4 bg-muted rounded animate-pulse"
+                        ></div>
                       ))}
-                    </div>
-                    <div className="pt-4 border-t border-border">
-                      <div className="h-4 bg-muted rounded animate-pulse w-1/2 mb-3"></div>
-                      <div className="space-y-2">
-                        {[...Array(3)].map((_, i) => (
-                          <div
-                            key={i}
-                            className="h-4 bg-muted rounded animate-pulse"
-                          ></div>
-                        ))}
-                      </div>
                     </div>
                   </div>
                   <div className="mt-6">
@@ -2712,7 +2687,7 @@ export default function HomePage() {
               </p>
             </div>
           ) : (
-            <div className="grid mx-auto max-w-[1700px] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
+            <div className="grid mx-auto max-w-[1700px] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 lg:gap-5">
               {pricingPlans.map((plan, index) => {
                 // Get supported sites for this plan
                 const planSupportedSites =
@@ -2743,17 +2718,45 @@ export default function HomePage() {
                   <div
                     key={plan.id || index}
                     ref={(el) => pricingAnimations.setCardRef(el, index)}
-                    className="group relative dark:bg-card bg-background backdrop-blur-sm shadow-xs border border-border/50 hover:border-primary/50 rounded-2xl p-6 lg:p-8 flex flex-col transition-colors duration-200"
+                    className={`relative group border transition-all hover:shadow-2xl duration-500 ${
+                      plan.recommended
+                        ? "bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 dark:from-primary/20 dark:via-primary/10 dark:to-primary/20 border-primary/30 dark:border-primary/20 shadow-2xl shadow-primary/20 dark:shadow-primary/30 ring-2 ring-primary/20 ring-offset-2 ring-offset-background transform hover:scale-[1.05] hover:shadow-3xl hover:shadow-primary/30 dark:hover:shadow-primary/40"
+                        : "bg-gradient-to-br from-secondary/20 dark:from-secondary via-accent/20 to-muted border-border text-foreground shadow-xl shadow-foreground/10"
+                    } rounded-2xl p-6.5`}
                   >
+                    {/* Recommended Badge */}
+                    {plan.recommended && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
+                        <div className="bg-primary text-primary-foreground px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg">
+                          <div className="flex items-center gap-1.5">
+                            <Crown className="w-4 h-4" />
+                            <span>
+                              {isRTL ? "الأكثر شعبية" : "Most Popular"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="pricing-card-content relative z-10 flex flex-col h-full space-y-6">
                       {/* Plan Header */}
                       <div className="space-y-4">
                         <div>
-                          <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-200">
+                          <h3
+                            className={`text-2xl font-bold transition-colors duration-200 ${
+                              plan.recommended
+                                ? "text-primary dark:text-primary"
+                                : "text-foreground group-hover:text-primary"
+                            }`}
+                          >
                             {plan.name}
                           </h3>
                           <p
-                            className={`text-sm text-muted-foreground ${isRTL && "!text-lg"}`}
+                            className={`text-sm ${
+                              plan.recommended
+                                ? "text-foreground/70 dark:text-foreground/60"
+                                : "text-muted-foreground"
+                            } ${isRTL && "!text-lg"}`}
                           >
                             {plan.description}
                           </p>
@@ -2762,31 +2765,71 @@ export default function HomePage() {
                       {/* Plan Features */}
                       <div className="space-y-4 flex-1">
                         <div className="space-y-3">
-                          <div className="flex items-center justify-between">
+                          <div
+                            className={`flex items-center justify-between p-3 rounded-lg ${
+                              plan.recommended
+                                ? "bg-primary/5 dark:bg-primary-foreground/5 border border-primary/20 dark:border-primary-foreground/20"
+                                : "bg-muted-foreground/5 border border-foreground/10"
+                            }`}
+                          >
                             <span
-                              className={`text-sm text-muted-foreground ${isRTL && "!text-lg"}`}
+                              className={`text-base ${
+                                plan.recommended
+                                  ? "text-primary/80 dark:text-primary-foreground/80"
+                                  : "text-muted-foreground"
+                              } ${isRTL && "!text-lg"}`}
                             >
                               {t("pricing.labels.credits")}
                             </span>
                             <div className="flex items-center space-x-1">
-                              <Coins className="w-4 h-4 text-primary" />
+                              <Coins
+                                className={`w-5 h-5 ${
+                                  plan.recommended
+                                    ? "text-primary dark:text-primary-foreground"
+                                    : "text-primary"
+                                }`}
+                              />
                               <span
-                                className={`text-sm font-semibold text-foreground ${isRTL && "!text-lg"}`}
+                                className={`text-lg font-semibold ${
+                                  plan.recommended
+                                    ? "text-primary dark:text-primary-foreground"
+                                    : "text-foreground"
+                                } ${isRTL && "!text-lg"}`}
                               >
                                 {plan.credits.toLocaleString()}
                               </span>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between">
+                          <div
+                            className={`flex items-center justify-between p-3 rounded-lg ${
+                              plan.recommended
+                                ? "bg-primary/5 dark:bg-primary-foreground/5 border border-primary/20 dark:border-primary-foreground/20"
+                                : "bg-muted-foreground/5 border border-foreground/10"
+                            }`}
+                          >
                             <span
-                              className={`text-sm text-muted-foreground ${isRTL && "!text-lg"}`}
+                              className={`text-base ${
+                                plan.recommended
+                                  ? "text-primary/80 dark:text-primary-foreground/80"
+                                  : "text-muted-foreground"
+                              } ${isRTL && "!text-lg"}`}
                             >
                               {t("pricing.labels.validity")}
                             </span>
                             <div className="flex items-center space-x-1">
-                              <Timer className="w-4 h-4 text-primary" />
+                              <Timer
+                                className={`w-5 h-5 ${
+                                  plan.recommended
+                                    ? "text-primary dark:text-primary-foreground"
+                                    : "text-primary"
+                                }`}
+                              />
                               <span
-                                className={`text-sm font-semibold text-foreground ${isRTL && "!text-lg"}`}
+                                className={`text-lg font-semibold ${
+                                  plan.recommended
+                                    ? "text-primary dark:text-primary-foreground"
+                                    : "text-foreground"
+                                } ${isRTL && "!text-lg"}`}
                               >
                                 {plan.daysValidity} {t("pricing.labels.days")}
                               </span>
@@ -2795,17 +2838,40 @@ export default function HomePage() {
                           {planSupportedSites.length > 0 && (
                             <Dialog>
                               <DialogTrigger asChild>
-                                <div className="flex items-center justify-between cursor-pointer hover:bg-muted rounded-lg p-2 -m-2 transition-colors">
+                                <div
+                                  className={`flex items-center justify-between cursor-pointer p-3 rounded-lg transition-colors ${
+                                    plan.recommended
+                                      ? "bg-primary/5 dark:bg-primary-foreground/5 border border-primary/20 dark:border-primary-foreground/20 hover:bg-primary/15 dark:hover:bg-primary-foreground/15"
+                                      : "bg-muted-foreground/5 border border-foreground/10 hover:bg-foreground/10"
+                                  }`}
+                                >
                                   <span
-                                    className={`text-sm text-muted-foreground ${isRTL && "!text-lg"}`}
+                                    className={`text-base ${
+                                      plan.recommended
+                                        ? "text-primary/80 dark:text-primary-foreground/80"
+                                        : "text-muted-foreground"
+                                    } ${isRTL && "!text-lg"}`}
                                   >
                                     {t("pricing.labels.supportedSites")}
                                   </span>
-                                  <span
-                                    className={`text-sm font-semibold text-foreground ${isRTL && "!text-lg"}`}
-                                  >
-                                    {planSupportedSites.length}
-                                  </span>
+                                  <div className="flex items-center space-x-1">
+                                    <Globe
+                                      className={`w-5 h-5 ${
+                                        plan.recommended
+                                          ? "text-primary dark:text-primary-foreground"
+                                          : "text-primary"
+                                      }`}
+                                    />
+                                    <span
+                                      className={`text-lg font-semibold ${
+                                        plan.recommended
+                                          ? "text-primary dark:text-primary-foreground"
+                                          : "text-foreground"
+                                      } ${isRTL && "!text-lg"}`}
+                                    >
+                                      {planSupportedSites.length}
+                                    </span>
+                                  </div>
                                 </div>
                               </DialogTrigger>
                               <DialogContent className="sm:max-w-2xl md:max-w-3xl lg:max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -2826,7 +2892,7 @@ export default function HomePage() {
                                   {planSupportedSites.map((site) => (
                                     <div
                                       key={site.id}
-                                      className="flex flex-col items-center p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                                      className="flex flex-col items-center p-4 rounded-lg bg-muted-foreground/5 dark:bg-muted/30 hover:bg-muted/50 transition-colors"
                                     >
                                       <img
                                         src={site.icon}
@@ -2852,29 +2918,29 @@ export default function HomePage() {
                           {/* Always-visible quick preview of supported sites for better discoverability */}
                           {planSupportedSites.length > 0 && (
                             <div className="mt-4">
-                              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                                {planSupportedSites.slice(0, 5).map((site) => (
+                              <div className="grid grid-cols-3 gap-2">
+                                {planSupportedSites.slice(0, 3).map((site) => (
                                   <div
                                     key={`preview-${site.id}`}
-                                    className="flex items-center justify-center gap-2 bg-muted/30 border border-border/50 rounded-md p-2 overflow-hidden"
+                                    className={`flex items-center justify-center gap-2 ${plan.recommended ? "bg-primary/10 border-primary/20" : "bg-muted-foreground/5 dark:bg-foreground/5"} border border-foreground/10 rounded-md p-2 overflow-hidden`}
                                     title={site.name}
                                   >
                                     <img
                                       src={site.icon}
                                       alt={`${site.name} icon`}
-                                      width={24}
-                                      height={24}
-                                      className="w-6 h-6 rounded object-contain"
+                                      width={48}
+                                      height={48}
+                                      className="w-12 h-12 rounded object-contain"
                                       onError={(e) => {
                                         e.currentTarget.src =
-                                          "https://via.placeholder.com/24x24/6366f1/ffffff?text=" +
+                                          "https://via.placeholder.com/48x48/6366f1/ffffff?text=" +
                                           site.name.charAt(0);
                                       }}
                                     />
                                   </div>
                                 ))}
                                 {planSupportedSites.length > 5 && (
-                                  <div className="col-span-2 flex items-center justify-center bg-muted/30 border border-border/50 rounded-md p-2 text-xs text-muted-foreground">
+                                  <div className="col-span-2 flex items-center justify-center bg-muted-foreground/5 dark:bg-foreground/5 border border-foreground/10 rounded-md p-2 text-xs text-muted-foreground">
                                     {isRTL
                                       ? `+${planSupportedSites.length - 5} المزيد`
                                       : `+${planSupportedSites.length - 5} more`}
@@ -2883,7 +2949,7 @@ export default function HomePage() {
                               </div>
                               {/* Helper text to guide users to open the full list */}
                               <p
-                                className={`mt-4 text-[12px] text-muted-foreground ${isRTL && "!text-sm"}`}
+                                className={`mt-4 text-[12px] ${plan.recommended ? "text-foreground/70 dark:text-foreground/60" : "text-muted-foreground"} ${isRTL && "!text-sm"}`}
                               >
                                 {isRTL
                                   ? 'انقر على "المواقع المدعومة" أعلاه لعرض المواقع.'
@@ -2892,35 +2958,12 @@ export default function HomePage() {
                             </div>
                           )}
                         </div>
-                        <div className="pt-4 border-t border-border">
-                          <h4
-                            className={`text-sm font-medium text-foreground mb-3 ${isRTL && "!text-lg"}`}
-                          >
-                            {t("pricing.labels.featuresIncluded")}
-                          </h4>
-                          <ul className="space-y-2">
-                            {(plan.features || []).map(
-                              (feature: string, featureIndex: number) => (
-                                <li
-                                  key={featureIndex}
-                                  className="flex items-center space-x-2"
-                                >
-                                  <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                  <span
-                                    className={`text-sm text-muted-foreground  ${isRTL && "!text-base"}`}
-                                  >
-                                    {feature}
-                                  </span>
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        </div>
                       </div>
-                      {/* CTA Button - Now at bottom */}
+                      {/* CTA Button - Enhanced styling for recommended cards */}
                       <div className="mt-auto">
                         <Button
-                          className="pricing-card-button w-full py-6 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-colors duration-200"
+                          variant={plan.recommended ? "default" : "outline"}
+                          className={`w-full ${plan.recommended ? "" : "bg-muted-foreground/5 dark:bg-foreground/5 border border-foreground/10"}`}
                           asChild
                         >
                           <a
@@ -2929,11 +2972,14 @@ export default function HomePage() {
                             }
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2"
                           >
                             <ExternalLink className="w-4 h-4 stroke-3" />
-                            {t(
-                              "dashboard.packageManagement.planDetails.contactUsLabel"
-                            )}
+                            <span>
+                              {t(
+                                "dashboard.packageManagement.planDetails.contactUsLabel"
+                              )}
+                            </span>
                           </a>
                         </Button>
                       </div>

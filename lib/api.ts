@@ -1376,12 +1376,13 @@ export interface PricingPlan {
   id?: number;
   name: string;
   description: string;
-  price?: string;
+  price: number;
   credits: number;
   daysValidity: number;
-  contactUsUrl?: string;
   supportedSites?: string[];
   features?: string[];
+  recommended?: boolean;
+  contactUsUrl?: string;
 }
 
 export interface PricingPlanResponse {
