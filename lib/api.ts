@@ -15,7 +15,7 @@ const getApiBaseUrl = () => {
     if (process.env.NODE_ENV === "production") {
       const directApiUrl =
         process.env.NEXT_PUBLIC_PRODUCTION_API_URL ||
-        "https://stockaty.virs.tech";
+        "https://stockaty.virus.best/";
 
       return directApiUrl;
     }
@@ -30,7 +30,7 @@ const getApiBaseUrl = () => {
   const fallbackUrl =
     process.env.NEXT_PUBLIC_PRODUCTION_API_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    "https://stockaty.virs.tech";
+    "https://stockaty.virus.best/";
 
   return fallbackUrl;
 };
@@ -60,7 +60,7 @@ const getSearchApiBaseUrl = () => {
   if (process.env.NODE_ENV === "production") {
     const directApiUrl =
       process.env.NEXT_PUBLIC_PRODUCTION_API_URL ||
-      "https://stockaty.virs.tech";
+      "https://stockaty.virus.best/";
     return directApiUrl;
   }
 
@@ -690,7 +690,7 @@ export const userApi = {
     // Bypass local proxy: call direct backend with absolute URL so axios ignores baseURL
     const DIRECT_API_URL =
       process.env.NEXT_PUBLIC_PRODUCTION_API_URL ||
-      "https://stockaty.virs.tech";
+      "https://stockaty.virus.best/";
     return apiRequest<DownloadHistoryResponse>(
       `${DIRECT_API_URL}/v1/user/history`,
       "GET"

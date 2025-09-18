@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       "images.unsplash.com",
       "pexels.com",
       "images.pexels.com",
-      "stockaty.virs.tech",
+      "stockaty.virus.best",
     ];
 
     const urlObj = new URL(url);

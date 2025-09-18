@@ -2,7 +2,7 @@ import { join } from "path";
 import { readFileSync } from "fs";
 import { NextResponse } from "next/server";
 
-const API_BASE_URL = "https://stockaty.virs.tech/v1";
+const API_BASE_URL = "https://stockaty.virus.best/v1";
 
 // Types
 interface ProviderStats {

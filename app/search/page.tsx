@@ -234,24 +234,88 @@ function transformApiResults(
 
 // Provider icon mapping for fallback when API doesn't provide icons
 const getProviderIcon = (providerName: string, apiIcon?: string): string => {
-  // Use API icon if available
-  if (apiIcon) return apiIcon;
+  // Use API icon if available, but check if it needs the API base URL prefix
+  if (apiIcon) {
+    // If it's already a full URL, use it as is
+    if (apiIcon.startsWith("http://") || apiIcon.startsWith("https://")) {
+      return apiIcon;
+    }
+    // If it's a relative URL, prefix with the API base URL
+    return `https://stockaty.virus.best/${apiIcon.replace(/^\/+/, "")}`;
+  }
 
   // Fallback mapping based on provider name
   const providerIconMap: Record<string, string> = {
     Freepik: "https://cdn-icons-png.freepik.com/512/18/18551.png",
     Shutterstock: "https://cdn.worldvectorlogo.com/logos/shutterstock.svg",
-    "Adobe Stock": "https://cdn.worldvectorlogo.com/logos/adobe-2.svg",
-    AdobeStock: "https://cdn.worldvectorlogo.com/logos/adobe-2.svg",
+    "Adobe Stock":
+      "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/adobe.svg",
+    AdobeStock:
+      "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/adobe.svg",
     "Getty Images": "https://cdn.worldvectorlogo.com/logos/getty-images-1.svg",
     Unsplash: "https://cdn.worldvectorlogo.com/logos/unsplash-1.svg",
-    Storyblocks: "https://www.storyblocks.com/favicon.ico",
+    Storyblocks: "https://logo.clearbit.com/storyblocks.com",
     Envato: "https://cdn.worldvectorlogo.com/logos/envato.svg",
     Vexels: "https://www.vexels.com/favicon.ico",
     Vectory: "https://vectory.com/favicon.ico",
     UI8: "https://ui8.net/favicon.ico",
     RawPixel: "https://www.rawpixel.com/favicon.ico",
-    PNGTree: "https://pngtree.com/favicon.ico",
+    PNGTree: "https://logo.clearbit.com/pngtree.com",
+    Pikbest: "https://logo.clearbit.com/pikbest.com",
+    "Creative Fabrica": "https://logo.clearbit.com/creativefabrica.com",
+    CreativeFabrica: "https://logo.clearbit.com/creativefabrica.com",
+    Iconscout: "https://www.google.com/s2/favicons?domain=iconscout.com&sz=128",
+    Vecteezy: "https://logo.clearbit.com/vecteezy.com",
+    Rawpixel: "https://www.rawpixel.com/favicon.ico",
+    Lovepik: "https://logo.clearbit.com/lovepik.com",
+    "Epidemic Sound":
+      "https://www.google.com/s2/favicons?domain=epidemicsound.com&sz=128",
+    EpidemicSound:
+      "https://www.google.com/s2/favicons?domain=epidemicsound.com&sz=128",
+    Flaticon: "https://www.google.com/s2/favicons?domain=flaticon.com&sz=128",
+    "Mockup Cloud":
+      "https://www.google.com/s2/favicons?domain=mockupcloud.com&sz=128",
+    MockupCloud:
+      "https://www.google.com/s2/favicons?domain=mockupcloud.com&sz=128",
+    "Envato Elements": "https://cdn.worldvectorlogo.com/logos/envato.svg",
+    EnvatoElements: "https://cdn.worldvectorlogo.com/logos/envato.svg",
+    Soundstripe:
+      "https://www.google.com/s2/favicons?domain=soundstripe.com&sz=128",
+    "Motion Array":
+      "https://www.google.com/s2/favicons?domain=motionarray.com&sz=128",
+    MotionArray:
+      "https://www.google.com/s2/favicons?domain=motionarray.com&sz=128",
+    MotionElements:
+      "https://www.google.com/s2/favicons?domain=motionelements.com&sz=128",
+    Pixelbuddha:
+      "https://www.google.com/s2/favicons?domain=pixelbuddha.net&sz=128",
+    Deeezy: "https://www.google.com/s2/favicons?domain=deeezy.com&sz=128",
+    "123RF": "https://www.google.com/s2/favicons?domain=123rf.com&sz=128",
+    Pixeden: "https://www.google.com/s2/favicons?domain=pixeden.com&sz=128",
+    Artlist: "https://www.google.com/s2/favicons?domain=artlist.io&sz=128",
+    Designi: "https://www.google.com/s2/favicons?domain=designi.com.br&sz=128",
+    UIHUT: "https://www.google.com/s2/favicons?domain=uihut.com&sz=128",
+    Depositphotos:
+      "https://www.google.com/s2/favicons?domain=depositphotos.com&sz=128",
+    PixelSquid:
+      "https://www.google.com/s2/favicons?domain=pixelsquid.com&sz=128",
+    ProductionCrate:
+      "https://www.google.com/s2/favicons?domain=productioncrate.com&sz=128",
+    GraphicsCrate: "https://logo.clearbit.com/graphics.crate.com",
+    VectorStock:
+      "https://www.google.com/s2/favicons?domain=vectorstock.com&sz=128",
+    Dreamstime:
+      "https://www.google.com/s2/favicons?domain=dreamstime.com&sz=128",
+    UpLabs: "https://logo.clearbit.com/uplabs.com",
+    Craftwork: "https://logo.clearbit.com/craftwork.design",
+    iStockphoto:
+      "https://www.google.com/s2/favicons?domain=istockphoto.com&sz=128",
+    Artgrid: "https://www.google.com/s2/favicons?domain=artgrid.io&sz=128",
+    "Yellow Images":
+      "https://www.google.com/s2/favicons?domain=yellowimages.com&sz=128",
+    YellowImages:
+      "https://www.google.com/s2/favicons?domain=yellowimages.com&sz=128",
+    Alamy: "https://www.google.com/s2/favicons?domain=alamy.com&sz=128",
   };
 
   return (
@@ -1733,7 +1797,11 @@ function SearchContent() {
                 <div className="relative w-44 sm:w-48 h-12">
                   {/* Light mode logos */}
                   <Image
-                    src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
+                    src={
+                      language === "ar"
+                        ? "/logo-black-ar.png"
+                        : "/logo-black-en.png"
+                    }
                     alt={t("header.logo")}
                     fill
                     className="block dark:hidden"
@@ -1741,7 +1809,11 @@ function SearchContent() {
                   />
                   {/* Dark mode logos */}
                   <Image
-                    src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
+                    src={
+                      language === "ar"
+                        ? "/logo-white-ar.png"
+                        : "/logo-white-en.png"
+                    }
                     alt={t("header.logo")}
                     fill
                     className="hidden dark:block"

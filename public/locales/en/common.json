@@ -188,6 +188,91 @@
       "moneyBack": "30-day money-back guarantee",
       "support24": "24/7 Support",
       "cancelAnytime": "Cancel anytime"
+    },
+    "errors": {
+      "noPlans": "No pricing plans available",
+      "noPlansDescription": "Please check back later or contact support for assistance.",
+      "title": "Failed to load pricing plans",
+      "retry": "Try Again"
+    },
+    "mostPopular": "Most Popular",
+    "showPlanDetails": "View Plan Details"
+  },
+  "planDetails": {
+    "title": "Plan Details",
+    "subtitle": "Everything you need to know about this plan",
+    "contactUs": "Contact Us",
+    "sites": "Sites",
+    "errors": {
+      "notFound": "Plan Not Found",
+      "notFoundDescription": "The plan you're looking for doesn't exist or has been removed."
+    },
+    "actions": {
+      "goBack": "Go Back",
+      "viewAllPlans": "View All Plans",
+      "subscribe": "Subscribe Now",
+      "contactUs": "Contact Us"
+    },
+    "features": {
+      "title": "Plan Features",
+      "unlimitedDownloads": {
+        "title": "Unlimited Downloads",
+        "description": "Download as many files as your credits allow"
+      },
+      "secureDownloads": {
+        "title": "Secure Downloads",
+        "description": "All downloads are safe and virus-free"
+      },
+      "support24": {
+        "title": "24/7 Support",
+        "description": "Get help whenever you need it"
+      },
+      "autoRenewal": {
+        "title": "Auto Renewal",
+        "description": "Automatic plan renewal for uninterrupted service"
+      },
+      "multiUser": {
+        "title": "Multi-User Access",
+        "description": "Share your plan with team members"
+      },
+      "prioritySupport": {
+        "title": "Priority Support",
+        "description": "Get faster response times from our support team"
+      },
+      "analytics": {
+        "title": "Usage Analytics",
+        "description": "Track your downloads and usage patterns"
+      },
+      "exclusiveContent": {
+        "title": "Exclusive Content",
+        "description": "Access to premium and exclusive resources"
+      },
+      "premiumQuality": {
+        "title": "Premium Quality",
+        "description": "High-resolution files with guaranteed quality"
+      }
+    },
+    "supportedSites": {
+      "title": "All Supported Websites"
+    },
+    "planFeatures": {
+      "title": "Plan Features",
+      "description": "Discover all the amazing features and benefits included with this plan to enhance your creative workflow."
+    },
+    "comparison": {
+      "title": "Plan Overview",
+      "credits": "Credits",
+      "validity": "Validity Period",
+      "sites": "Supported Sites",
+      "sitesCount": "sites",
+      "support": "Support"
+    },
+    "benefits": {
+      "title": "Additional Benefits",
+      "moneyBack": "30-day money-back guarantee",
+      "instantAccess": "Instant access after purchase",
+      "noHiddenFees": "No hidden fees or charges",
+      "cancelAnytime": "Cancel anytime without penalty"
     }
   },
   "faq": {
@@ -1148,8 +1233,8 @@
     }
   },
   "register": {
-    "title": "Create Your Account",
-    "subtitle": "Join our community today.",
+    "title": "Create Account",
+    "subtitle": "Join thousands of creators and access premium resources",
     "form": {
       "firstName": {
         "label": "First Name",
@@ -1165,9 +1250,19 @@
       },
       "phone": {
         "label": "Phone Number",
-        "placeholder": "Enter your phone number",
-        "otpMessage": "OTP code will be sent to you via WhatsApp",
-        "sendCodeButton": "Send Code"
+        "placeholder": "+1234567890",
+        "sendCodeButton": "Send Code",
+        "sendingCode": "Sending...",
+        "codeSent": "Verification code sent to your phone",
+        "otpMessage": "We'll send you a verification code"
+      },
+      "otp": {
+        "label": "Verification Code",
+        "placeholder": "Enter 6-digit code",
+        "verifyButton": "Verify",
+        "verifying": "Verifying...",
+        "resendCode": "Resend Code",
+        "resending": "Resending..."
       },
       "confirmPassword": {
         "label": "Confirm Password",
@@ -1189,21 +1284,21 @@
       "invalidEmail": "Please enter a valid email address",
       "phoneRequired": "Phone number is required",
       "invalidPhone": "Please enter a valid phone number",
-      "phoneCountryCode": "Phone number must include country code (e.g., +1234567890)",
+      "phoneCountryCode": "Phone number must include country code (e.g., +1)",
+      "phoneNotVerified": "Please verify your phone number",
       "passwordRequired": "Password is required",
-      "passwordTooShort": "Password must be at least 8 characters long",
-      "passwordWeak": "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordWeak": "Password must contain uppercase, lowercase, and numbers",
       "confirmPasswordRequired": "Please confirm your password",
       "passwordsDoNotMatch": "Passwords do not match",
-      "termsRequired": "You must agree to the Terms of Service and Privacy Policy",
+      "termsRequired": "You must agree to the terms and conditions",
       "otpRequired": "Verification code is required",
       "invalidOtp": "Please enter a valid 6-digit code",
-      "otpIncorrect": "The code is wrong, please try again",
-      "phoneNotVerified": "Please verify your phone number first"
+      "otpIncorrect": "Incorrect verification code. Please try again."
     },
     "footer": {
       "alreadyHaveAccount": "Already have an account?",
-      "loginLink": "Login"
+      "loginLink": "Sign in here"
     }
   },
   "forgotPassword": {
@@ -1974,7 +2069,7 @@
     "description": "Track all your download activities",
     "columns": {
       "file": "File",
-      "platform": "Platform", 
+      "platform": "Platform",
       "status": "Status",
       "progress": "Progress",
       "price": "Price",
@@ -1999,7 +2094,7 @@
     },
     "status": {
       "completed": "Completed",
-      "failed": "Failed", 
+      "failed": "Failed",
       "in_progress": "In Progress",
       "pending": "Pending"
     },
@@ -2011,7 +2106,7 @@
   },
   "statisticsCards": {
     "totalDownloads": "Total Downloads",
-    "successRate": "Success Rate", 
+    "successRate": "Success Rate",
     "creditsSpent": "Credits Spent",
     "topPlatforms": "Top Platforms",
     "thisMonth": "This Month",

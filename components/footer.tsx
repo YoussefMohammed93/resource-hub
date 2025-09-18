@@ -22,7 +22,7 @@ if (typeof window !== "undefined") {
 
 export default function Footer() {
   const { t } = useTranslation("common");
-  const { isRTL } = useLanguage();
+  const { isRTL, language } = useLanguage();
   
   // Refs for animations
   const footerRef = useRef<HTMLElement>(null);
@@ -169,20 +169,21 @@ export default function Footer() {
                   className="flex items-center"
                 >
                   <div className="relative w-44 sm:w-48 h-12">
-                    <Image
-                      src="/logo-black.png"
-                      alt={t("header.logo")}
-                      fill
-                      className="block dark:hidden"
-                      priority
-                    />
-                    <Image
-                      src="/logo-white.png"
-                      alt={t("header.logo")}
-                      fill
-                      className="hidden dark:block"
-                      priority
-                    />
+                    {language === "ar" ? (
+                      <Image
+                        src="/logo-white-ar.png"
+                        alt={t("header.logo")}
+                        fill
+                        priority
+                      />
+                    ) : (
+                      <Image
+                        src="/logo-white-en.png"
+                        alt={t("header.logo")}
+                        fill
+                        priority
+                      />
+                    )}
                   </div>
                 </Link>
               </div>

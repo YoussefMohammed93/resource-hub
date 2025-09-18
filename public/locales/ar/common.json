@@ -188,6 +188,91 @@
       "moneyBack": "ضمان استرداد الأموال لمدة 30 يومًا",
       "support24": "دعم 24/7",
       "cancelAnytime": "إلغاء في أي وقت"
+    },
+    "errors": {
+      "noPlans": "لا توجد خطط أسعار متاحة",
+      "noPlansDescription": "يرجى المراجعة لاحقاً أو التواصل مع الدعم للمساعدة.",
+      "title": "فشل في تحميل خطط الأسعار",
+      "retry": "حاول مرة أخرى"
+    },
+    "mostPopular": "الأكثر شعبية",
+    "showPlanDetails": "عرض تفاصيل الخطة"
+  },
+  "planDetails": {
+    "title": "تفاصيل الخطة",
+    "subtitle": "كل ما تحتاج لمعرفته حول هذه الخطة",
+    "contactUs": "تواصل معنا",
+    "sites": "المواقع",
+    "errors": {
+      "notFound": "الخطة غير موجودة",
+      "notFoundDescription": "الخطة التي تبحث عنها غير موجودة أو تم حذفها."
+    },
+    "actions": {
+      "goBack": "العودة",
+      "viewAllPlans": "عرض جميع الخطط",
+      "subscribe": "اشترك الآن",
+      "contactUs": "تواصل معنا"
+    },
+    "features": {
+      "title": "ميزات الخطة",
+      "unlimitedDownloads": {
+        "title": "تحميل غير محدود",
+        "description": "حمل أكبر عدد من الملفات حسب نقاطك المتاحة"
+      },
+      "secureDownloads": {
+        "title": "تحميل آمن",
+        "description": "جميع التحميلات آمنة وخالية من الفيروسات"
+      },
+      "support24": {
+        "title": "دعم 24/7",
+        "description": "احصل على المساعدة متى احتجتها"
+      },
+      "autoRenewal": {
+        "title": "التجديد التلقائي",
+        "description": "تجديد تلقائي للخطة لخدمة متواصلة"
+      },
+      "multiUser": {
+        "title": "وصول متعدد المستخدمين",
+        "description": "شارك خطتك مع أعضاء الفريق"
+      },
+      "prioritySupport": {
+        "title": "دعم أولوية",
+        "description": "احصل على استجابة أسرع من فريق الدعم"
+      },
+      "analytics": {
+        "title": "تحليلات الاستخدام",
+        "description": "تتبع تحميلاتك وأنماط الاستخدام"
+      },
+      "exclusiveContent": {
+        "title": "محتوى حصري",
+        "description": "الوصول إلى الموارد المميزة والحصرية"
+      },
+      "premiumQuality": {
+        "title": "جودة مميزة",
+        "description": "ملفات عالية الدقة مع ضمان الجودة"
+      }
+    },
+    "supportedSites": {
+      "title": "جميع المواقع المدعومة"
+    },
+    "planFeatures": {
+      "title": "مميزات الخطة",
+      "description": "اكتشف جميع المميزات والفوائد المذهلة المتضمنة في هذه الخطة لتعزيز سير عملك الإبداعي."
+    },
+    "comparison": {
+      "title": "نظرة عامة على الخطة",
+      "credits": "النقاط",
+      "validity": "فترة الصلاحية",
+      "sites": "المواقع المدعومة",
+      "sitesCount": "مواقع",
+      "support": "الدعم"
+    },
+    "benefits": {
+      "title": "مزايا إضافية",
+      "moneyBack": "ضمان استرداد الأموال لمدة 30 يومًا",
+      "instantAccess": "وصول فوري بعد الشراء",
+      "noHiddenFees": "لا توجد رسوم مخفية أو إضافية",
+      "cancelAnytime": "إلغاء في أي وقت بدون غرامة"
     }
   },
   "faq": {

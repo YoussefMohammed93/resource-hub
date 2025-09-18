@@ -54,7 +54,7 @@ async function handleProxyRequest(
   try {
     // Construct the target URL
     const targetPath = pathSegments.join("/");
-    const targetUrl = `https://stockaty.virs.tech/${targetPath}`;
+    const targetUrl = `https://stockaty.virus.best/${targetPath}`;
 
     // Get query parameters
     const url = new URL(request.url);

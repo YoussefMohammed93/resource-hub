@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFileSync } from "fs";
 import { join } from "path";
 
-const API_BASE_URL = "https://stockaty.virs.tech/v1";
+const API_BASE_URL = "https://stockaty.virus.best/v1";
 
 // Simple in-memory cache for search responses to speed up repeat queries during a session
 const searchCache = new Map<string, { data: unknown; expiresAt: number }>();

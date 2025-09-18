@@ -180,8 +180,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Forward the request to the actual backend API
     const API_BASE_URL =
       process.env.NODE_ENV === "production"
-        ? "https://stockaty.virs.tech"
-        : "https://stockaty.virs.tech"; // Use same URL for both environments
+        ? "https://stockaty.virus.best/"
+        : "https://stockaty.virus.best/"; // Use same URL for both environments
 
     const backendResponse = await fetch(`${API_BASE_URL}/v1/cookies/add`, {
       method: "POST",

@@ -14,7 +14,6 @@ import {
   Globe,
   Timer,
   Coins,
-  ExternalLink,
   Download,
   Sparkles,
   Users,
@@ -28,6 +27,7 @@ import {
   User,
   TrendingUp,
   Target,
+  X,
   Shield,
   Package,
 } from "lucide-react";
@@ -653,6 +653,11 @@ export default function HomePage() {
     }
 
     return { isValid: true, cleanedQuery };
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    if (searchError) setSearchError(null);
   };
 
   const handleSearch = async () => {
@@ -1634,7 +1639,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <main className="min-h-screen bg-background font-sans">
       {/* Header */}
       <header
         ref={headerRef}
@@ -2065,12 +2070,21 @@ export default function HomePage() {
                       }
                     }}
                     disabled={isSearching}
-                    className={`${isRTL ? "pr-12 pl-4" : "pl-12 pr-4"} py-8 h-12 2xl:h-16 text-lg border-2 ${
+                    className={`${isRTL ? "pr-12" : "pl-12"} ${searchQuery ? (isRTL ? "pl-12" : "pr-12") : isRTL ? "pl-4" : "pr-4"} py-8 h-12 2xl:h-16 text-lg border-2 ${
                       searchError
                         ? "border-red-500 focus:border-red-500"
                         : "border-border focus:border-primary"
                     } rounded-xl bg-background/80 backdrop-blur-sm w-full ${isSearching ? "opacity-50" : ""} placeholder:text-muted-foreground/70`}
                   />
+                  {searchQuery && (
+                    <button
+                      onClick={clearSearch}
+                      className={`absolute ${isRTL ? "left-4" : "right-4"} top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors`}
+                      type="button"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
                   {searchError && (
                     <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                       <p className="text-sm text-red-600 dark:text-red-400">
@@ -2181,12 +2195,27 @@ export default function HomePage() {
                       }
                     }}
                     disabled={isSearching}
-                    className={`${isRTL ? "pr-48 pl-32" : "pl-48 pr-32"} py-8 h-12 2xl:h-20 text-xl border-2 ${
+                    className={`${isRTL ? "pr-48" : "pl-48"} ${searchQuery ? (isRTL ? "pl-20" : "pr-20") : isRTL ? "pl-32" : "pr-32"} py-8 h-12 2xl:h-20 text-xl border-2 ${
                       searchError
                         ? "border-red-500 focus:border-red-500"
                         : "border-border focus:border-primary"
                     } rounded-xl bg-background/80 backdrop-blur-sm placeholder:text-base 2xl:placeholder:text-xl ${isRTL && "placeholder:text-base 2xl:placeholder:text-lg"} ${isSearching ? "opacity-50" : ""} placeholder:text-muted-foreground/70`}
                   />
+
+                  {/* Clear Button */}
+                  {searchQuery && (
+                    <button
+                      onClick={clearSearch}
+                      className={`cursor-pointer absolute ${
+                        isSearching 
+                          ? (isRTL ? "left-44" : "right-44")
+                          : (isRTL ? "left-32" : "right-36")
+                      } top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10`}
+                      type="button"
+                    >
+                      <X className="w-5 h-5 2xl:w-6 2xl:h-6" />
+                    </button>
+                  )}
 
                   {/* Search Button */}
                   <Button
@@ -2724,33 +2753,28 @@ export default function HomePage() {
                         : "bg-gradient-to-br from-secondary/20 dark:from-secondary via-accent/20 to-muted border-border text-foreground shadow-xl shadow-foreground/10"
                     } rounded-2xl p-6.5`}
                   >
-                    {/* Recommended Badge */}
-                    {plan.recommended && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-primary text-primary-foreground px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg">
-                          <div className="flex items-center gap-1.5">
-                            <Crown className="w-4 h-4" />
-                            <span>
-                              {isRTL ? "الأكثر شعبية" : "Most Popular"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
                     <div className="pricing-card-content relative z-10 flex flex-col h-full space-y-6">
                       {/* Plan Header */}
                       <div className="space-y-4">
                         <div>
-                          <h3
-                            className={`text-2xl font-bold transition-colors duration-200 ${
-                              plan.recommended
-                                ? "text-primary dark:text-primary"
-                                : "text-foreground group-hover:text-primary"
-                            }`}
-                          >
-                            {plan.name}
-                          </h3>
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <h3
+                              className={`text-2xl font-bold transition-colors duration-200 ${
+                                plan.recommended
+                                  ? "text-primary dark:text-primary"
+                                  : "text-foreground group-hover:text-primary"
+                              }`}
+                            >
+                              {plan.name}
+                            </h3>
+                            {plan.recommended && (
+                              <span
+                                className={`bg-primary/50 text-primary-foreground px-2 py-0.5 rounded-full text-xs font-medium ${isRTL ? "text-sm" : ""}`}
+                              >
+                                {t("pricing.mostPopular")}
+                              </span>
+                            )}
+                          </div>
                           <p
                             className={`text-sm ${
                               plan.recommended
@@ -2963,24 +2987,20 @@ export default function HomePage() {
                       <div className="mt-auto">
                         <Button
                           variant={plan.recommended ? "default" : "outline"}
-                          className={`w-full ${plan.recommended ? "" : "bg-muted-foreground/5 dark:bg-foreground/5 border border-foreground/10"}`}
-                          asChild
+                          className={`w-full ${plan.recommended ? "" : "bg-muted-foreground/5 dark:bg-foreground/5 border border-foreground/10"} ${isRTL ? "text-base font-medium" : ""}`}
+                          onClick={() => {
+                            const slug = (plan.name || "")
+                              .toLowerCase()
+                              .trim()
+                              .replace(/\s+/g, "-");
+                            const target =
+                              plan.id != null ? String(plan.id) : slug;
+                            window.location.href = `/plans/${encodeURIComponent(target)}`;
+                          }}
                         >
-                          <a
-                            href={
-                              plan.contactUsUrl || "https://example.com/contact"
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2"
-                          >
-                            <ExternalLink className="w-4 h-4 stroke-3" />
-                            <span>
-                              {t(
-                                "dashboard.packageManagement.planDetails.contactUsLabel"
-                              )}
-                            </span>
-                          </a>
+                          <span className={isRTL ? "text-base" : ""}>
+                            {t("pricing.showPlanDetails")}
+                          </span>
                         </Button>
                       </div>
                     </div>
@@ -3601,6 +3621,6 @@ export default function HomePage() {
       <FAQSection />
       {/* Footer */}
       <Footer />
-    </div>
+    </main>
   );
 }

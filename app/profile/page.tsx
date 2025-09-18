@@ -33,7 +33,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
 import { authApi, userApi } from "@/lib/api";
-import Footer from "@/components/footer";
 import Image from "next/image";
 
 export default function ProfilePage() {
@@ -62,7 +61,7 @@ export default function ProfilePage() {
     const controller = new AbortController();
     const fetchSites = async () => {
       try {
-        const res = await fetch("https://stockaty.virs.tech/v1/sites/get", {
+        const res = await fetch("https://stockaty.virus.best/v1/sites/get", {
           signal: controller.signal,
           headers: {
             Accept: "application/json",
@@ -93,7 +92,7 @@ export default function ProfilePage() {
     if (!icon) return undefined;
     if (/^https?:\/\//i.test(icon)) return icon;
     // Prefix relative icons with API origin
-    return `https://stockaty.virs.tech/${icon.replace(/^\/?/, "")}`;
+    return `https://stockaty.virus.best/${icon.replace(/^\/?/, "")}`;
   };
   const getIconForProvider = (nameOrHost?: string): string | undefined => {
     const key = normalize(nameOrHost);
@@ -1098,7 +1097,6 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </main>
-      <Footer />
     </div>
   );
 }

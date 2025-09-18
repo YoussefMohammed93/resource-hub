@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_BASE_URL = "https://stockaty.virs.tech/v1";
+const API_BASE_URL = "https://stockaty.virus.best/v1";
 
 // Rate limiting
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
