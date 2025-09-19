@@ -497,6 +497,11 @@ section[id] {
   .hero-floating-icons .hero-floating-icon {
     display: block !important;
   }
+  .file-url {
+    max-width: 400px !important;
+    width: 100% !important;
+    white-space: wrap !important;
+  }
 }
 
 /* Line clamp utilities */

@@ -1440,7 +1440,9 @@
       "urlNotAllowed": "URLs are not allowed in search queries",
       "invalid": "Invalid search query",
       "navigation": "Failed to navigate to search results"
-    }
+    },
+    "load_more": "Load More Results",
+    "loading_more": "Loading More..."
   },
   "mediaDetail": {
     "title": "Media Details",
@@ -2021,6 +2023,14 @@
         "title": "Verification Failed",
         "verificationFailed": "Verification Failed",
         "unableToVerify": "Unable to verify download eligibility"
+      },
+      "authentication": {
+        "title": "Authentication Required",
+        "description": "You need to be logged in to download content from our platform.",
+        "loginButton": "Login",
+        "registerButton": "Register",
+        "loginDescription": "Already have an account? Sign in to continue",
+        "registerDescription": "New to our platform? Create an account to get started"
       },
       "tryAgain": "Try Again"
     },

@@ -2365,25 +2365,25 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {/* Total Users Card */}
                 <Card className="group dark:bg-muted/50">
-                  <CardContent>
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-3 sm:space-y-4 flex-1">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
-                            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                      <div className="space-y-4 sm:space-y-5 flex-1">
+                        <div className="flex items-center space-x-3 sm:space-x-4">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
+                            <Users className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-primary" />
                           </div>
-                          <div>
-                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                          <div className="flex-1">
+                            <h3 className="text-base sm:text-lg lg:text-xl font-medium text-foreground uppercase tracking-wide">
                               {t("dashboard.stats.totalUsers.title")}
                             </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                            <p className="text-sm sm:text-base text-muted-foreground/80 mt-1">
                               {t("dashboard.stats.totalUsers.description")}
                             </p>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-primary transition-colors">
+                            <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground group-hover:text-primary transition-colors">
                               {usersData?.total_users?.toLocaleString() || "0"}
                             </span>
                           </div>
@@ -2394,25 +2394,25 @@ export default function DashboardPage() {
                 </Card>
                 {/* Active Sites Card */}
                 <Card className="group dark:bg-muted/50">
-                  <CardContent>
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-3 sm:space-y-4 flex-1">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500/10 border border-emerald-500/10 rounded-xl flex items-center justify-center">
-                            <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
+                      <div className="space-y-4 sm:space-y-5 flex-1">
+                        <div className="flex items-center space-x-3 sm:space-x-4">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-emerald-500/10 border border-emerald-500/10 rounded-xl flex items-center justify-center">
+                            <Globe className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-emerald-500" />
                           </div>
-                          <div>
-                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                          <div className="flex-1">
+                            <h3 className="text-base sm:text-lg lg:text-xl font-medium text-foreground uppercase tracking-wide">
                               {t("dashboard.stats.activeSites.title")}
                             </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                            <p className="text-sm sm:text-base text-muted-foreground/80 mt-1">
                               {t("dashboard.stats.activeSites.description")}
                             </p>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-emerald-500 transition-colors">
+                            <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground group-hover:text-emerald-500 transition-colors">
                               {sites?.length?.toLocaleString() || "0"}
                             </span>
                           </div>
@@ -2423,26 +2423,26 @@ export default function DashboardPage() {
                 </Card>
                 {/* Online Users Card */}
                 <Card className="group dark:bg-muted/50">
-                  <CardContent>
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-3 sm:space-y-4 flex-1">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-600/10 border border-yellow-600/10 rounded-xl flex items-center justify-center relative">
-                            <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <div className="space-y-4 sm:space-y-5 flex-1">
+                        <div className="flex items-center space-x-3 sm:space-x-4">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-yellow-600/10 border border-yellow-600/10 rounded-xl flex items-center justify-center relative">
+                            <Activity className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-primary" />
+                            <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full animate-pulse"></div>
                           </div>
-                          <div>
-                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                          <div className="flex-1">
+                            <h3 className="text-base sm:text-lg lg:text-xl font-medium text-foreground uppercase tracking-wide">
                               {t("dashboard.stats.onlineUsers.title")}
                             </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                            <p className="text-sm sm:text-base text-muted-foreground/80 mt-1">
                               {t("dashboard.stats.onlineUsers.description")}
                             </p>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-yellow-600 transition-colors">
+                            <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground group-hover:text-yellow-600 transition-colors">
                               {usersData?.online_users?.toLocaleString() || "0"}
                             </span>
                           </div>
@@ -2465,21 +2465,21 @@ export default function DashboardPage() {
                     <div className="flex items-start justify-between">
                       <div className="space-y-3 sm:space-y-4 flex-1">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600/10 border border-blue-600/10 rounded-xl flex items-center justify-center">
-                            <Download className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-blue-600/10 border border-blue-600/10 rounded-xl flex items-center justify-center">
+                            <Download className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-600" />
                           </div>
                           <div>
-                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                            <h3 className="text-base sm:text-lg lg:text-xl font-medium text-foreground uppercase tracking-wide">
                               {t("statisticsCards.totalDownloads")}
                             </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                            <p className="text-sm sm:text-base text-muted-foreground/80">
                               {t("statisticsCards.allTime")}
                             </p>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-blue-600 transition-colors">
+                            <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground group-hover:text-blue-600 transition-colors">
                               {downloadStatistics.totalDownloads.toLocaleString()}
                             </span>
                           </div>
@@ -2495,21 +2495,21 @@ export default function DashboardPage() {
                     <div className="flex items-start justify-between">
                       <div className="space-y-3 sm:space-y-4 flex-1">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-600/10 border border-green-600/10 rounded-xl flex items-center justify-center">
-                            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-green-600/10 border border-green-600/10 rounded-xl flex items-center justify-center">
+                            <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-green-600" />
                           </div>
                           <div>
-                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                            <h3 className="text-base sm:text-lg lg:text-xl font-medium text-foreground uppercase tracking-wide">
                               {t("statisticsCards.successRate")}
                             </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                            <p className="text-sm sm:text-base text-muted-foreground/80">
                               {t("statisticsCards.allTime")}
                             </p>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                            <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                               {downloadStatistics.successRate.toFixed(1)}%
                             </span>
                           </div>
@@ -2525,21 +2525,21 @@ export default function DashboardPage() {
                     <div className="flex items-start justify-between">
                       <div className="space-y-3 sm:space-y-4 flex-1">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500/10 border border-red-500/10 rounded-xl flex items-center justify-center">
-                            <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
-                          </div>
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-red-500/10 border border-red-500/10 rounded-xl flex items-center justify-center">
+                            <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-red-600" />
+                          </div>  
                           <div>
-                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                            <h3 className="text-base sm:text-lg lg:text-xl font-medium text-foreground uppercase tracking-wide">
                               {t("statisticsCards.creditsSpent")}
-                            </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                            </h3> 
+                            <p className="text-sm sm:text-base text-muted-foreground/80">
                               {t("statisticsCards.allTime")}
                             </p>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-red-600 transition-colors">
+                            <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground group-hover:text-red-600 transition-colors">
                               {downloadStatistics.creditsSpent.toLocaleString()}
                             </span>
                           </div>
@@ -2555,21 +2555,21 @@ export default function DashboardPage() {
                     <div className="flex items-start justify-between">
                       <div className="space-y-3 sm:space-y-4 flex-1">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-violet-500/10 border border-violet-500/10 rounded-xl flex items-center justify-center">
-                            <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600" />
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-violet-500/10 border border-violet-500/10 rounded-xl flex items-center justify-center">
+                            <Calendar className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-violet-600" />
                           </div>
                           <div>
-                            <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground uppercase tracking-wide">
+                            <h3 className="text-base sm:text-lg lg:text-xl font-medium text-foreground uppercase tracking-wide">
                               {t("statisticsCards.thisMonth")}
                             </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground/80">
+                            <p className="text-sm sm:text-base text-muted-foreground/80">
                               {t("statisticsCards.totalDownloads")}
                             </p>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                            <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                               {downloadStatistics.thisMonth.toLocaleString()}
                             </span>
                           </div>
@@ -2627,7 +2627,7 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {/* Desktop Table View */}
+                {/* Desztop Table View */}
                 <div className="hidden lg:block overflow-x-auto max-h-[278px] overflow-y-auto">
                   <table className="w-full">
                     <thead>
@@ -3272,7 +3272,7 @@ export default function DashboardPage() {
                                     href={originalUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-sm text-primary hover:text-primary/80 underline truncate block max-w-[180px]"
+                                    className="text-sm text-primary hover:text-primary/80 underline truncate block max-w-[180px] file-url"
                                     title={originalUrl}
                                   >
                                     {originalUrl}

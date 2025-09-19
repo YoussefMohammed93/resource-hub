@@ -828,6 +828,17 @@ export const otpApi = {
     type: "signup" | "forgot_password" = "signup",
     email?: string
   ): Promise<ApiResponse<SendOtpResponse>> {
+    // Comprehensive input validation
+    if (!phoneNumber || phoneNumber.trim().length === 0) {
+      return {
+        success: false,
+        error: {
+          id: "missing_phone",
+          message: "Phone number is required",
+        },
+      };
+    }
+
     // Validate phone number format (must start with +)
     if (!phoneNumber.startsWith("+")) {
       return {
@@ -835,6 +846,29 @@ export const otpApi = {
         error: {
           id: "invalid_phone_format",
           message: "Phone number must start with + and include country code",
+        },
+      };
+    }
+
+    // Validate phone number length (basic check)
+    if (phoneNumber.length < 8 || phoneNumber.length > 20) {
+      return {
+        success: false,
+        error: {
+          id: "invalid_phone_length",
+          message: "Phone number length is invalid",
+        },
+      };
+    }
+
+    // Validate phone number contains only digits after +
+    const phoneDigits = phoneNumber.slice(1);
+    if (!/^\d+$/.test(phoneDigits)) {
+      return {
+        success: false,
+        error: {
+          id: "invalid_phone_characters",
+          message: "Phone number can only contain digits after the + sign",
         },
       };
     }
@@ -850,6 +884,17 @@ export const otpApi = {
       };
     }
 
+    // Validate email format if provided
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return {
+        success: false,
+        error: {
+          id: "invalid_email_format",
+          message: "Invalid email format",
+        },
+      };
+    }
+
     const token = generateTimestampToken();
 
     try {
@@ -860,14 +905,14 @@ export const otpApi = {
         email?: string;
         resend?: boolean;
       } = {
-        phoneNum: phoneNumber,
+        phoneNum: phoneNumber.trim(),
         token,
         type,
       };
 
       // Add email for forgot_password type
       if (type === "forgot_password" && email) {
-        requestBody.email = email;
+        requestBody.email = email.trim();
       }
 
       // Add resend parameter if this is a resend request
@@ -883,21 +928,70 @@ export const otpApi = {
 
       // If the API returns an error response, handle it appropriately
       if (!response.success && response.error) {
-        // Map specific error IDs to user-friendly messages
+        // Comprehensive error mapping for different failure scenarios
         const errorMessages: Record<string, string> = {
-          "5": "Failed to send OTP. Please check your phone number and try again.",
-          "6": "Service temporarily unavailable. Please try again later.",
+          // Server-defined error IDs from otp.yaml
+          "5": "Failed to send OTP. Please verify your phone number and try again.",
+          "6": "Service temporarily unavailable. Please try again in a few minutes.",
+
+          // Phone number related errors
           invalid_phone:
-            "Invalid phone number format. Please include country code.",
-          rate_limit: "Too many requests. Please wait before trying again.",
+            "Invalid phone number format. Please include country code starting with +.",
+          phone_not_found:
+            "Phone number not found. Please check and try again.",
+          phone_blocked:
+            "This phone number has been temporarily blocked. Please contact support.",
+          invalid_country_code:
+            "Invalid country code. Please check your phone number.",
+
+          // Rate limiting and quota errors
+          rate_limit:
+            "Too many OTP requests. Please wait 5 minutes before trying again.",
+          rate_limit_exceeded:
+            "Daily OTP limit exceeded. Please try again tomorrow.",
+          quota_exceeded: "OTP quota exceeded. Please contact support.",
+
+          // Service and network errors
           network_error:
-            "Network connection failed. Please check your internet connection.",
+            "Network connection failed. Please check your internet connection and try again.",
+          service_unavailable:
+            "OTP service is temporarily unavailable. Please try again later.",
+          timeout: "Request timed out. Please try again.",
+          sms_provider_error:
+            "SMS service error. Please try again or contact support.",
+
+          // Authentication and token errors
+          invalid_token:
+            "Invalid request token. Please refresh the page and try again.",
+          token_expired:
+            "Request token expired. Please refresh the page and try again.",
+          unauthorized:
+            "Unauthorized request. Please refresh the page and try again.",
+
+          // Email related errors (for forgot_password type)
+          email_not_found: "Email address not found in our system.",
+          email_phone_mismatch:
+            "Email and phone number don't match our records.",
+
+          // General errors
+          validation_error:
+            "Invalid request data. Please check your input and try again.",
+          server_error: "Internal server error. Please try again later.",
+          maintenance: "Service is under maintenance. Please try again later.",
         };
 
         const errorMessage =
-          errorMessages[response.error.id.toString()] ||
+          errorMessages[response.error.id?.toString()] ||
           response.error.message ||
           "Failed to send OTP. Please try again.";
+
+        console.error("OTP Send Error:", {
+          errorId: response.error.id,
+          errorMessage: response.error.message,
+          phoneNumber: phoneNumber.replace(/\d(?=\d{4})/g, "*"), // Mask phone for logging
+          type,
+          isResend,
+        });
 
         return {
           success: false,
@@ -908,14 +1002,57 @@ export const otpApi = {
         };
       }
 
+      // Log successful OTP send (without sensitive data)
+      console.log("OTP sent successfully:", {
+        phoneNumber: phoneNumber.replace(/\d(?=\d{4})/g, "*"), // Mask phone for logging
+        type,
+        isResend,
+      });
+
       return response;
-    } catch (error) {
-      console.error("Failed to send OTP:", error);
+    } catch (error: unknown) {
+      // Enhanced error handling for different types of exceptions
+      console.error("Failed to send OTP - Exception:", error);
+
+      let errorId = "send_otp_failed";
+      let errorMessage = "Failed to send OTP. Please try again.";
+
+      // Handle specific error types with proper type checking
+      if (error instanceof Error) {
+        if (error.name === "TypeError" && error.message.includes("fetch")) {
+          errorId = "network_error";
+          errorMessage =
+            "Network connection failed. Please check your internet connection and try again.";
+        } else if (error.name === "AbortError") {
+          errorId = "request_cancelled";
+          errorMessage = "Request was cancelled. Please try again.";
+        } else if (error.message?.includes("timeout")) {
+          errorId = "timeout";
+          errorMessage = "Request timed out. Please try again.";
+        }
+      }
+
+      // Handle HTTP status errors (axios errors)
+      if (error && typeof error === "object" && "status" in error) {
+        const httpError = error as { status: number };
+        if (httpError.status === 429) {
+          errorId = "rate_limit";
+          errorMessage = "Too many requests. Please wait before trying again.";
+        } else if (httpError.status >= 500) {
+          errorId = "server_error";
+          errorMessage = "Server error. Please try again later.";
+        } else if (httpError.status >= 400 && httpError.status < 500) {
+          errorId = "client_error";
+          errorMessage =
+            "Invalid request. Please check your input and try again.";
+        }
+      }
+
       return {
         success: false,
         error: {
-          id: "send_otp_failed",
-          message: "Failed to send OTP. Please try again.",
+          id: errorId,
+          message: errorMessage,
         },
       };
     }
@@ -926,6 +1063,17 @@ export const otpApi = {
     phoneNumber: string,
     otp: string
   ): Promise<ApiResponse<VerifyOtpResponse>> {
+    // Comprehensive input validation
+    if (!phoneNumber || phoneNumber.trim().length === 0) {
+      return {
+        success: false,
+        error: {
+          id: "missing_phone",
+          message: "Phone number is required",
+        },
+      };
+    }
+
     // Validate phone number format (must start with +)
     if (!phoneNumber.startsWith("+")) {
       return {
@@ -948,24 +1096,140 @@ export const otpApi = {
       };
     }
 
+    // Validate OTP format (should be numeric and reasonable length)
+    const otpTrimmed = otp.trim();
+    if (!/^\d+$/.test(otpTrimmed)) {
+      return {
+        success: false,
+        error: {
+          id: "invalid_otp_format",
+          message: "OTP must contain only numbers",
+        },
+      };
+    }
+
+    if (otpTrimmed.length < 4 || otpTrimmed.length > 8) {
+      return {
+        success: false,
+        error: {
+          id: "invalid_otp_length",
+          message: "OTP must be between 4 and 8 digits",
+        },
+      };
+    }
+
     try {
       const response = await apiRequest<VerifyOtpResponse>(
         "/v1/otp/verify",
         "POST",
         {
-          phoneNum: phoneNumber,
-          otp: otp.trim(),
+          phoneNum: phoneNumber.trim(),
+          otp: otpTrimmed,
         }
       );
 
+      // Handle API error responses
+      if (!response.success && response.error) {
+        // Map specific error IDs to user-friendly messages
+        const errorMessages: Record<string, string> = {
+          // OTP verification specific errors
+          invalid_otp: "Invalid OTP. Please check the code and try again.",
+          otp_expired: "OTP has expired. Please request a new code.",
+          otp_already_used:
+            "This OTP has already been used. Please request a new code.",
+          max_attempts_exceeded:
+            "Too many incorrect attempts. Please request a new OTP.",
+
+          // Phone number related errors
+          phone_not_found:
+            "Phone number not found. Please check and try again.",
+          invalid_phone: "Invalid phone number format.",
+
+          // Session and token errors
+          session_expired:
+            "Session expired. Please start the verification process again.",
+          invalid_session:
+            "Invalid session. Please start the verification process again.",
+
+          // Rate limiting
+          rate_limit:
+            "Too many verification attempts. Please wait before trying again.",
+
+          // Service errors
+          service_unavailable:
+            "Verification service is temporarily unavailable. Please try again later.",
+          server_error: "Internal server error. Please try again later.",
+        };
+
+        const errorMessage =
+          errorMessages[response.error.id?.toString()] ||
+          response.error.message ||
+          "Failed to verify OTP. Please try again.";
+
+        console.error("OTP Verify Error:", {
+          errorId: response.error.id,
+          errorMessage: response.error.message,
+          phoneNumber: phoneNumber.replace(/\d(?=\d{4})/g, "*"), // Mask phone for logging
+        });
+
+        return {
+          success: false,
+          error: {
+            id: response.error.id,
+            message: errorMessage,
+          },
+        };
+      }
+
+      // Log successful OTP verification (without sensitive data)
+      console.log("OTP verified successfully:", {
+        phoneNumber: phoneNumber.replace(/\d(?=\d{4})/g, "*"), // Mask phone for logging
+      });
+
       return response;
-    } catch (error) {
-      console.error("Failed to verify OTP:", error);
+    } catch (error: unknown) {
+      // Enhanced error handling for different types of exceptions
+      console.error("Failed to verify OTP - Exception:", error);
+
+      let errorId = "verify_otp_failed";
+      let errorMessage = "Failed to verify OTP. Please try again.";
+
+      // Handle specific error types with proper type checking
+      if (error instanceof Error) {
+        if (error.name === "TypeError" && error.message.includes("fetch")) {
+          errorId = "network_error";
+          errorMessage =
+            "Network connection failed. Please check your internet connection and try again.";
+        } else if (error.name === "AbortError") {
+          errorId = "request_cancelled";
+          errorMessage = "Request was cancelled. Please try again.";
+        } else if (error.message?.includes("timeout")) {
+          errorId = "timeout";
+          errorMessage = "Request timed out. Please try again.";
+        }
+      }
+
+      // Handle HTTP status errors (axios errors)
+      if (error && typeof error === "object" && "status" in error) {
+        const httpError = error as { status: number };
+        if (httpError.status === 429) {
+          errorId = "rate_limit";
+          errorMessage = "Too many requests. Please wait before trying again.";
+        } else if (httpError.status >= 500) {
+          errorId = "server_error";
+          errorMessage = "Server error. Please try again later.";
+        } else if (httpError.status >= 400 && httpError.status < 500) {
+          errorId = "client_error";
+          errorMessage =
+            "Invalid request. Please check your input and try again.";
+        }
+      }
+
       return {
         success: false,
         error: {
-          id: "verify_otp_failed",
-          message: "Failed to verify OTP. Please try again.",
+          id: errorId,
+          message: errorMessage,
         },
       };
     }

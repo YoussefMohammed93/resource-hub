@@ -370,7 +370,11 @@ export default function ProfilePage() {
               <div className="relative w-44 sm:w-48 h-12">
                 {/* Light mode logos */}
                 <Image
-                  src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
+                  src={
+                    language === "ar"
+                      ? "/logo-black-ar.png"
+                      : "/logo-black-en.png"
+                  }
                   alt={t("header.logo")}
                   fill
                   className="block dark:hidden"
@@ -378,7 +382,11 @@ export default function ProfilePage() {
                 />
                 {/* Dark mode logos */}
                 <Image
-                  src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
+                  src={
+                    language === "ar"
+                      ? "/logo-white-ar.png"
+                      : "/logo-white-en.png"
+                  }
                   alt={t("header.logo")}
                   fill
                   className="hidden dark:block"
@@ -926,13 +934,15 @@ export default function ProfilePage() {
         <Card className="dark:bg-muted/50">
           <CardHeader>
             <div
-              className={`flex items-start justify-between ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
+              className={`flex flex-col sm:flex-row gap-5 items-start justify-between ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
             >
               <div
                 className={`flex items-center ${isRTL ? "space-x-reverse !space-x-3" : "space-x-3"}`}
               >
-                <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
-                  <Download className="w-5 h-5 text-primary" />
+                <div className="w-16 h-16 sm:w-auto sm:h-auto">
+                  <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
+                    <Download className="w-5 h-5 text-primary" />
+                  </div>
                 </div>
                 <div>
                   <CardTitle className="text-lg font-semibold text-foreground">

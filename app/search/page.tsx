@@ -8,7 +8,6 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
-  Menu,
   ImageIcon,
   File,
   Palette,
@@ -22,6 +21,7 @@ import {
   Mail,
   CreditCard,
   Coins,
+  SlidersHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -347,8 +347,11 @@ function SearchContent() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [allResults, setAllResults] = useState<SearchResult[]>([]); // Store all unfiltered results
   const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [totalResults, setTotalResults] = useState(0);
+  const [hasMorePages, setHasMorePages] = useState(true);
+  const [nextPageToLoad, setNextPageToLoad] = useState(2);
 
   // Dynamic sidebar data state - extracted from search results
   const [providers, setProviders] = useState<ProviderStats[]>([]);
@@ -536,15 +539,22 @@ function SearchContent() {
       setProvidersError(null);
       setFileTypesError(null);
 
-      // For page 1, store all results for filtering. For other pages, append to existing results
+      // For page 1, reset results. For other pages, append to existing results
+      let updatedResults: SearchResult[];
       if (page === 1) {
+        updatedResults = pageResults;
         setAllResults(pageResults);
+        setNextPageToLoad(2);
+        setHasMorePages(pageResults.length === resultsPerPage);
       } else {
-        setAllResults((prev) => [...prev, ...pageResults]);
+        updatedResults = [...allResults, ...pageResults];
+        setAllResults(updatedResults);
+        setNextPageToLoad(page + 1);
+        setHasMorePages(pageResults.length === resultsPerPage);
       }
 
       // Apply current filter to results
-      applyCurrentFilter(pageResults, page);
+      applyCurrentFilter(updatedResults, page);
       setCurrentPage(page);
 
       // Clear any previous errors
@@ -599,6 +609,8 @@ function SearchContent() {
       setSearchResults([]);
       setAllResults([]);
       setTotalResults(0);
+      setHasMorePages(false);
+      setNextPageToLoad(2);
 
       // Clear sidebar data on error
       setProviders([]);
@@ -1385,6 +1397,46 @@ function SearchContent() {
     }
   };
 
+  // Load more results function
+  const loadMoreResults = async () => {
+    if (!searchQuery || isLoadingMore || !hasMorePages) return;
+
+    setIsLoadingMore(true);
+    try {
+      await performSearch(searchQuery, nextPageToLoad);
+    } catch (error) {
+      console.error("Failed to load more results:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  // Infinite scroll functionality
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        !hasMorePages ||
+        isLoadingMore ||
+        isSearchLoading ||
+        !searchQuery
+      ) {
+        return;
+      }
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // Load more when user is 200px from bottom
+      if (scrollTop + windowHeight >= documentHeight - 200) {
+        loadMoreResults();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMorePages, isLoadingMore, isSearchLoading, searchQuery, loadMoreResults]);
+
   // Get fallback dimensions for items with null width/height
   const getFallbackDimensions = (result: SearchResult) => {
     if (result.width && result.height) {
@@ -1787,7 +1839,7 @@ function SearchContent() {
                 className="cursor-pointer lg:hidden p-2 hover:bg-muted rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
                 aria-label={t("search.toggleFilters")}
               >
-                <Menu className="w-5 h-5 text-muted-foreground" />
+                <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
               </button>
               <Link
                 href="/"
@@ -3022,6 +3074,34 @@ function SearchContent() {
                       />
                     </Button>
                   </div>
+                </div>
+              )}
+
+            {/* Load More Button */}
+            {!isSearchLoading &&
+              !searchError &&
+              searchResults.length > 0 &&
+              hasMorePages && (
+                <div className="flex justify-center pt-6">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    disabled={isLoadingMore}
+                    onClick={loadMoreResults}
+                    className="px-8 py-3 rounded-xl border-2 font-semibold hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                        {t("search.loading_more")}
+                      </>
+                    ) : (
+                      <>
+                        <ChevronRight className="w-4 h-4 mr-2" />
+                        {t("search.load_more")}
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
           </div>

@@ -31,10 +31,13 @@ import {
   ExternalLink,
   AlertTriangle,
   Info,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 import { downloadApi } from "@/lib/api";
 import { useLanguage } from "./i18n-provider";
 import { FlyingDownloadAnimation } from "./flying-download-animation";
+import { useRouter } from "next/navigation";
 
 interface ApiVerificationResponse {
   success: boolean;
@@ -244,11 +247,26 @@ export function DownloadVerificationSheet({
     : null;
 
   const { isRTL } = useLanguage();
+  const router = useRouter();
 
   const handleAnimationComplete = () => {
     setShowFlyingAnimation(false);
     setDownloadButtonRef(null);
   };
+
+  const handleLoginClick = () => {
+    router.push("/login");
+  };
+
+  const handleRegisterClick = () => {
+    router.push("/register");
+  };
+
+  // Check if the error is authentication-related
+  const isAuthenticationError =
+    verificationData &&
+    !verificationData.success &&
+    verificationData.error?.id === "authentication_required";
 
   return (
     <>
@@ -788,35 +806,135 @@ export function DownloadVerificationSheet({
                 </div>
               )}
 
-            {/* Failed Verification State */}
-            {verificationData && !verificationData.success && !isVerifying && (
-              <Card className="border-destructive/20">
+            {/* Authentication Required State */}
+            {isAuthenticationError && (
+              <Card className="relative overflow-hidden border-border bg-card">
                 <CardContent className="text-center py-12">
-                  <div className="space-y-4">
-                    <div className="p-3 bg-destructive/10 rounded-full w-fit mx-auto">
-                      <XCircle className="w-8 h-8 text-destructive" />
+                  <div className="space-y-6 relative z-10">
+                    {/* Icon */}
+                    <div className="p-4 bg-muted rounded-full w-fit mx-auto">
+                      <AlertCircle className="w-10 h-10 text-muted-foreground" />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-destructive mb-2">
-                        {t("download.verification.error.verificationFailed")}
+
+                    {/* Title and Description */}
+                    <div className="space-y-3">
+                      <h3 className="text-xl font-bold text-foreground">
+                        {t("download.verification.authentication.title")}
                       </h3>
-                      <p className="text-destructive/80 mb-4">
-                        {verificationData.error?.message ||
-                          t("download.verification.error.unableToVerify")}
+                      <p
+                        className={`text-muted-foreground text-base leading-relaxed max-w-md mx-auto ${
+                          isRTL ? "text-center" : "text-center"
+                        }`}
+                      >
+                        {t("download.verification.authentication.description")}
                       </p>
                     </div>
-                    <Button
-                      onClick={handleVerifyDownload}
-                      variant="outline"
-                      className="gap-2"
-                    >
-                      <AlertCircle className="w-4 h-4" />
-                      {isRTL ? "اعد المحاولة" : "Try again"}
-                    </Button>
+
+                    {/* Login and Register Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
+                      <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                        {/* Login Button */}
+                        <div className="flex flex-col items-center space-y-2">
+                          <Button
+                            onClick={handleLoginClick}
+                            className="w-full sm:w-auto min-w-[140px] bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-200"
+                            size="lg"
+                          >
+                            <LogIn
+                              className={`w-5 h-5 ${isRTL ? "ml-2" : "mr-2"}`}
+                            />
+                            {t(
+                              "download.verification.authentication.loginButton"
+                            )}
+                          </Button>
+                          <p
+                            className={`text-xs text-muted-foreground max-w-[140px] leading-tight ${
+                              isRTL ? "text-right" : "text-left"
+                            }`}
+                          >
+                            {t(
+                              "download.verification.authentication.loginDescription"
+                            )}
+                          </p>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="flex items-center justify-center py-2 sm:py-0">
+                          <div className="w-full h-px bg-border sm:w-px sm:h-12"></div>
+                          <span className="px-3 text-muted-foreground text-sm font-medium bg-card">
+                            {isRTL ? "أو" : "OR"}
+                          </span>
+                          <div className="w-full h-px bg-border sm:w-px sm:h-12"></div>
+                        </div>
+
+                        {/* Register Button */}
+                        <div className="flex flex-col items-center space-y-2">
+                          <Button
+                            onClick={handleRegisterClick}
+                            variant="outline"
+                            className="w-full sm:w-auto min-w-[140px] border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold transition-all duration-200"
+                            size="lg"
+                          >
+                            <UserPlus
+                              className={`w-5 h-5 ${isRTL ? "ml-2" : "mr-2"}`}
+                            />
+                            {t(
+                              "download.verification.authentication.registerButton"
+                            )}
+                          </Button>
+                          <p
+                            className={`text-xs text-muted-foreground max-w-[140px] leading-tight ${
+                              isRTL ? "text-right" : "text-left"
+                            }`}
+                          >
+                            {t(
+                              "download.verification.authentication.registerDescription"
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Decorative elements using design system colors */}
+                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-10 bg-primary"></div>
+                    <div className="absolute -bottom-16 -left-16 w-24 h-24 rounded-full blur-2xl opacity-5 bg-primary"></div>
                   </div>
                 </CardContent>
               </Card>
             )}
+
+            {/* Failed Verification State (Non-Authentication Errors) */}
+            {verificationData &&
+              !verificationData.success &&
+              !isVerifying &&
+              !isAuthenticationError && (
+                <Card className="border-destructive/20">
+                  <CardContent className="text-center py-12">
+                    <div className="space-y-4">
+                      <div className="p-3 bg-destructive/10 rounded-full w-fit mx-auto">
+                        <XCircle className="w-8 h-8 text-destructive" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-destructive mb-2">
+                          {t("download.verification.error.verificationFailed")}
+                        </h3>
+                        <p className="text-destructive/80 mb-4">
+                          {verificationData.error?.message ||
+                            t("download.verification.error.unableToVerify")}
+                        </p>
+                      </div>
+                      <Button
+                        onClick={handleVerifyDownload}
+                        variant="outline"
+                        className="gap-2"
+                      >
+                        <AlertCircle className="w-4 h-4" />
+                        {t("download.verification.tryAgain")}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
           </div>
 
           {/* Bottom Close Button */}

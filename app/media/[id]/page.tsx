@@ -456,6 +456,15 @@ export default function ImageDetailsPage() {
     []
   );
 
+  // Handle keyword click - navigate to search page with keyword as query
+  const handleKeywordClick = useCallback(
+    (keyword: string) => {
+      // Navigate to search page with the keyword as query parameter
+      router.push(`/search?q=${encodeURIComponent(keyword)}`);
+    },
+    [router]
+  );
+
   // Handle keyboard controls for full-screen video
   useEffect(() => {
     if (!isFullImageOpen) return;
@@ -797,11 +806,11 @@ export default function ImageDetailsPage() {
 
               {/* Desktop Layout: Two-column grid */}
               <div
-                className={`hidden xl:grid xl:grid-cols-5 gap-8 ${isRTL ? "xl:grid-flow-col-dense" : ""}`}
+                className={`hidden xl:grid xl:grid-cols-8 gap-8 ${isRTL ? "xl:grid-flow-col-dense" : ""}`}
               >
                 {/* Media Display Section */}
                 <div
-                  className={`xl:col-span-3 ${isRTL ? "xl:order-2" : ""} space-y-6`}
+                  className={`xl:col-span-6 ${isRTL ? "xl:order-2" : ""} space-y-6`}
                 >
                   {/* Main Media Card */}
                   <div className="bg-card dark:bg-card/50 rounded-xl border border-border/50 overflow-hidden">
@@ -1924,18 +1933,19 @@ export default function ImageDetailsPage() {
                       <div className="flex flex-wrap gap-2">
                         {(showAllKeywords
                           ? fileData.keywords
-                          : fileData.keywords.slice(0, 8)
+                          : fileData.keywords.slice(0, 10)
                         ).map((keyword, index) => (
                           <Badge
                             key={index}
                             variant="secondary"
                             className="text-xs px-3 py-1.5 hover:bg-primary/10 hover:text-primary transition-all duration-200 cursor-pointer border border-border/30"
+                            onClick={() => handleKeywordClick(keyword)}
                           >
                             {keyword}
                           </Badge>
                         ))}
                       </div>
-                      {fileData.keywords.length > 8 && (
+                      {fileData.keywords.length > 10 && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -1967,10 +1977,10 @@ export default function ImageDetailsPage() {
 
             {/* Desktop Layout: Keep the current layout exactly as it is now */}
             <div
-              className={`hidden xl:grid xl:grid-cols-5 gap-8 ${isRTL ? "xl:grid-flow-col-dense" : ""}`}
+              className={`hidden xl:grid xl:grid-cols-8 gap-8 ${isRTL ? "xl:grid-flow-col-dense" : ""}`}
             >
               {/* Media Display Section */}
-              <div className={`xl:col-span-3 ${isRTL ? "xl:order-2" : ""}`}>
+              <div className={`xl:col-span-6 ${isRTL ? "xl:order-2" : ""}`}>
                 <div className="bg-card dark:bg-card/50 rounded-xl border border-border/50 overflow-hidden">
                   {/* Provider Header */}
                   <div
@@ -2243,18 +2253,19 @@ export default function ImageDetailsPage() {
                         <div className="flex flex-wrap gap-2">
                           {(showAllKeywords
                             ? fileData.keywords
-                            : fileData.keywords.slice(0, 8)
+                            : fileData.keywords.slice(0, 16)
                           ).map((keyword, index) => (
                             <Badge
                               key={index}
                               variant="secondary"
                               className="text-xs px-3 py-1.5 hover:bg-primary/10 hover:text-primary transition-all duration-200 cursor-pointer border border-border/30"
+                              onClick={() => handleKeywordClick(keyword)}
                             >
                               {keyword}
                             </Badge>
                           ))}
                         </div>
-                        {fileData.keywords.length > 8 && (
+                        {fileData.keywords.length > 16 && (
                           <Button
                             variant="ghost"
                             size="sm"
