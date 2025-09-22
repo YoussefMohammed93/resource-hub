@@ -34,16 +34,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tag,
-  ExternalLink,
-  Loader2,
-  AlertCircle,
-  ImageIcon,
-  VideoIcon,
-  AudioLines,
-  Users,
-} from "lucide-react";
+import { Tag, ExternalLink, Loader2, AudioLines, Users } from "lucide-react";
 import { searchApi, type ProviderDataRequest, type FileData } from "@/lib/api";
 import { RelatedFilesSection } from "@/components/media/related-files-section";
 import { useAuth } from "@/components/auth-provider";
@@ -82,10 +73,8 @@ export default function ImageDetailsPage() {
 
   // Enhanced provider data state
   const [fileData, setFileData] = useState<FileData | null>(null);
-  const [isProviderDataLoading, setIsProviderDataLoading] = useState(false);
-  const [providerDataError, setProviderDataError] = useState<string | null>(
-    null
-  );
+  const [, setIsProviderDataLoading] = useState(false);
+  const [, setProviderDataError] = useState<string | null>(null);
   const [isDownloading] = useState(false);
   const [isDownloadSheetOpen, setIsDownloadSheetOpen] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string>("");
@@ -123,8 +112,10 @@ export default function ImageDetailsPage() {
 
     const hr = fileData?.high_resolution;
     if (hr && hr.width && hr.height) {
-      const numW = typeof hr.width === "string" ? parseInt(hr.width, 10) : hr.width;
-      const numH = typeof hr.height === "string" ? parseInt(hr.height, 10) : hr.height;
+      const numW =
+        typeof hr.width === "string" ? parseInt(hr.width, 10) : hr.width;
+      const numH =
+        typeof hr.height === "string" ? parseInt(hr.height, 10) : hr.height;
       if (!isNaN(numW as number) && !isNaN(numH as number)) {
         w = numW as number;
         h = numH as number;
@@ -612,7 +603,7 @@ export default function ImageDetailsPage() {
             </svg>
           </div>
 
-          <main className="container mx-auto max-w-7xl px-4 sm:px-5 py-6 relative z-10">
+          <main className="container mx-auto max-w-[1700px] px-4 sm:px-5 py-6 relative z-10">
             {/* Back Button Skeleton */}
             <div className="mb-6">
               <Skeleton className="h-10 w-32 rounded-lg" />
@@ -962,30 +953,6 @@ export default function ImageDetailsPage() {
                     </div>
                   </div>
 
-                  {/* High Resolution Card */}
-                  <div className="bg-card dark:bg-card/50 border border-primary/40 dark:border-primary/20 rounded-xl overflow-hidden">
-                    <div className="p-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Skeleton className="w-4 h-4" />
-                        <Skeleton className="h-6 w-32" />
-                      </div>
-                      <div className="space-y-3">
-                        {Array.from({ length: 3 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="flex justify-between items-center"
-                          >
-                            <Skeleton className="h-4 w-20" />
-                            <Skeleton className="h-5 w-16" />
-                          </div>
-                        ))}
-                        <div className="pt-2 border-t border-border/50">
-                          <Skeleton className="h-8 w-full" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Additional Actions Card */}
                   <div className="bg-card dark:bg-card/50 border border-primary/40 dark:border-primary/20 rounded-xl overflow-hidden">
                     <div className="p-6">
@@ -1025,7 +992,11 @@ export default function ImageDetailsPage() {
                   <div className="relative w-44 sm:w-48 h-12">
                     {/* Light mode logos */}
                     <Image
-                      src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
+                      src={
+                        language === "ar"
+                          ? "/logo-black-ar.png"
+                          : "/logo-black-en.png"
+                      }
                       alt={t("header.logo")}
                       fill
                       className="block dark:hidden"
@@ -1033,7 +1004,11 @@ export default function ImageDetailsPage() {
                     />
                     {/* Dark mode logos */}
                     <Image
-                      src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
+                      src={
+                        language === "ar"
+                          ? "/logo-white-ar.png"
+                          : "/logo-white-en.png"
+                      }
                       alt={t("header.logo")}
                       fill
                       className="hidden dark:block"
@@ -1085,7 +1060,11 @@ export default function ImageDetailsPage() {
                 <div className="relative w-44 sm:w-48 h-12">
                   {/* Light mode logos */}
                   <Image
-                    src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
+                    src={
+                      language === "ar"
+                        ? "/logo-black-ar.png"
+                        : "/logo-black-en.png"
+                    }
                     alt={t("header.logo")}
                     fill
                     className="block dark:hidden"
@@ -1093,7 +1072,11 @@ export default function ImageDetailsPage() {
                   />
                   {/* Dark mode logos */}
                   <Image
-                    src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
+                    src={
+                      language === "ar"
+                        ? "/logo-white-ar.png"
+                        : "/logo-white-en.png"
+                    }
                     alt={t("header.logo")}
                     fill
                     className="hidden dark:block"
@@ -1756,117 +1739,6 @@ export default function ImageDetailsPage() {
                 </div>
               </div>
 
-              {/* 5. High resolution view card */}
-              {fileData && isHighResolutionAvailable(fileData) && (
-                <div className="bg-card dark:bg-card/50 border border-primary/40 dark:border-primary/20 rounded-xl overflow-hidden">
-                  <div className="p-6">
-                    <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                      {isAudioItem() ? (
-                        <AudioLines className="w-4 h-4 text-primary" />
-                      ) : isVideoItem() ? (
-                        <VideoIcon className="w-4 h-4 text-primary" />
-                      ) : (
-                        <ImageIcon className="w-4 h-4 text-primary" />
-                      )}
-                      {isAudioItem()
-                        ? t("mediaDetail.highResolution.titleAudio")
-                        : t("mediaDetail.highResolution.title")}
-                    </h3>
-                    <div className="space-y-3">
-                      {/* Only show dimensions and aspect ratio for images and videos, not audio */}
-                      {!isAudioItem() && (
-                        <>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-muted-foreground">
-                              {t("mediaDetail.highResolution.dimensions")}:
-                            </span>
-                            <Badge variant="outline" className="font-mono">
-                              {fileData?.high_resolution?.width} ×{" "}
-                              {fileData?.high_resolution?.height}
-                            </Badge>
-                          </div>
-
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-muted-foreground">
-                              {t("mediaDetail.highResolution.aspectRatio")}:
-                            </span>
-                            <span className="text-sm font-medium">
-                              {fileData?.high_resolution?.width &&
-                              fileData?.high_resolution?.height
-                                ? (
-                                    (typeof fileData.high_resolution.width ===
-                                    "string"
-                                      ? parseInt(
-                                          fileData.high_resolution.width,
-                                          10
-                                        )
-                                      : fileData.high_resolution.width) /
-                                    (typeof fileData.high_resolution.height ===
-                                    "string"
-                                      ? parseInt(
-                                          fileData.high_resolution.height,
-                                          10
-                                        )
-                                      : fileData.high_resolution.height)
-                                  ).toFixed(2)
-                                : "N/A"}
-                              :1
-                            </span>
-                          </div>
-                        </>
-                      )}
-
-                      {/* Only show total pixels for images and videos, not audio */}
-                      {!isAudioItem() && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">
-                            {t("mediaDetail.highResolution.totalPixels")}:
-                          </span>
-                          <span className="text-sm font-medium">
-                            {fileData?.high_resolution?.width &&
-                            fileData?.high_resolution?.height
-                              ? (
-                                  ((typeof fileData.high_resolution.width ===
-                                  "string"
-                                    ? parseInt(
-                                        fileData.high_resolution.width,
-                                        10
-                                      )
-                                    : fileData.high_resolution.width) *
-                                    (typeof fileData.high_resolution.height ===
-                                    "string"
-                                      ? parseInt(
-                                          fileData.high_resolution.height,
-                                          10
-                                        )
-                                      : fileData.high_resolution.height)) /
-                                  1000000
-                                ).toFixed(1)
-                              : "N/A"}
-                            MP
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="pt-2">
-                        <Button
-                          size="sm"
-                          className="w-full"
-                          onClick={() => setIsFullImageOpen(true)}
-                        >
-                          <Eye className="w-4 h-4" />
-                          {isAudioItem()
-                            ? t("mediaDetail.highResolution.viewAudio")
-                            : isVideoItem()
-                              ? t("mediaDetail.highResolution.viewVideo")
-                              : t("mediaDetail.highResolution.viewImage")}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* 6. Actions card */}
               <div className="bg-card dark:bg-card/50 border border-primary/40 dark:border-primary/20 rounded-xl overflow-hidden">
                 <div className="p-6">
@@ -2113,7 +1985,10 @@ export default function ImageDetailsPage() {
                         const natH = natural.height || undefined;
                         return (
                           <video
-                            key={fileData?.high_resolution?.src || imageData.thumbnail}
+                            key={
+                              fileData?.high_resolution?.src ||
+                              imageData.thumbnail
+                            }
                             poster={imageData.poster || "/placeholder.png"}
                             controls
                             controlsList="nodownload"
@@ -2141,27 +2016,36 @@ export default function ImageDetailsPage() {
                                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                   video.onseeked = resolve as any;
                                 });
-                                const thumbnailUrl = await generateVideoThumbnail(video);
+                                const thumbnailUrl =
+                                  await generateVideoThumbnail(video);
                                 video.poster = thumbnailUrl;
                               } catch (error) {
-                                console.warn("Failed to generate video thumbnail:", error);
+                                console.warn(
+                                  "Failed to generate video thumbnail:",
+                                  error
+                                );
                               }
                             }}
                             onError={(e) => {
-                              console.warn("Video load error, showing as image");
+                              console.warn(
+                                "Video load error, showing as image"
+                              );
                               setIsVideoLoading(false);
                               const video = e.target as HTMLVideoElement;
                               video.style.display = "none";
                               const container = video.parentElement;
                               if (container) {
-                                const fallbackImg = document.createElement("img");
+                                const fallbackImg =
+                                  document.createElement("img");
                                 const natural = getNaturalMedia();
                                 fallbackImg.src = imageData.thumbnail;
                                 fallbackImg.alt = imageData.title;
                                 fallbackImg.style.maxHeight = "650px";
                                 fallbackImg.style.maxWidth = "100%";
-                                if (natural.width) fallbackImg.width = natural.width;
-                                if (natural.height) fallbackImg.height = natural.height;
+                                if (natural.width)
+                                  fallbackImg.width = natural.width;
+                                if (natural.height)
+                                  fallbackImg.height = natural.height;
                                 fallbackImg.className = "rounded-lg";
                                 container.appendChild(fallbackImg);
                               }
@@ -2181,16 +2065,23 @@ export default function ImageDetailsPage() {
                           >
                             {/* Multiple source elements for better browser compatibility */}
                             <source
-                              src={fileData?.high_resolution?.src || imageData.thumbnail}
+                              src={
+                                fileData?.high_resolution?.src ||
+                                imageData.thumbnail
+                              }
                               type={getVideoMimeType(
-                                fileData?.high_resolution?.src || imageData.thumbnail
+                                fileData?.high_resolution?.src ||
+                                  imageData.thumbnail
                               )}
                             />
                             {/* Fallback message for browsers that don't support video */}
                             <p className="text-muted-foreground text-center p-4">
                               Your browser does not support the video tag.
                               <a
-                                href={fileData?.high_resolution?.src || imageData.thumbnail}
+                                href={
+                                  fileData?.high_resolution?.src ||
+                                  imageData.thumbnail
+                                }
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-primary hover:underline ml-1"
@@ -2208,8 +2099,14 @@ export default function ImageDetailsPage() {
                         const natH = natural.height || undefined;
                         return (
                           <img
-                            key={fileData?.high_resolution?.src || imageData.thumbnail}
-                            src={fileData?.high_resolution?.src || imageData.thumbnail}
+                            key={
+                              fileData?.high_resolution?.src ||
+                              imageData.thumbnail
+                            }
+                            src={
+                              fileData?.high_resolution?.src ||
+                              imageData.thumbnail
+                            }
                             alt={imageData.title}
                             width={natW}
                             height={natH}
@@ -2475,213 +2372,6 @@ export default function ImageDetailsPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Enhanced Provider Data Loading */}
-                {isProviderDataLoading && (
-                  <div className="p-4 border-b border-border">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      <h3 className="font-semibold text-foreground">
-                        {t("mediaDetail.providerData.loadingTitle")}
-                      </h3>
-                    </div>
-                    <div className="space-y-4">
-                      {/* Keywords Loading */}
-                      <div>
-                        <Skeleton className="h-4 w-24 mb-2" />
-                        <div className="flex flex-wrap gap-1">
-                          {Array.from({ length: 6 }).map((_, i) => (
-                            <Skeleton
-                              key={i}
-                              className="h-6 w-16 rounded-full"
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* High Resolution Loading */}
-                      <div>
-                        <Skeleton className="h-4 w-32 mb-2" />
-                        <div className="bg-muted/30 rounded-lg p-3 space-y-2">
-                          <Skeleton className="h-3 w-full" />
-                          <Skeleton className="h-3 w-2/3" />
-                          <Skeleton className="h-8 w-full" />
-                        </div>
-                      </div>
-
-                      {/* Related Files Loading */}
-                      <div>
-                        <Skeleton className="h-4 w-28 mb-2" />
-                        <div className="space-y-2">
-                          {Array.from({ length: 3 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className="flex gap-3 p-3 border rounded-lg"
-                            >
-                              <Skeleton className="w-16 h-16 rounded-lg" />
-                              <div className="flex-1 space-y-2">
-                                <Skeleton className="h-3 w-full" />
-                                <Skeleton className="h-3 w-2/3" />
-                                <Skeleton className="h-6 w-20" />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {providerDataError && (
-                  <div className="p-4 border-b border-border">
-                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-destructive mb-1">
-                            {t("mediaDetail.providerData.errorTitle")}
-                          </h4>
-                          <p className="text-sm text-destructive/80">
-                            {providerDataError}
-                          </p>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2 h-8 text-xs border-destructive/20 hover:bg-destructive/5"
-                            onClick={() =>
-                              imageData && fetchProviderData(imageData)
-                            }
-                          >
-                            {t("mediaDetail.providerData.retryButton")}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {fileData && (
-                  <>
-                    {/* High Resolution Info - Only show when data is available */}
-                    {isHighResolutionAvailable(fileData) && (
-                      <div className="bg-card dark:bg-card/50 border border-primary/40 dark:border-primary/20 rounded-xl overflow-hidden">
-                        <div className="p-6">
-                          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                            {isAudioItem() ? (
-                              <AudioLines className="w-4 h-4 text-primary" />
-                            ) : isVideoItem() ? (
-                              <VideoIcon className="w-4 h-4 text-primary" />
-                            ) : (
-                              <ImageIcon className="w-4 h-4 text-primary" />
-                            )}
-                            {isAudioItem()
-                              ? t("mediaDetail.highResolution.titleAudio")
-                              : t("mediaDetail.highResolution.title")}
-                          </h3>
-                          <div className="space-y-3">
-                            {/* Only show dimensions and aspect ratio for images and videos, not audio */}
-                            {!isAudioItem() && (
-                              <>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm text-muted-foreground">
-                                    {t("mediaDetail.highResolution.dimensions")}
-                                    :
-                                  </span>
-                                  <Badge
-                                    variant="outline"
-                                    className="font-mono"
-                                  >
-                                    {fileData?.high_resolution?.width} ×{" "}
-                                    {fileData?.high_resolution?.height}
-                                  </Badge>
-                                </div>
-
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm text-muted-foreground">
-                                    {t(
-                                      "mediaDetail.highResolution.aspectRatio"
-                                    )}
-                                    :
-                                  </span>
-                                  <span className="text-sm font-medium">
-                                    {fileData?.high_resolution?.width &&
-                                    fileData?.high_resolution?.height
-                                      ? (
-                                          (typeof fileData.high_resolution
-                                            .width === "string"
-                                            ? parseInt(
-                                                fileData.high_resolution.width,
-                                                10
-                                              )
-                                            : fileData.high_resolution.width) /
-                                          (typeof fileData.high_resolution
-                                            .height === "string"
-                                            ? parseInt(
-                                                fileData.high_resolution.height,
-                                                10
-                                              )
-                                            : fileData.high_resolution.height)
-                                        ).toFixed(2)
-                                      : "N/A"}
-                                    :1
-                                  </span>
-                                </div>
-                              </>
-                            )}
-
-                            {/* Only show total pixels for images and videos, not audio */}
-                            {!isAudioItem() && (
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-muted-foreground">
-                                  {t("mediaDetail.highResolution.totalPixels")}:
-                                </span>
-                                <span className="text-sm font-medium">
-                                  {fileData?.high_resolution?.width &&
-                                  fileData?.high_resolution?.height
-                                    ? (
-                                        ((typeof fileData.high_resolution
-                                          .width === "string"
-                                          ? parseInt(
-                                              fileData.high_resolution.width,
-                                              10
-                                            )
-                                          : fileData.high_resolution.width) *
-                                          (typeof fileData.high_resolution
-                                            .height === "string"
-                                            ? parseInt(
-                                                fileData.high_resolution.height,
-                                                10
-                                              )
-                                            : fileData.high_resolution
-                                                .height)) /
-                                        1000000
-                                      ).toFixed(1)
-                                    : "N/A"}
-                                  MP
-                                </span>
-                              </div>
-                            )}
-
-                            <div className="pt-2">
-                              <Button
-                                size="sm"
-                                className="w-full"
-                                onClick={() => setIsFullImageOpen(true)}
-                              >
-                                <Eye className="w-4 h-4" />
-                                {isAudioItem()
-                                  ? t("mediaDetail.highResolution.viewAudio")
-                                  : isVideoItem()
-                                    ? t("mediaDetail.highResolution.viewVideo")
-                                    : t("mediaDetail.highResolution.viewImage")}
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
 
                 {/* Additional Actions Card */}
                 <div className="bg-card dark:bg-card/50 border border-primary/40 dark:border-primary/20 rounded-xl overflow-hidden">

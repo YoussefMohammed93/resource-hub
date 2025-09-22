@@ -122,7 +122,7 @@ import Image from "next/image";
 
 // Type definitions
 interface PricingPlan {
-  id: number;
+  id: number | string;
   name: string;
   description: string;
   price: string;
@@ -2118,7 +2118,7 @@ export default function DashboardPage() {
   const [isLoadingSites, setIsLoadingSites] = useState<boolean>(false);
   const [sitesError, setSitesError] = useState<string>("");
 
-  const [pricingPlans, setPricingPlans] = useState([
+  const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([
     {
       id: 1,
       name: "Test Plan",
@@ -2364,7 +2364,7 @@ export default function DashboardPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {/* Total Users Card */}
-                <Card className="group dark:bg-muted/50">
+                <Card className="group dark:bg-muted/50 py-0">
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex items-start justify-between">
                       <div className="space-y-4 sm:space-y-5 flex-1">
@@ -2393,7 +2393,7 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
                 {/* Active Sites Card */}
-                <Card className="group dark:bg-muted/50">
+                <Card className="group dark:bg-muted/50 py-0">
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex items-start justify-between">
                       <div className="space-y-4 sm:space-y-5 flex-1">
@@ -2422,7 +2422,7 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
                 {/* Online Users Card */}
-                <Card className="group dark:bg-muted/50">
+                <Card className="group dark:bg-muted/50 py-0">
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex items-start justify-between">
                       <div className="space-y-4 sm:space-y-5 flex-1">
@@ -2527,11 +2527,11 @@ export default function DashboardPage() {
                         <div className="flex items-center space-x-3">
                           <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-red-500/10 border border-red-500/10 rounded-xl flex items-center justify-center">
                             <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-red-600" />
-                          </div>  
+                          </div>
                           <div>
                             <h3 className="text-base sm:text-lg lg:text-xl font-medium text-foreground uppercase tracking-wide">
                               {t("statisticsCards.creditsSpent")}
-                            </h3> 
+                            </h3>
                             <p className="text-sm sm:text-base text-muted-foreground/80">
                               {t("statisticsCards.allTime")}
                             </p>

@@ -468,10 +468,7 @@ export const mockApiResponses = {
       setTimeout(() => {
         resolve({
           success: true,
-          data: {
-            success: true,
-            data: mockPricingPlans,
-          },
+          data: mockPricingPlans,
         });
       }, 600);
     });
@@ -488,7 +485,7 @@ export const mockApiResponses = {
           id: mockPricingPlans.length + 1,
           name: data.PlanName,
           description: data.PlanDescription,
-          price: parseFloat(data.PlanPrice || '0'),
+          price: parseFloat(data.PlanPrice || "0"),
           credits: parseInt(data.credits),
           daysValidity: parseInt(data.DaysValidity),
           contactUsUrl: data.ContactUsUrl,
@@ -527,7 +524,7 @@ export const mockApiResponses = {
             ...mockPricingPlans[planIndex],
             name: data.PlanName,
             description: data.PlanDescription,
-            price: parseFloat(data.PlanPrice || '0'),
+            price: parseFloat(data.PlanPrice || "0"),
             credits: parseInt(data.credits),
             daysValidity: parseInt(data.DaysValidity),
             contactUsUrl: data.ContactUsUrl,

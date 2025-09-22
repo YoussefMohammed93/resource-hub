@@ -236,8 +236,12 @@ function transformApiResults(
 const getProviderIcon = (providerName: string, apiIcon?: string): string => {
   // Use API icon if available, but check if it needs the API base URL prefix
   if (apiIcon) {
-    // If it's already a full URL, use it as is
-    if (apiIcon.startsWith("http://") || apiIcon.startsWith("https://")) {
+    // If it's already a full URL or a data URL, use it as is
+    if (
+      apiIcon.startsWith("http://") ||
+      apiIcon.startsWith("https://") ||
+      apiIcon.startsWith("data:")
+    ) {
       return apiIcon;
     }
     // If it's a relative URL, prefix with the API base URL
@@ -828,14 +832,133 @@ function SearchContent() {
     []
   );
 
-  // Get video poster - use a simple approach that works
-  const getVideoPoster = useCallback((videoUrl: string): string => {
-    if (!videoUrl) return "/placeholder.png";
+  // Simple and reliable URL cleaning
+  const cleanUrl = useCallback((url: string): string => {
+    if (!url) return "";
 
-    // For now, we'll use placeholder and generate thumbnail on load
-    // This is more reliable than trying to extract frames from URLs
-    return "/placeholder.png";
+    // Simple but effective cleaning - just replace &amp; with &
+    const cleanedUrl = url.replace(/&amp;/g, "&");
+
+    if (url !== cleanedUrl) {
+      console.log("🧹 Cleaned URL:", { original: url, cleaned: cleanedUrl });
+    }
+
+    return cleanedUrl;
   }, []);
+
+  // Get video poster - use improved video-thumbnail API with backend proxy
+  const getVideoPoster = useCallback(
+    (videoUrl: string): string => {
+      if (!videoUrl) return "/placeholder.png";
+
+      // Clean the URL first to remove HTML entities
+      const cleanedUrl = cleanUrl(videoUrl);
+
+      // For Envato videos, prioritize the video-thumbnail API for better extraction
+      if (
+        cleanedUrl.includes("elements.envato.com") ||
+        cleanedUrl.includes("elements.envatousercontent.com")
+      ) {
+        // If it's already a page URL, use it directly with our API
+        if (cleanedUrl.includes("/video/") || cleanedUrl.includes("/item/")) {
+          return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
+        }
+
+        // If it's a direct video file URL, try to construct the page URL
+        const match = cleanedUrl.match(/\/([^\/]+)\/[^\/]*\.(mp4|mov|avi)/i);
+        if (match) {
+          const itemName = match[1];
+          const pageUrl = `https://elements.envato.com/video/${itemName}`;
+          return `/api/video-thumbnail?url=${encodeURIComponent(pageUrl)}`;
+        }
+
+        // If we can't construct a page URL, use the video-thumbnail API with the direct URL
+        // The API will handle the backend proxy internally
+        return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
+      }
+
+      // For other providers, try the video-thumbnail API
+      return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
+    },
+    [cleanUrl]
+  );
+
+  // Get proxied URL to handle CORS issues using backend proxy
+  const getProxiedUrl = useCallback(
+    (url: string, forceProxy: boolean = false): string => {
+      if (!url) return "";
+
+      // Clean the URL first
+      const cleanedUrl = cleanUrl(url);
+
+      // Skip proxying for local URLs and API endpoints
+      if (
+        cleanedUrl.startsWith("/") ||
+        cleanedUrl.startsWith("data:") ||
+        cleanedUrl.includes("localhost") ||
+        cleanedUrl.includes("127.0.0.1")
+      ) {
+        return cleanedUrl;
+      }
+
+      // Skip proxying for CDNs that don't have CORS restrictions
+      const corsFreeDomains = [
+        "static.vecteezy.com",
+        "cdn.pixabay.com",
+        "images.unsplash.com",
+        "images.pexels.com",
+        "cdn.freepik.com",
+        "img.freepik.com",
+        "static.freepik.com",
+        "www.creativefabrica.com/wp-content/uploads",
+      ];
+
+      if (
+        !forceProxy &&
+        corsFreeDomains.some((domain) => cleanedUrl.includes(domain))
+      ) {
+        console.log("🔓 Direct access (CORS-free):", {
+          original: url,
+          cleaned: cleanedUrl,
+        });
+        return cleanedUrl;
+      }
+
+      // For external URLs that need CORS handling, use proxy
+      const encodedUrl = encodeURIComponent(cleanedUrl);
+      const proxiedUrl = `https://stockaty.virus.best/v1/proxy?request_to=${encodedUrl}`;
+
+      console.log("🔗 Proxying URL:", {
+        original: url,
+        cleaned: cleanedUrl,
+        proxied: proxiedUrl,
+      });
+
+      return proxiedUrl;
+    },
+    [cleanUrl]
+  );
+
+  // Get proxied video URL to handle CORS issues using backend proxy
+  const getProxiedVideoUrl = useCallback(
+    (videoUrl: string): string => {
+      if (!videoUrl) return "";
+
+      // Clean the URL first to remove HTML entities like &amp;
+      const cleanedUrl = cleanUrl(videoUrl);
+      const encodedUrl = encodeURIComponent(cleanedUrl);
+
+      // For videos, always use proxy to avoid CORS issues
+      const proxiedUrl = `https://stockaty.virus.best/v1/proxy?request_to=${encodedUrl}`;
+      console.log("🎥 Video URL:", {
+        original: videoUrl,
+        cleaned: cleanedUrl,
+        proxied: proxiedUrl,
+      });
+      return proxiedUrl;
+    },
+    [cleanUrl]
+  );
 
   // Function to detect image dimensions from URL
   const detectImageDimensions = useCallback(
@@ -1414,16 +1537,12 @@ function SearchContent() {
   // Infinite scroll functionality
   useEffect(() => {
     const handleScroll = () => {
-      if (
-        !hasMorePages ||
-        isLoadingMore ||
-        isSearchLoading ||
-        !searchQuery
-      ) {
+      if (!hasMorePages || isLoadingMore || isSearchLoading || !searchQuery) {
         return;
       }
 
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
 
@@ -1435,7 +1554,13 @@ function SearchContent() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMorePages, isLoadingMore, isSearchLoading, searchQuery, loadMoreResults]);
+  }, [
+    hasMorePages,
+    isLoadingMore,
+    isSearchLoading,
+    searchQuery,
+    loadMoreResults,
+  ]);
 
   // Get fallback dimensions for items with null width/height
   const getFallbackDimensions = (result: SearchResult) => {
@@ -2087,7 +2212,7 @@ function SearchContent() {
                         className={`relative ${!provider.isOnline ? "grayscale" : ""}`}
                       >
                         <img
-                          src={provider.logo}
+                          src={getProxiedUrl(provider.logo)}
                           alt={provider.name}
                           width={150}
                           height={56}
@@ -2520,86 +2645,152 @@ function SearchContent() {
                                 ))}
                               </div>
                             </div>
-                          ) : (result.file_type === "video" ||
-                              result.file_type === "gif") &&
-                            isValidVideoUrl(result.thumbnail) ? (
+                          ) : result.file_type === "video" ||
+                            result.file_type === "gif" ? (
                             <>
-                              <video
-                                src={result.thumbnail}
-                                poster={result.poster || "/placeholder.png"}
-                                className="w-full h-full object-cover"
-                                muted
-                                loop
-                                playsInline
-                                preload="metadata"
-                                onLoadedData={async (e) => {
-                                  // Generate thumbnail when video loads
-                                  const video = e.target as HTMLVideoElement;
-                                  try {
-                                    video.currentTime = 1; // Seek to 1 second
-                                    await new Promise((resolve) => {
-                                      video.onseeked = resolve;
-                                    });
-                                    const thumbnailUrl =
-                                      await generateVideoThumbnail(video);
-                                    video.poster = thumbnailUrl;
+                              {/* For videos, always try to show the video element with proper poster */}
+                              {isValidVideoUrl(result.thumbnail) ? (
+                                <video
+                                  src={getProxiedVideoUrl(result.thumbnail)}
+                                  poster={getVideoPoster(
+                                    result.url || result.thumbnail
+                                  )}
+                                  className="w-full h-full object-cover"
+                                  muted
+                                  loop
+                                  playsInline
+                                  preload="metadata"
+                                  crossOrigin="anonymous"
+                                  onLoadedData={async (e) => {
+                                    // Generate thumbnail when video loads
+                                    const video = e.target as HTMLVideoElement;
+                                    try {
+                                      video.currentTime = 1; // Seek to 1 second
+                                      await new Promise((resolve) => {
+                                        video.onseeked = resolve;
+                                      });
+                                      const thumbnailUrl =
+                                        await generateVideoThumbnail(video);
+                                      video.poster = thumbnailUrl;
 
-                                    // Update fallback image too
+                                      // Update fallback image too
+                                      const fallbackImg =
+                                        video.nextElementSibling as HTMLImageElement;
+                                      if (fallbackImg) {
+                                        fallbackImg.src = thumbnailUrl;
+                                      }
+                                    } catch (error) {
+                                      console.warn(
+                                        "Failed to generate video thumbnail:",
+                                        error
+                                      );
+                                    }
+                                  }}
+                                  onMouseEnter={(e) =>
+                                    handleVideoHover(
+                                      e.target as HTMLVideoElement,
+                                      true
+                                    )
+                                  }
+                                  onMouseLeave={(e) =>
+                                    handleVideoHover(
+                                      e.target as HTMLVideoElement,
+                                      false
+                                    )
+                                  }
+                                  onError={(e) => {
+                                    const video = e.target as HTMLVideoElement;
+                                    console.warn("Video load error:", {
+                                      src: video.src,
+                                      poster: video.poster,
+                                      error: e,
+                                    });
+                                    video.style.display = "none";
                                     const fallbackImg =
                                       video.nextElementSibling as HTMLImageElement;
                                     if (fallbackImg) {
-                                      fallbackImg.src = thumbnailUrl;
+                                      console.log(
+                                        "Showing fallback image:",
+                                        fallbackImg.src
+                                      );
+                                      fallbackImg.style.display = "block";
                                     }
-                                  } catch (error) {
-                                    console.warn(
-                                      "Failed to generate video thumbnail:",
-                                      error
-                                    );
-                                  }
-                                }}
-                                onMouseEnter={(e) =>
-                                  handleVideoHover(
-                                    e.target as HTMLVideoElement,
-                                    true
-                                  )
-                                }
-                                onMouseLeave={(e) =>
-                                  handleVideoHover(
-                                    e.target as HTMLVideoElement,
-                                    false
-                                  )
-                                }
-                                onError={(e) => {
-                                  const video = e.target as HTMLVideoElement;
-                                  video.style.display = "none";
-                                  const fallback =
-                                    video.nextElementSibling as HTMLElement;
-                                  if (fallback) fallback.style.display = "flex";
-                                }}
-                              />
-                              {/* Fallback for videos/gifs - text placeholder if no poster */}
-                              {result.poster ? (
-                                <img
-                                  src={result.poster}
-                                  alt={result.title}
-                                  className="w-full h-full object-cover"
-                                  style={{ display: "none" }}
+                                  }}
                                 />
                               ) : (
-                                <div
-                                  className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm"
-                                  style={{ display: "none" }}
-                                >
-                                  <div className="text-center">
-                                    <Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                    No thumbnail available
-                                  </div>
-                                </div>
+                                /* If not a valid video URL, just show the poster image directly */
+                                <img
+                                  src={getVideoPoster(
+                                    result.url || result.thumbnail
+                                  )}
+                                  alt={result.title}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                  onError={(e) => {
+                                    console.warn(
+                                      "Video poster failed, trying direct proxy"
+                                    );
+                                    const img = e.target as HTMLImageElement;
+                                    img.src = getProxiedUrl(result.thumbnail);
+                                  }}
+                                />
                               )}
+                              {/* Fallback for videos/gifs - use video-thumbnail API */}
+                              <img
+                                src={getVideoPoster(
+                                  result.url || result.thumbnail
+                                )}
+                                alt={result.title}
+                                className="w-full h-full object-cover"
+                                style={{ display: "none" }}
+                                loading="lazy"
+                                onError={(e) => {
+                                  console.warn(
+                                    "Primary fallback image failed, trying direct proxy"
+                                  );
+                                  const img = e.target as HTMLImageElement;
+                                  img.style.display = "none";
+                                  const directProxyImg =
+                                    img.nextElementSibling as HTMLImageElement;
+                                  if (directProxyImg) {
+                                    directProxyImg.style.display = "block";
+                                  }
+                                }}
+                              />
+                              {/* Secondary fallback - direct proxy to thumbnail */}
+                              <img
+                                src={getProxiedUrl(result.thumbnail)}
+                                alt={result.title}
+                                className="w-full h-full object-cover"
+                                style={{ display: "none" }}
+                                loading="lazy"
+                                onError={(e) => {
+                                  console.warn(
+                                    "Direct proxy fallback failed, showing text placeholder"
+                                  );
+                                  const img = e.target as HTMLImageElement;
+                                  img.style.display = "none";
+                                  const textPlaceholder =
+                                    img.nextElementSibling as HTMLDivElement;
+                                  if (textPlaceholder) {
+                                    textPlaceholder.style.display = "flex";
+                                  }
+                                }}
+                              />
+                              {/* Final fallback - text placeholder */}
+                              <div
+                                className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm"
+                                style={{ display: "none" }}
+                              >
+                                <div className="text-center">
+                                  <Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                  No thumbnail available
+                                </div>
+                              </div>
                             </>
                           ) : (
                             <img
-                              src={result.thumbnail}
+                              src={getProxiedUrl(result.thumbnail)}
                               alt={result.title}
                               className={`w-full h-full ${(() => {
                                 const isPNG =
@@ -2640,7 +2831,7 @@ function SearchContent() {
                             className={`absolute top-2 ${isRTL ? "right-2" : "left-2"} p-1 bg-white/90 backdrop-blur-sm rounded-md shadow-sm`}
                           >
                             <img
-                              src={result.providerIcon}
+                              src={getProxiedUrl(result.providerIcon || "")}
                               alt={result.provider}
                               width={40}
                               height={40}
@@ -2785,106 +2976,158 @@ function SearchContent() {
                                       )}
                                     </div>
                                   </div>
-                                ) : (result.file_type === "video" ||
-                                    result.file_type === "gif") &&
-                                  isValidVideoUrl(result.thumbnail) ? (
+                                ) : result.file_type === "video" ||
+                                  result.file_type === "gif" ? (
                                   <>
-                                    <video
-                                      src={result.thumbnail}
-                                      poster={getVideoPoster(result.thumbnail)}
-                                      className="w-full h-full object-cover"
-                                      muted
-                                      loop
-                                      playsInline
-                                      preload="metadata"
-                                      onLoadedData={async (e) => {
-                                        // Generate thumbnail when video loads
-                                        const video =
-                                          e.target as HTMLVideoElement;
-                                        try {
-                                          video.currentTime = 1; // Seek to 1 second
-                                          await new Promise((resolve) => {
-                                            video.onseeked = resolve;
-                                          });
-                                          const thumbnailUrl =
-                                            await generateVideoThumbnail(video);
-                                          video.poster = thumbnailUrl;
+                                    {/* For videos, always try to show the video element with proper poster */}
+                                    {isValidVideoUrl(result.thumbnail) ? (
+                                      <video
+                                        src={getProxiedVideoUrl(
+                                          result.thumbnail
+                                        )}
+                                        poster={getVideoPoster(
+                                          result.url || result.thumbnail
+                                        )}
+                                        className="w-full h-full object-cover"
+                                        muted
+                                        loop
+                                        playsInline
+                                        preload="metadata"
+                                        crossOrigin="anonymous"
+                                        onLoadedData={async (e) => {
+                                          // Generate thumbnail when video loads
+                                          const video =
+                                            e.target as HTMLVideoElement;
+                                          try {
+                                            video.currentTime = 1; // Seek to 1 second
+                                            await new Promise((resolve) => {
+                                              video.onseeked = resolve;
+                                            });
+                                            const thumbnailUrl =
+                                              await generateVideoThumbnail(
+                                                video
+                                              );
+                                            video.poster = thumbnailUrl;
 
-                                          // Update fallback image too
+                                            // Update fallback image too
+                                            const fallbackImg =
+                                              video.nextElementSibling as HTMLImageElement;
+                                            if (fallbackImg) {
+                                              fallbackImg.src = thumbnailUrl;
+                                            }
+                                          } catch (error) {
+                                            console.warn(
+                                              "Failed to generate video thumbnail:",
+                                              error
+                                            );
+                                          }
+                                        }}
+                                        onMouseEnter={(e) =>
+                                          handleVideoHover(
+                                            e.target as HTMLVideoElement,
+                                            true
+                                          )
+                                        }
+                                        onMouseLeave={(e) =>
+                                          handleVideoHover(
+                                            e.target as HTMLVideoElement,
+                                            false
+                                          )
+                                        }
+                                        onError={(e) => {
+                                          console.warn(
+                                            "Video load error, falling back to image"
+                                          );
+                                          const video =
+                                            e.target as HTMLVideoElement;
+                                          video.style.display = "none";
                                           const fallbackImg =
                                             video.nextElementSibling as HTMLImageElement;
                                           if (fallbackImg) {
-                                            fallbackImg.src = thumbnailUrl;
-                                          }
-                                        } catch (error) {
-                                          console.warn(
-                                            "Failed to generate video thumbnail:",
-                                            error
-                                          );
-                                        }
-                                      }}
-                                      onMouseEnter={(e) =>
-                                        handleVideoHover(
-                                          e.target as HTMLVideoElement,
-                                          true
-                                        )
-                                      }
-                                      onMouseLeave={(e) =>
-                                        handleVideoHover(
-                                          e.target as HTMLVideoElement,
-                                          false
-                                        )
-                                      }
-                                      onError={(e) => {
-                                        console.warn(
-                                          "Video load error, falling back to image"
-                                        );
-                                        const video =
-                                          e.target as HTMLVideoElement;
-                                        video.style.display = "none";
-                                        const fallbackImg =
-                                          video.nextElementSibling as HTMLImageElement;
-                                        if (fallbackImg) {
-                                          fallbackImg.style.display = "block";
-                                        }
-                                      }}
-                                    />
-                                    {/* Fallback for videos - text placeholder if no poster */}
-                                    {result.poster ? (
-                                      <img
-                                        src={result.poster}
-                                        alt={result.title}
-                                        className="w-full h-full object-cover"
-                                        style={{ display: "none" }}
-                                        loading="lazy"
-                                        onError={(e) => {
-                                          const img =
-                                            e.target as HTMLImageElement;
-                                          img.style.display = "none";
-                                          const textPlaceholder =
-                                            img.nextElementSibling as HTMLDivElement;
-                                          if (textPlaceholder) {
-                                            textPlaceholder.style.display =
-                                              "flex";
+                                            fallbackImg.style.display = "block";
                                           }
                                         }}
                                       />
-                                    ) : null}
-                                    {/* Text placeholder for videos without poster */}
+                                    ) : (
+                                      /* If not a valid video URL, just show the poster image directly */
+                                      <img
+                                        src={getVideoPoster(
+                                          result.url || result.thumbnail
+                                        )}
+                                        alt={result.title}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                        onError={(e) => {
+                                          console.warn(
+                                            "Video poster failed, trying direct proxy"
+                                          );
+                                          const img =
+                                            e.target as HTMLImageElement;
+                                          img.src = getProxiedUrl(
+                                            result.thumbnail
+                                          );
+                                        }}
+                                      />
+                                    )}
+                                    {/* Fallback for videos - use video-thumbnail API */}
+                                    <img
+                                      src={getVideoPoster(
+                                        result.url || result.thumbnail
+                                      )}
+                                      alt={result.title}
+                                      className="w-full h-full object-cover"
+                                      style={{ display: "none" }}
+                                      loading="lazy"
+                                      onError={(e) => {
+                                        console.warn(
+                                          "Desktop primary fallback failed, trying direct proxy"
+                                        );
+                                        const img =
+                                          e.target as HTMLImageElement;
+                                        img.style.display = "none";
+                                        const directProxyImg =
+                                          img.nextElementSibling as HTMLImageElement;
+                                        if (directProxyImg) {
+                                          directProxyImg.style.display =
+                                            "block";
+                                        }
+                                      }}
+                                    />
+                                    {/* Secondary fallback - direct proxy to thumbnail */}
+                                    <img
+                                      src={getProxiedUrl(result.thumbnail)}
+                                      alt={result.title}
+                                      className="w-full h-full object-cover"
+                                      style={{ display: "none" }}
+                                      loading="lazy"
+                                      onError={(e) => {
+                                        console.warn(
+                                          "Desktop direct proxy fallback failed, showing text placeholder"
+                                        );
+                                        const img =
+                                          e.target as HTMLImageElement;
+                                        img.style.display = "none";
+                                        const textPlaceholder =
+                                          img.nextElementSibling as HTMLDivElement;
+                                        if (textPlaceholder) {
+                                          textPlaceholder.style.display =
+                                            "flex";
+                                        }
+                                      }}
+                                    />
+                                    {/* Final fallback - text placeholder */}
                                     <div
                                       className="absolute inset-0 flex items-center justify-center bg-muted/80 text-muted-foreground"
-                                      style={{
-                                        display: result.poster
-                                          ? "none"
-                                          : "none",
-                                      }}
+                                      style={{ display: "none" }}
                                     >
-                                      <div className="text-center">
-                                        <div className="text-2xl mb-2">🎥</div>
-                                        <div className="text-sm font-medium">
+                                      <div className="text-center w-full">
+                                        <div className="w-fit mx-auto text-2xl mb-2 bg-primary/20 p-3 rounded-full">
+                                          🎥
+                                        </div>
+                                        <div className="text-lg font-medium">
                                           Video Preview
                                         </div>
-                                        <div className="text-xs">
+                                        <div className="text-2xl">
                                           No thumbnail available
                                         </div>
                                       </div>
@@ -2892,7 +3135,7 @@ function SearchContent() {
                                   </>
                                 ) : (
                                   <img
-                                    src={result.thumbnail}
+                                    src={getProxiedUrl(result.thumbnail)}
                                     alt={result.title}
                                     className={`w-full h-full ${(() => {
                                       const isPNG =
@@ -2933,7 +3176,9 @@ function SearchContent() {
                                   className={`absolute top-2 ${isRTL ? "right-2" : "left-2"} p-1 bg-black/90 backdrop-blur-sm rounded-md shadow-sm`}
                                 >
                                   <img
-                                    src={result.providerIcon}
+                                    src={getProxiedUrl(
+                                      result.providerIcon || ""
+                                    )}
                                     alt={result.provider}
                                     width={40}
                                     height={40}

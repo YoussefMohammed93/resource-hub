@@ -35,7 +35,7 @@ export function HeroSkeleton() {
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-primary/20 via-primary/5 to-primary/20 py-12 md:pb-20 md:pt-8 overflow-hidden">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-35 dark:opacity-100"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-15 dark:opacity-100"></div>
 
       <div className="w-full container mx-auto max-w-7xl px-4 sm:px-5 relative z-10">
         <div className="flex flex-col items-center justify-center min-h-[85vh] sm:min-h-[80vh] text-center space-y-6 sm:space-y-8 lg:space-y-12 py-8 sm:py-0">
@@ -122,56 +122,6 @@ export function FeaturesSkeleton() {
               </div>
             </div>
           ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Supported Platforms Section Skeleton
-export function SupportedPlatformsSkeleton() {
-  return (
-    <section className="py-16 lg:py-20 lg:pb-28 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden">
-      <div className="px-5 relative z-10">
-        {/* Section Header */}
-        <div className="text-center mb-12 lg:mb-16">
-          <div className="space-y-4">
-            <Skeleton className="h-12 w-80 mx-auto bg-white dark:bg-muted" />
-            <Skeleton className="h-6 w-96 mx-auto bg-white dark:bg-muted" />
-          </div>
-        </div>
-        {/* Tabbed Platforms Interface */}
-        <div className="max-w-[1200px] mx-auto">
-          {/* Tabs List Skeleton */}
-          <div className="grid w-full grid-cols-3 mb-8 bg-muted rounded-lg p-1">
-            {Array.from({ length: 3 }, (_, i) => (
-              <div key={i} className="flex items-center justify-center py-2">
-                <Skeleton className="h-6 w-32 bg-white dark:bg-muted" />
-              </div>
-            ))}
-          </div>
-
-          {/* Scrollable Content Area */}
-          <div className="max-h-[50vh] overflow-y-auto overflow-x-hidden pr-2">
-            {/* Platform Cards Grid */}
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3 py-5 sm:gap-4 w-full">
-              {Array.from({ length: 14 }, (_, i) => (
-                <div
-                  key={i}
-                  className="group relative aspect-square bg-background dark:bg-muted/50 border border-border/50 rounded-lg transition-all duration-200"
-                >
-                  <div className="relative w-full h-full p-2 flex flex-col items-center justify-center">
-                    {/* Platform Icon/Logo */}
-                    <div className="w-12 h-12 sm:w-24 sm:h-24 mb-1 sm:mb-2 relative">
-                      <Skeleton className="w-full h-full rounded" />
-                    </div>
-                    {/* Platform Name */}
-                    <Skeleton className="h-3 w-16 sm:h-4 sm:w-24" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </section>

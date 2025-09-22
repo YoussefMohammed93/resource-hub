@@ -16,7 +16,7 @@ export function useHeaderAnimations(enabled: boolean = true) {
     if (enabled) {
       hasRunRef.current = false;
     }
-    
+
     if (!enabled || hasRunRef.current) return;
     const header = headerRef.current;
     const logo = logoRef.current;
@@ -134,7 +134,9 @@ export function useHeaderAnimations(enabled: boolean = true) {
               opacity: 1,
               skewY: 0,
               ease: "expo.out",
-              onComplete: () => { gsap.set(button, { willChange: "auto" }); },
+              onComplete: () => {
+                gsap.set(button, { willChange: "auto" });
+              },
             },
             `navButtons+=${index * 0.05}`
           );

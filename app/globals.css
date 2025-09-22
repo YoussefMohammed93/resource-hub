@@ -184,29 +184,24 @@ section[id] {
   }
 
   .animate-float {
-    animation: float 6s ease-in-out infinite;
+    animation: float 2s ease-in-out infinite;
   }
 
   .animate-float-delayed {
-    animation: float-delayed 8s ease-in-out infinite;
-    animation-delay: 2s;
-  }
-
-  .animate-float-delayed {
-    animation: float 6s ease-in-out infinite;
-    animation-delay: 2s;
+    animation: float-delayed 3s ease-in-out infinite;
+    animation-delay: 0.5s;
   }
 
   .animate-pulse-slow {
-    animation: pulse-slow 4s ease-in-out infinite;
+    animation: pulse-slow 0.4s ease-in-out infinite;
   }
 
   .animate-bounce-slow {
-    animation: bounce-slow 3s ease-in-out infinite;
+    animation: bounce-slow 1.5s ease-in-out infinite;
   }
 
   .animate-float-slow {
-    animation: float-slow 10s ease-in-out infinite;
+    animation: float-slow 4s ease-in-out infinite;
   }
 
   @keyframes float {
@@ -325,8 +320,21 @@ section[id] {
   }
 
   .animate-gradient-x {
-    animation: gradient-x 4s ease infinite;
+    animation: gradient-x 2s ease infinite;
     background-size: 200% 200%;
+  }
+
+  /* Super fast search input animations */
+  .animate-spin-fast {
+    animation: spin 0.3s linear infinite;
+  }
+
+  .transition-fast {
+    transition: all 0.1s ease-in-out;
+  }
+
+  .transition-super-fast {
+    transition: all 0.05s ease-in-out;
   }
 
   /* Desktop infinite scroll animations - show all cards */
@@ -465,11 +473,11 @@ section[id] {
 
   /* RTL mobile-specific animations */
   [dir="rtl"] .animate-scroll-left-mobile {
-    animation: scroll-rtl-left-to-right-mobile 150s linear infinite;
+    animation: scroll-rtl-left-to-right-mobile 100s linear infinite;
   }
 
   [dir="rtl"] .animate-scroll-right-mobile {
-    animation: scroll-rtl-right-to-left-mobile 150s linear infinite;
+    animation: scroll-rtl-right-to-left-mobile 100s linear infinite;
   }
 
   /* RTL desktop animations on larger screens */

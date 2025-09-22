@@ -82,8 +82,18 @@ const validateEmail = (email: string) => {
 
 // Phone validation function
 const validatePhone = (phone: string) => {
-  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-  return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""));
+  // Remove any spaces, dashes, or parentheses
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
+
+  // Must start with + followed by 1-15 digits
+  const phoneRegex = /^\+[1-9]\d{0,14}$/;
+
+  // Check if it matches the pattern and has reasonable length
+  return (
+    phoneRegex.test(cleanPhone) &&
+    cleanPhone.length >= 4 &&
+    cleanPhone.length <= 16
+  );
 };
 
 // Password strength validation
@@ -225,6 +235,37 @@ export default function RegisterPage() {
     }
   };
 
+  // Handle phone number input with + prefix
+  const handlePhoneChange = (value: string) => {
+    // Remove any non-digit characters except +
+    let cleanValue = value.replace(/[^\d+]/g, "");
+
+    // Handle special cases
+    if (cleanValue === "") {
+      // Allow empty field
+      handleInputChange("phone", "");
+      return;
+    }
+
+    // If user tries to delete the +, keep it
+    if (cleanValue && !cleanValue.startsWith("+")) {
+      cleanValue = "+" + cleanValue;
+    }
+
+    // Prevent multiple + signs
+    const plusCount = (cleanValue.match(/\+/g) || []).length;
+    if (plusCount > 1) {
+      cleanValue = "+" + cleanValue.replace(/\+/g, "");
+    }
+
+    // Limit to reasonable phone number length (+ plus up to 15 digits)
+    if (cleanValue.length > 16) {
+      cleanValue = cleanValue.slice(0, 16);
+    }
+
+    handleInputChange("phone", cleanValue);
+  };
+
   // Send OTP code
   const handleSendOtp = async (isResend: boolean = false) => {
     if (!validatePhone(formData.phone)) {
@@ -235,15 +276,7 @@ export default function RegisterPage() {
       return;
     }
 
-    // Ensure phone number starts with + for API requirement
     const phoneNumber = formData.phone.trim();
-    if (!phoneNumber.startsWith("+")) {
-      setErrors((prev) => ({
-        ...prev,
-        phone: t("register.validation.phoneCountryCode"),
-      }));
-      return;
-    }
 
     setIsSendingOtp(true);
     setErrors((prev) => ({ ...prev, phone: "", otp: "", general: "" }));
@@ -297,15 +330,7 @@ export default function RegisterPage() {
       return;
     }
 
-    // Ensure phone number starts with + for API requirement
     const phoneNumber = formData.phone.trim();
-    if (!phoneNumber.startsWith("+")) {
-      setErrors((prev) => ({
-        ...prev,
-        phone: t("register.validation.phoneCountryCode"),
-      }));
-      return;
-    }
 
     setIsVerifyingOtp(true);
     setErrors((prev) => ({ ...prev, otp: "", general: "" }));
@@ -368,7 +393,7 @@ export default function RegisterPage() {
     if (!formData.phone.trim()) {
       newErrors.phone = t("register.validation.phoneRequired");
     } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = t("register.validation.invalidPhone");
+      newErrors.phone = t("register.validation.phoneCountryCode");
     } else if (!phoneVerified) {
       newErrors.phone = t("register.validation.phoneNotVerified");
     }
@@ -798,7 +823,11 @@ export default function RegisterPage() {
               <div className="relative w-44 sm:w-48 h-12">
                 {/* Light mode logos */}
                 <Image
-                  src={language === "ar" ? "/logo-black-ar.png" : "/logo-black-en.png"}
+                  src={
+                    language === "ar"
+                      ? "/logo-black-ar.png"
+                      : "/logo-black-en.png"
+                  }
                   alt={t("header.logo")}
                   fill
                   className="block dark:hidden"
@@ -806,7 +835,11 @@ export default function RegisterPage() {
                 />
                 {/* Dark mode logos */}
                 <Image
-                  src={language === "ar" ? "/logo-white-ar.png" : "/logo-white-en.png"}
+                  src={
+                    language === "ar"
+                      ? "/logo-white-ar.png"
+                      : "/logo-white-en.png"
+                  }
                   alt={t("header.logo")}
                   fill
                   className="hidden dark:block"
@@ -935,18 +968,37 @@ export default function RegisterPage() {
                   </Label>
                   <div className="space-y-3">
                     <div className="flex flex-col sm:flex-row gap-2">
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder={t("register.form.phone.placeholder")}
-                        value={formData.phone}
-                        onChange={(e) =>
-                          handleInputChange("phone", e.target.value)
-                        }
-                        className={`flex-1 ${isRTL ? "text-right" : "text-left"} ${errors.phone ? "border-destructive" : ""}`}
-                        dir={isRTL ? "rtl" : "ltr"}
-                        disabled={phoneVerified}
-                      />
+                      <div className="relative flex-1">
+                        <Input
+                          id="phone"
+                          type="tel"
+                          placeholder={t(
+                            "register.form.phone.placeholderWithCode"
+                          )}
+                          value={formData.phone}
+                          onChange={(e) => handlePhoneChange(e.target.value)}
+                          className={`${isRTL ? "text-right" : "text-left"} ${errors.phone ? "border-destructive" : ""} ${phoneVerified ? "bg-muted/50" : ""}`}
+                          dir={isRTL ? "rtl" : "ltr"}
+                          disabled={phoneVerified}
+                          onFocus={() => {
+                            // Auto-add + if field is empty
+                            if (!formData.phone) {
+                              handlePhoneChange("+");
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            // Prevent deletion of + when it's the only character
+                            if (
+                              e.key === "Backspace" &&
+                              formData.phone === "+"
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
+                          inputMode="tel"
+                          autoComplete="tel"
+                        />
+                      </div>
                       {!phoneVerified && (
                         <Button
                           type="button"

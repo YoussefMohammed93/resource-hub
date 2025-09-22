@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 "use client";
 
 import {
@@ -27,10 +29,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { publicApi, PricingPlan } from "@/lib/api";
 
-// Mock data structure matching the API response
+// Plan data structure matching the API response
 interface PlanData {
-  id: string;
+  id: string | number;
   name: string;
   price: string | null;
   days: string;
@@ -41,114 +44,42 @@ interface PlanData {
   recommended: boolean;
 }
 
-// Mock data with enhanced features
-const mockPlansData: PlanData[] = [
-  {
-    id: "1",
-    name: "Bronze",
-    price: null,
-    days: "30",
-    description:
-      "Perfect for individuals and small projects. Get started with essential creative resources.",
-    contact: "https://example.com/contact",
-    credits: "500",
-    sites: [
+// Helper function to transform API response to frontend format
+const transformApiPlanToFrontend = (apiPlan: PricingPlan): PlanData => {
+  console.log("Transforming API plan:", apiPlan);
+
+  // Handle sites data - check supportedSites field
+  let sites: string[] = [];
+  if (Array.isArray(apiPlan.supportedSites)) {
+    sites = apiPlan.supportedSites;
+  }
+
+  // If no sites found, use default sites
+  if (sites.length === 0) {
+    sites = [
       "freepik.com",
       "shutterstock.com",
-      "stock.adobe.com",
-      "gettyimages.com",
-      "unsplash.com",
-      "storyblocks.com",
       "elements.envato.com",
-      "vexels.com",
-      "vectory.com",
-      "ui8.net",
-      "rawpixel.com",
-      "pngtree.com",
-      "pikbest.com",
-      "creativefabrica.com",
-      "iconscout.com",
-      "vecteezy.com",
-      "lovepik.com",
-      "epidemicsound.com",
-      "flaticon.com",
-      "mockupcloud.com",
-      "soundstripe.com",
-      "motionarray.com",
-      "motionelements.com",
-      "pixelbuddha.net",
-      "deeezy.com",
-      "123rf.com",
-      "pixeden.com",
-      "artlist.io",
-      "designi.com.br",
-      "uihut.com",
-      "depositphotos.com",
-      "pixelsquid.com",
-      "productioncrate.com",
-      "graphics.crate.com",
-      "vectorstock.com",
-      "dreamstime.com",
-      "uplabs.com",
-      "craftwork.design",
-      "istockphoto.com",
-      "artgrid.io",
-      "yellowimages.com",
-      "alamy.com",
-    ],
-    recommended: false,
-  },
-  {
-    id: "2",
-    name: "Special",
-    price: null,
-    days: "30",
-    description:
-      "Most popular choice for professionals and growing businesses. Unlock premium features.",
-    contact: "https://example.com/contact",
-    credits: "1500",
-    sites: [
-      "vecteezy.com",
-      "rawpixel.com",
-      "shutterstock.com",
-      "adobe.com",
-      "unsplash.com",
-    ],
-    recommended: true,
-  },
-  {
-    id: "3",
-    name: "Silver",
-    price: "$49",
-    days: "30",
-    description:
-      "Great value for regular users who need consistent access to quality resources.",
-    contact: "https://example.com/contact",
-    credits: "1000",
-    sites: ["freepik.com", "elements.envato.com", "pexels.com", "pixabay.com"],
-    recommended: false,
-  },
-  {
-    id: "4",
-    name: "Gold",
-    price: "$99",
-    days: "60",
-    description:
-      "Premium plan for power users and creative teams with extended validity.",
-    contact: "https://example.com/contact",
-    credits: "3000",
-    sites: [
-      "vecteezy.com",
-      "freepik.com",
-      "shutterstock.com",
-      "adobe.com",
-      "rawpixel.com",
       "unsplash.com",
       "pexels.com",
-    ],
-    recommended: false,
-  },
-];
+    ];
+  }
+
+  const transformed: PlanData = {
+    id: apiPlan.id || "unknown",
+    name: apiPlan.name || "Unknown Plan",
+    price: apiPlan.price ? `$${apiPlan.price}` : null,
+    days: String(apiPlan.daysValidity || "30"),
+    description: apiPlan.description || "No description available",
+    contact: apiPlan.contactUsUrl || "#",
+    credits: String(apiPlan.credits || "0"),
+    sites: sites,
+    recommended: Boolean(apiPlan.recommended),
+  };
+
+  console.log("Transformed plan:", transformed);
+  return transformed;
+};
 
 export default function PlanDetailsPage() {
   const { t } = useTranslation("common");
@@ -158,6 +89,7 @@ export default function PlanDetailsPage() {
   const [planData, setPlanData] = useState<PlanData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState<string>("");
 
   // Refs for header elements
   const headerRef = useRef<HTMLElement>(null);
@@ -167,20 +99,54 @@ export default function PlanDetailsPage() {
   useEffect(() => {
     const loadPlanData = async () => {
       setIsLoading(true);
+      setError("");
+      setNotFound(false);
 
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        const planId = params.planId as string;
+        console.log("Loading plan with ID:", planId);
 
-      const planId = params.planId as string;
-      const foundPlan = mockPlansData.find((plan) => plan.id === planId);
+        // Fetch all pricing plans from the API
+        const response = await publicApi.getPricingPlans();
+        console.log("API Response:", response);
 
-      if (foundPlan) {
-        setPlanData(foundPlan);
-      } else {
-        setNotFound(true);
+        if (response.success && response.data) {
+          console.log("Raw API data:", response.data);
+
+          // Transform API data to frontend format
+          const transformedPlans = response.data.map(
+            transformApiPlanToFrontend
+          );
+          console.log("Transformed plans:", transformedPlans);
+
+          // Find the plan with matching ID (convert both to string for comparison)
+          const foundPlan = transformedPlans.find(
+            (plan) => String(plan.id) === String(planId)
+          );
+          console.log("Found plan:", foundPlan);
+
+          if (foundPlan) {
+            setPlanData(foundPlan);
+          } else {
+            console.log(
+              "Plan not found in available plans:",
+              transformedPlans.map((p: PlanData) => p.id)
+            );
+            setNotFound(true);
+          }
+        } else {
+          console.error("API response error:", response);
+          setError(
+            response.error?.message ||
+              t("planDetails.errors.loadErrorDescription")
+          );
+        }
+      } catch (err) {
+        console.error("Error loading plan data:", err);
+        setError(t("planDetails.errors.loadErrorDescription"));
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     loadPlanData();
@@ -213,6 +179,106 @@ export default function PlanDetailsPage() {
       key: "premiumQuality",
     },
   ];
+
+  // API Error Page
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background">
+        <header
+          ref={headerRef}
+          className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 h-16 min-h-[4rem] max-h-[4rem]"
+        >
+          {/* Header particle effects container */}
+          <div className="header-particles"></div>
+
+          <div className="container mx-auto max-w-7xl px-4 sm:px-5">
+            <div className="flex items-center justify-between h-16">
+              {/* Logo and Mobile Menu Button */}
+              <div className="flex items-center gap-1 sm:gap-2">
+                <div ref={logoRef}>
+                  <Link
+                    href="/"
+                    aria-label={t("header.logo")}
+                    className="flex items-center"
+                  >
+                    <div className="relative w-44 sm:w-48 h-12">
+                      {/* Light mode logos */}
+                      <Image
+                        src={
+                          language === "ar"
+                            ? "/logo-black-ar.png"
+                            : "/logo-black-en.png"
+                        }
+                        alt={t("header.logo")}
+                        fill
+                        className="block dark:hidden"
+                        priority
+                      />
+                      {/* Dark mode logos */}
+                      <Image
+                        src={
+                          language === "ar"
+                            ? "/logo-white-ar.png"
+                            : "/logo-white-en.png"
+                        }
+                        alt={t("header.logo")}
+                        fill
+                        className="hidden dark:block"
+                        priority
+                      />
+                    </div>
+                  </Link>
+                </div>
+              </div>
+              {/* Header Controls */}
+              <div ref={controlsRef}>
+                <HeaderControls enabled={!isLoading} />
+              </div>
+            </div>
+          </div>
+        </header>
+        <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+          <div className="text-center space-y-6 max-w-md">
+            <div className="w-24 h-24 mx-auto bg-destructive/10 rounded-full flex items-center justify-center">
+              <AlertCircle className="w-12 h-12 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold text-foreground">Error</h1>
+              <h2
+                className={`text-xl font-semibold text-foreground ${isRTL ? "font-tajawal" : ""}`}
+              >
+                {t("planDetails.errors.loadError")}
+              </h2>
+              <p
+                className={`text-muted-foreground ${isRTL ? "font-tajawal" : ""}`}
+              >
+                {error}
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                onClick={() => window.location.reload()}
+                variant="outline"
+                className={`gap-2 ${isRTL ? "font-tajawal" : ""}`}
+              >
+                <RefreshCw className="w-4 h-4" />
+                {t("planDetails.actions.retry")}
+              </Button>
+              <Button asChild>
+                <Link
+                  href="/#pricing"
+                  className={`gap-2 ${isRTL ? "font-tajawal" : ""}`}
+                >
+                  {t("planDetails.actions.viewAllPlans")}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   // 404 Error Page
   if (notFound) {

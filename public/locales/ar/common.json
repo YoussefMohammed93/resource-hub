@@ -11,9 +11,8 @@
     "logo": "مركز الموارد",
     "navigation": {
       "home": "الرئيسية",
-      "platforms": "المنصات",
       "pricing": "الأسعار",
-      "categories": "الفئات",
+      "testimonials": "آراء العملاء",
       "features": "المميزات",
       "faq": "الأسئلة الشائعة"
     }
@@ -69,7 +68,7 @@
   },
   "features": {
     "title": "لماذا تختار",
-    "titleHighlight": "مركز الموارد",
+    "titleHighlight": "ستوكاتي",
     "description": "كل ما تحتاجه للوصول إلى الموارد الإبداعية المميزة من أفضل المنصات حول العالم.",
     "premiumQuality": {
       "title": "جودة مميزة",
@@ -205,13 +204,16 @@
     "sites": "المواقع",
     "errors": {
       "notFound": "الخطة غير موجودة",
-      "notFoundDescription": "الخطة التي تبحث عنها غير موجودة أو تم حذفها."
+      "notFoundDescription": "الخطة التي تبحث عنها غير موجودة أو تم حذفها.",
+      "loadError": "فشل في تحميل الخطة",
+      "loadErrorDescription": "حدث خطأ أثناء تحميل تفاصيل الخطة. يرجى المحاولة مرة أخرى."
     },
     "actions": {
       "goBack": "العودة",
       "viewAllPlans": "عرض جميع الخطط",
       "subscribe": "اشترك الآن",
-      "contactUs": "تواصل معنا"
+      "contactUs": "تواصل معنا",
+      "retry": "حاول مرة أخرى"
     },
     "features": {
       "title": "ميزات الخطة",
@@ -419,12 +421,14 @@
     "allRightsReserved": "جميع الحقوق محفوظة.",
     "links": {
       "home": "الرئيسية",
-      "categories": "الفئات",
       "pricing": "الأسعار",
+      "testimonials": "آراء العملاء",
+      "features": "المميزات",
+      "faq": "الأسئلة الشائعة",
+      "categories": "الفئات",
       "about": "حولنا",
       "helpCenter": "مركز المساعدة",
       "contactSupport": "تواصل مع الدعم",
-      "faq": "الأسئلة الشائعة",
       "privacyPolicy": "سياسة الخصوصية",
       "termsOfService": "شروط الخدمة",
       "cookiePolicy": "سياسة ملفات تعريف الارتباط",
@@ -1250,11 +1254,13 @@
       },
       "phone": {
         "label": "رقم الهاتف",
-        "placeholder": "أدخل رقم هاتفك",
+        "placeholder": "1234567890",
+        "placeholderWithCode": "أدخل رقم هاتفك",
         "otpMessage": "سيتم إرسال رمز التحقق إليك عبر الواتساب",
         "sendCodeButton": "إرسال الرمز",
         "sendingCode": "جاري إرسال الرمز...",
-        "codeSent": "تم إرسال الرمز إلى الواتساب"
+        "codeSent": "تم إرسال الرمز إلى الواتساب",
+        "countryCodePrefix": "+"
       },
       "otp": {
         "label": "رمز التحقق",

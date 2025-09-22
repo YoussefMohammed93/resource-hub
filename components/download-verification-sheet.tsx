@@ -840,9 +840,7 @@ export function DownloadVerificationSheet({
                             className="w-full sm:w-auto min-w-[140px] bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-200"
                             size="lg"
                           >
-                            <LogIn
-                              className={`w-5 h-5 ${isRTL ? "ml-2" : "mr-2"}`}
-                            />
+                            <LogIn className={`w-5 h-5`} />
                             {t(
                               "download.verification.authentication.loginButton"
                             )}
@@ -875,9 +873,7 @@ export function DownloadVerificationSheet({
                             className="w-full sm:w-auto min-w-[140px] border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold transition-all duration-200"
                             size="lg"
                           >
-                            <UserPlus
-                              className={`w-5 h-5 ${isRTL ? "ml-2" : "mr-2"}`}
-                            />
+                            <UserPlus className={`w-5 h-5`} />
                             {t(
                               "download.verification.authentication.registerButton"
                             )}

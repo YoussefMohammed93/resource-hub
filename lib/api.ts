@@ -1637,7 +1637,7 @@ export interface PricingPlanInput {
 }
 
 export interface PricingPlan {
-  id?: number;
+  id?: number | string;
   name: string;
   description: string;
   price: number;
@@ -1654,10 +1654,8 @@ export interface PricingPlanResponse {
   message: string;
 }
 
-export interface GetPricingPlansResponse {
-  success: boolean;
-  data: PricingPlan[];
-}
+// The API directly returns an array of PricingPlan objects
+export type GetPricingPlansResponse = PricingPlan[];
 
 export interface DeletePricingPlanRequest {
   PlanName: string;

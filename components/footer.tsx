@@ -23,7 +23,7 @@ if (typeof window !== "undefined") {
 export default function Footer() {
   const { t } = useTranslation("common");
   const { isRTL, language } = useLanguage();
-  
+
   // Refs for animations
   const footerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -35,126 +35,127 @@ export default function Footer() {
   const socialSectionRef = useRef<HTMLDivElement>(null);
   const copyrightRef = useRef<HTMLDivElement>(null);
 
-  // Animation setup
+  // Animation setup - Optimized for Speed and Smoothness
   useEffect(() => {
     if (!footerRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Set initial states - only opacity and y position, no scale/transform
-      gsap.set(logoRef.current, { opacity: 0, y: 30 });
-      gsap.set(descriptionRef.current, { opacity: 0, y: 20 });
-      gsap.set(contactInfoRef.current, { opacity: 0, y: 25 });
-      gsap.set(".footer-section", { opacity: 0, y: 40 });
-      gsap.set(".footer-link", { opacity: 0, y: 15 });
-      gsap.set(".social-icon", { opacity: 0, y: 20 });
-      gsap.set(copyrightRef.current, { opacity: 0, y: 15 });
+      // Set initial states - Reduced movement distances for smoother feel
+      gsap.set(logoRef.current, { opacity: 0, y: 15 }); // Reduced from 30px to 15px
+      gsap.set(descriptionRef.current, { opacity: 0, y: 10 }); // Reduced from 20px to 10px
+      gsap.set(contactInfoRef.current, { opacity: 0, y: 12 }); // Reduced from 25px to 12px
+      gsap.set(".footer-section", { opacity: 0, y: 20 }); // Reduced from 40px to 20px
+      gsap.set(".footer-link", { opacity: 0, y: 8 }); // Reduced from 15px to 8px
+      gsap.set(".social-icon", { opacity: 0, y: 10 }); // Reduced from 20px to 10px
+      gsap.set(copyrightRef.current, { opacity: 0, y: 8 }); // Reduced from 15px to 8px
 
-      // Logo animation
+      // Logo animation - Faster and earlier activation
       gsap.to(logoRef.current, {
         opacity: 1,
         y: 0,
-        duration: 0.8,
+        duration: 0.3, // Reduced from 0.8s to 0.3s (62% faster)
         ease: "power3.out",
         scrollTrigger: {
           trigger: footerRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse"
-        }
+          start: "top 95%", // Changed from "top 85%" to "top 95%" for earlier activation
+          toggleActions: "play none none reverse",
+        },
       });
 
-      // Description animation
+      // Description animation - Faster timing
       gsap.to(descriptionRef.current, {
         opacity: 1,
         y: 0,
-        duration: 0.7,
-        delay: 0.2,
+        duration: 0.25, // Reduced from 0.7s to 0.25s (64% faster)
+        delay: 0.1, // Reduced from 0.2s to 0.1s
         ease: "power2.out",
         scrollTrigger: {
           trigger: footerRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse"
-        }
+          start: "top 95%", // Changed from "top 85%" to "top 95%" for earlier activation
+          toggleActions: "play none none reverse",
+        },
       });
 
-      // Contact info animation
+      // Contact info animation - Faster and tighter timing
       gsap.to(contactInfoRef.current, {
         opacity: 1,
         y: 0,
-        duration: 0.6,
-        delay: 0.4,
+        duration: 0.2, // Reduced from 0.6s to 0.2s (67% faster)
+        delay: 0.2, // Reduced from 0.4s to 0.2s
         ease: "power2.out",
         scrollTrigger: {
           trigger: footerRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse"
-        }
+          start: "top 95%", // Changed from "top 85%" to "top 95%" for earlier activation
+          toggleActions: "play none none reverse",
+        },
       });
 
-      // Footer sections staggered animation
+      // Footer sections staggered animation - Faster and earlier
       gsap.to(".footer-section", {
         opacity: 1,
         y: 0,
-        duration: 0.7,
-        stagger: 0.15,
+        duration: 0.25, // Reduced from 0.7s to 0.25s (64% faster)
+        stagger: 0.06, // Reduced from 0.15s to 0.06s (60% faster)
         ease: "power2.out",
         scrollTrigger: {
           trigger: footerRef.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse"
-        }
+          start: "top 90%", // Changed from "top 80%" to "top 90%" for earlier activation
+          toggleActions: "play none none reverse",
+        },
       });
 
-      // Footer links staggered animation
+      // Footer links staggered animation - Much faster
       gsap.to(".footer-link", {
         opacity: 1,
         y: 0,
-        duration: 0.5,
-        stagger: 0.05,
+        duration: 0.2, // Reduced from 0.5s to 0.2s (60% faster)
+        stagger: 0.02, // Reduced from 0.05s to 0.02s (60% faster)
         ease: "power1.out",
-        delay: 0.3,
+        delay: 0.15, // Reduced from 0.3s to 0.15s
         scrollTrigger: {
           trigger: footerRef.current,
-          start: "top 75%",
-          toggleActions: "play none none reverse"
-        }
+          start: "top 85%", // Changed from "top 75%" to "top 85%" for earlier activation
+          toggleActions: "play none none reverse",
+        },
       });
 
-      // Social icons animation
+      // Social icons animation - Faster entrance
       gsap.to(".social-icon", {
         opacity: 1,
         y: 0,
-        duration: 0.6,
-        stagger: 0.1,
+        duration: 0.25, // Reduced from 0.6s to 0.25s (58% faster)
+        stagger: 0.04, // Reduced from 0.1s to 0.04s (60% faster)
         ease: "back.out(1.7)",
         scrollTrigger: {
           trigger: socialSectionRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse"
-        }
+          start: "top 95%", // Changed from "top 85%" to "top 95%" for earlier activation
+          toggleActions: "play none none reverse",
+        },
       });
 
-      // Copyright animation
+      // Copyright animation - Faster and tighter timing
       gsap.to(copyrightRef.current, {
         opacity: 1,
         y: 0,
-        duration: 0.6,
-        delay: 0.8,
+        duration: 0.25, // Reduced from 0.6s to 0.25s (58% faster)
+        delay: 0.3, // Reduced from 0.8s to 0.3s (62% faster)
         ease: "power2.out",
         scrollTrigger: {
           trigger: socialSectionRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse"
-        }
+          start: "top 95%", // Changed from "top 85%" to "top 95%" for earlier activation
+          toggleActions: "play none none reverse",
+        },
       });
-
-
     }, footerRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <footer ref={footerRef} className="bg-foreground dark:bg-muted border-t border-border py-16 lg:py-20 relative overflow-hidden">
+    <footer
+      ref={footerRef}
+      className="bg-foreground dark:bg-muted border-t border-border py-16 lg:py-20 relative overflow-hidden"
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-20 dark:opacity-10"></div>
       <div className="container mx-auto max-w-7xl px-5 relative z-10">
@@ -224,14 +225,18 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 { name: t("footer.links.home"), href: "/#home" },
-                { name: t("footer.links.categories"), href: "/#platforms" },
                 { name: t("footer.links.pricing"), href: "/#pricing" },
-                { name: t("footer.links.about"), href: "/#features" },
+                {
+                  name: t("footer.links.testimonials"),
+                  href: "/#testimonials",
+                },
+                { name: t("footer.links.features"), href: "/#features" },
+                { name: t("footer.links.faq"), href: "/#faq" },
               ].map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`footer-link text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-200 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
+                    className={`footer-link text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-100 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
                   >
                     {link.name}
                   </Link>
@@ -262,7 +267,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`footer-link text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-200 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
+                    className={`footer-link text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-100 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
                   >
                     {link.name}
                   </Link>
@@ -291,7 +296,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`footer-link text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-200 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
+                    className={`footer-link text-background/80 dark:text-muted-foreground hover:text-primary dark:hover:text-primary hover:underline transition-all duration-100 text-sm lg:text-base ${isRTL ? "font-tajawal" : "font-sans"}`}
                   >
                     {link.name}
                   </Link>
@@ -301,7 +306,10 @@ export default function Footer() {
           </div>
         </div>
         {/* Social Media & Bottom Section */}
-        <div ref={socialSectionRef} className="mt-12 pt-8 border-t border-background/10 dark:border-border">
+        <div
+          ref={socialSectionRef}
+          className="mt-12 pt-8 border-t border-background/10 dark:border-border"
+        >
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
             {/* Social Media Links */}
             <div className="flex items-center space-x-4">
@@ -343,7 +351,7 @@ export default function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="social-icon w-9 h-9 bg-muted/15 dark:bg-background/20 hover:bg-primary/10 border border-transparent hover:border-primary/30 rounded-lg flex items-center justify-center transition-all duration-300 group"
+                    className="social-icon w-9 h-9 bg-muted/15 dark:bg-background/20 hover:bg-primary/10 border border-transparent hover:border-primary/30 rounded-lg flex items-center justify-center transition-all duration-150 group"
                     aria-label={social.label}
                   >
                     <social.icon className="w-4 h-4 text-background/70 dark:text-muted-foreground group-hover:text-primary transition-colors" />

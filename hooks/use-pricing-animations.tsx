@@ -52,7 +52,7 @@ export const usePricingAnimations = ({
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: "top 85%",
+        start: "top 95%", // Start earlier for faster activation
         toggleActions: "play none none none",
         once: true, // Play only once for better performance
       },
@@ -60,15 +60,15 @@ export const usePricingAnimations = ({
 
     // Animate title
     if (titleRef.current) {
-      gsap.set(titleRef.current, { 
-        opacity: 0, 
-        y: 30,
-        force3D: true 
+      gsap.set(titleRef.current, {
+        opacity: 0,
+        y: 20,
+        force3D: true,
       });
       tl.to(titleRef.current, {
         opacity: 1,
         y: 0,
-        duration: 0.6,
+        duration: 0.3,
         ease: "power2.out",
         force3D: true,
       });
@@ -76,21 +76,21 @@ export const usePricingAnimations = ({
 
     // Animate description
     if (descriptionRef.current) {
-      gsap.set(descriptionRef.current, { 
-        opacity: 0, 
-        y: 20,
-        force3D: true 
+      gsap.set(descriptionRef.current, {
+        opacity: 0,
+        y: 15,
+        force3D: true,
       });
       tl.to(
         descriptionRef.current,
         {
           opacity: 1,
           y: 0,
-          duration: 0.5,
+          duration: 0.25,
           ease: "power2.out",
           force3D: true,
         },
-        "-=0.3"
+        "-=0.2"
       );
     }
 
@@ -99,7 +99,7 @@ export const usePricingAnimations = ({
     if (validCards.length > 0) {
       gsap.set(validCards, {
         opacity: 0,
-        y: 40,
+        y: 25,
         force3D: true,
       });
 
@@ -108,65 +108,63 @@ export const usePricingAnimations = ({
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
+          duration: 0.35,
           ease: "power2.out",
           force3D: true,
           stagger: {
-            amount: 0.3,
+            amount: 0.15,
             from: "start",
           },
         },
-        "-=0.2"
+        "-=0.15"
       );
     }
 
     // Animate additional info
     if (additionalInfoRef.current) {
-      gsap.set(additionalInfoRef.current, { 
-        opacity: 0, 
-        y: 15,
-        force3D: true 
+      gsap.set(additionalInfoRef.current, {
+        opacity: 0,
+        y: 10,
+        force3D: true,
       });
       tl.to(
         additionalInfoRef.current,
         {
           opacity: 1,
           y: 0,
-          duration: 0.4,
+          duration: 0.25,
           ease: "power2.out",
           force3D: true,
         },
-        "-=0.2"
+        "-=0.1"
       );
     }
 
     timelineRef.current = tl;
   }, [isLoading, hasError]);
 
-
   // Animate loading state with optimized performance
   const animateLoadingState = useCallback(() => {
     if (!cardsContainerRef.current) return;
 
-    const skeletons = cardsContainerRef.current.querySelectorAll(
-      "[data-skeleton]"
-    );
+    const skeletons =
+      cardsContainerRef.current.querySelectorAll("[data-skeleton]");
 
     if (skeletons.length > 0) {
       gsap.fromTo(
         skeletons,
         {
           opacity: 0,
-          y: 20,
+          y: 15,
           force3D: true,
         },
         {
           opacity: 1,
           y: 0,
-          duration: 0.4,
+          duration: 0.25,
           ease: "power2.out",
           force3D: true,
-          stagger: 0.05,
+          stagger: 0.03,
         }
       );
     }
@@ -176,22 +174,21 @@ export const usePricingAnimations = ({
   const animateErrorState = useCallback(() => {
     if (!cardsContainerRef.current) return;
 
-    const errorContainer = cardsContainerRef.current.querySelector(
-      "[data-error]"
-    );
+    const errorContainer =
+      cardsContainerRef.current.querySelector("[data-error]");
 
     if (errorContainer) {
       gsap.fromTo(
         errorContainer,
         {
           opacity: 0,
-          y: 15,
+          y: 10,
           force3D: true,
         },
         {
           opacity: 1,
           y: 0,
-          duration: 0.4,
+          duration: 0.25,
           ease: "power2.out",
           force3D: true,
         }
@@ -209,7 +206,7 @@ export const usePricingAnimations = ({
       // Small delay to ensure DOM is ready
       const timer = setTimeout(() => {
         initEntranceAnimations();
-      }, 50);
+      }, 20);
 
       return () => clearTimeout(timer);
     }
@@ -245,7 +242,7 @@ export const usePricingAnimations = ({
     if (!isLoading && !hasError && cardsCount > 0) {
       setTimeout(() => {
         initEntranceAnimations();
-      }, 50);
+      }, 20);
     }
   }, [isLoading, hasError, cardsCount, initEntranceAnimations]);
 

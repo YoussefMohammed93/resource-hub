@@ -34,6 +34,7 @@ import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
 import { authApi, userApi } from "@/lib/api";
 import Image from "next/image";
+import Footer from "@/components/footer";
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -1107,6 +1108,7 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </main>
+      <Footer />
     </div>
   );
 }

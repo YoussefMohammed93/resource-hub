@@ -11,9 +11,8 @@
     "logo": "ResourceHub",
     "navigation": {
       "home": "Home",
-      "platforms": "Platforms",
       "pricing": "Pricing",
-      "categories": "Categories",
+      "testimonials": "Testimonials",
       "features": "Features",
       "faq": "FAQ"
     }
@@ -69,7 +68,7 @@
   },
   "features": {
     "title": "Why Choose",
-    "titleHighlight": "Resource Hub",
+    "titleHighlight": "Stockaty",
     "description": "Everything you need to access premium creative resources from top platforms worldwide.",
     "premiumQuality": {
       "title": "Premium Quality",
@@ -205,13 +204,16 @@
     "sites": "Sites",
     "errors": {
       "notFound": "Plan Not Found",
-      "notFoundDescription": "The plan you're looking for doesn't exist or has been removed."
+      "notFoundDescription": "The plan you're looking for doesn't exist or has been removed.",
+      "loadError": "Failed to Load Plan",
+      "loadErrorDescription": "There was an error loading the plan details. Please try again."
     },
     "actions": {
       "goBack": "Go Back",
       "viewAllPlans": "View All Plans",
       "subscribe": "Subscribe Now",
-      "contactUs": "Contact Us"
+      "contactUs": "Contact Us",
+      "retry": "Try Again"
     },
     "features": {
       "title": "Plan Features",
@@ -253,7 +255,7 @@
       }
     },
     "supportedSites": {
-      "title": "All Supported Websites"
+      "title": "Supported Sites"
     },
     "planFeatures": {
       "title": "Plan Features",
@@ -419,12 +421,14 @@
     "allRightsReserved": "All rights reserved.",
     "links": {
       "home": "Home",
-      "categories": "Categories",
       "pricing": "Pricing",
+      "testimonials": "Testimonials",
+      "features": "Features",
+      "faq": "FAQ",
+      "categories": "Categories",
       "about": "About",
       "helpCenter": "Help Center",
       "contactSupport": "Contact Support",
-      "faq": "FAQ",
       "privacyPolicy": "Privacy Policy",
       "termsOfService": "Terms of Service",
       "cookiePolicy": "Cookie Policy",
@@ -1250,11 +1254,13 @@
       },
       "phone": {
         "label": "Phone Number",
-        "placeholder": "+1234567890",
+        "placeholder": "1234567890",
+        "placeholderWithCode": "Enter your phone number",
         "sendCodeButton": "Send Code",
         "sendingCode": "Sending...",
         "codeSent": "Verification code sent to your phone",
-        "otpMessage": "We'll send you a verification code"
+        "otpMessage": "We'll send you a verification code",
+        "countryCodePrefix": "+"
       },
       "otp": {
         "label": "Verification Code",

@@ -67,8 +67,6 @@ import {
   HeaderSkeleton,
   HeroSkeleton,
   FeaturesSkeleton,
-  CategoriesSkeleton,
-  SupportedPlatformsSkeleton,
   FooterSkeleton,
   FAQSkeleton,
   TestimonialsSkeleton,
@@ -116,7 +114,7 @@ function StatisticCard({
 }: StatisticCardProps) {
   const { count, elementRef } = useAnimatedCounter({
     end: value,
-    duration: 3000 + delay,
+    duration: 2000 + delay,
     decimals: 0,
   });
   const { isRTL } = useLanguage();
@@ -129,15 +127,15 @@ function StatisticCard({
   return (
     <div
       ref={elementRef}
-      className="statistic-card group bg-card border border-border rounded-2xl p-6 lg:p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-lg relative overflow-hidden flex flex-col items-center justify-center min-h-[200px]"
+      className="statistic-card group bg-card border border-border rounded-2xl p-6 lg:p-8 transition-all duration-200 hover:border-primary/30 hover:shadow-lg relative overflow-hidden flex flex-col items-center justify-center min-h-[200px]"
     >
       {/* Hover effect overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl transform scale-0 group-hover:scale-100 transition-transform duration-500 ease-out"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl transform scale-0 group-hover:scale-100 transition-transform duration-200 ease-out"></div>
 
       <div className="relative z-10 flex flex-col items-center justify-center text-center space-y-4">
         {/* Icon */}
         {icon && (
-          <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-2xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-primary/10 border border-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-150">
             {icon}
           </div>
         )}
@@ -540,7 +538,6 @@ export default function HomePage() {
     mobileSearchTypeRef,
     mobileSearchInputRef,
     mobileSearchButtonRef,
-    desktopSearchBarRef,
     errorDisplayRef,
     squareGridRef,
     diamondGridRef,
@@ -742,8 +739,6 @@ export default function HomePage() {
 
         if (Array.isArray(response.data)) {
           apiPlans = response.data;
-        } else if (response.data.data && Array.isArray(response.data.data)) {
-          apiPlans = response.data.data;
         }
 
         // Transform API pricing plans to frontend format
@@ -751,7 +746,13 @@ export default function HomePage() {
           (plan: unknown, index: number) => {
             const planObj = plan as Record<string, unknown>;
             return {
-              id: index + 1,
+              // Use actual ID from API response, fallback to index-based ID for backward compatibility
+              id:
+                typeof planObj.id === "string"
+                  ? planObj.id
+                  : typeof planObj.Id === "string"
+                    ? planObj.Id
+                    : index + 1,
               name:
                 typeof planObj.name === "string"
                   ? planObj.name
@@ -809,7 +810,9 @@ export default function HomePage() {
                 t("dashboard.packageManagement.features.support"),
                 t("dashboard.packageManagement.features.adminManagement"),
               ],
-              recommended: planObj.recommended === true,
+              // Use the recommended field from API response
+              recommended:
+                planObj.recommended === true || planObj.recommended === "true",
             };
           }
         );
@@ -1210,13 +1213,13 @@ export default function HomePage() {
 
       // Set initial states for title and description
       gsap.set([statsTitleRef.current, statsDescriptionRef.current], {
-        y: 50,
+        y: 25,
         opacity: 0,
       });
 
       // Set initial state for cards container
       gsap.set(statsCardsContainerRef.current, {
-        y: 80,
+        y: 40,
         opacity: 0,
       });
 
@@ -1224,7 +1227,7 @@ export default function HomePage() {
       const mainTl = gsap.timeline({
         scrollTrigger: {
           trigger: statisticsSectionRef.current,
-          start: "top 80%",
+          start: "top 95%",
           end: "bottom 20%",
           toggleActions: "play none none reverse",
         },
@@ -1237,7 +1240,7 @@ export default function HomePage() {
           {
             y: 0,
             opacity: 1,
-            duration: 1,
+            duration: 0.4,
             ease: "power3.out",
           },
           0
@@ -1247,10 +1250,10 @@ export default function HomePage() {
           {
             y: 0,
             opacity: 1,
-            duration: 0.8,
+            duration: 0.3,
             ease: "power3.out",
           },
-          0.2
+          0.1
         );
 
       // Animate statistics cards with individual staggered entrance
@@ -1270,9 +1273,9 @@ export default function HomePage() {
             statsCardsContainerRef.current,
             {
               opacity: 1,
-              duration: 0.1,
+              duration: 0.05,
             },
-            0.4
+            0.2
           )
           // Then animate individual cards with stagger
           .to(
@@ -1280,14 +1283,14 @@ export default function HomePage() {
             {
               opacity: 1,
               scale: 1,
-              duration: 1,
+              duration: 0.4,
               ease: "power2.out",
               stagger: {
-                amount: 0.6,
+                amount: 0.2,
                 from: "start",
               },
             },
-            0.5
+            0.25
           );
       }
 
@@ -1305,11 +1308,11 @@ export default function HomePage() {
           scale: 1,
           rotation: 0,
           opacity: 1,
-          duration: 1.2,
+          duration: 0.5,
           ease: "back.out(1.7)",
-          stagger: 0.15,
+          stagger: 0.05,
         },
-        0.6
+        0.3
       );
 
       // Animate dot grids with staggered entrance
@@ -1323,26 +1326,26 @@ export default function HomePage() {
         {
           opacity: 0.5,
           scale: 1,
-          duration: 0.8,
+          duration: 0.3,
           ease: "power2.out",
-          stagger: 0.1,
+          stagger: 0.03,
         },
-        0.5
+        0.2
       );
 
       // Continuous floating animations for icons
       const floatingIcons = [
-        { ref: statsChartIconRef.current, y: -15, duration: 3, delay: 0 },
+        { ref: statsChartIconRef.current, y: -7, duration: 1.2, delay: 0 },
         {
           ref: statsDownloadIconRef.current,
-          y: -12,
-          duration: 2.5,
-          delay: 0.5,
+          y: -6,
+          duration: 1.0,
+          delay: 0.1,
         },
-        { ref: statsHeartIconRef.current, y: -10, duration: 2.8, delay: 1 },
-        { ref: statsGlobeIconRef.current, y: -14, duration: 3.2, delay: 1.5 },
-        { ref: statsTargetIconRef.current, y: -11, duration: 2.7, delay: 2 },
-        { ref: statsPackageIconRef.current, y: -13, duration: 3.1, delay: 2.5 },
+        { ref: statsHeartIconRef.current, y: -5, duration: 1.1, delay: 0.2 },
+        { ref: statsGlobeIconRef.current, y: -7, duration: 1.3, delay: 0.3 },
+        { ref: statsTargetIconRef.current, y: -5, duration: 1.1, delay: 0.4 },
+        { ref: statsPackageIconRef.current, y: -6, duration: 1.2, delay: 0.5 },
       ];
 
       floatingIcons.forEach(({ ref, y, duration, delay }) => {
@@ -1360,9 +1363,9 @@ export default function HomePage() {
 
       // Rotation animations for icons
       const rotatingIcons = [
-        { ref: statsChartIconRef.current, rotation: 5, duration: 4 },
-        { ref: statsGlobeIconRef.current, rotation: -3, duration: 5 },
-        { ref: statsTargetIconRef.current, rotation: 4, duration: 3.5 },
+        { ref: statsChartIconRef.current, rotation: 2, duration: 1.8 },
+        { ref: statsGlobeIconRef.current, rotation: -2, duration: 2.0 },
+        { ref: statsTargetIconRef.current, rotation: 2, duration: 1.6 },
       ];
 
       rotatingIcons.forEach(({ ref, rotation, duration }) => {
@@ -1388,22 +1391,22 @@ export default function HomePage() {
         gsap.fromTo(
           dots,
           {
-            scale: 0.5,
-            opacity: 0.3,
+            scale: 0.8,
+            opacity: 0.4,
           },
           {
-            scale: 1.2,
-            opacity: 0.8,
-            duration: 0.6,
+            scale: 1.1,
+            opacity: 0.7,
+            duration: 0.3,
             ease: "power2.out",
             stagger: {
-              amount: 2,
+              amount: 0.5,
               grid: "auto",
               from: "random",
             },
             repeat: -1,
             yoyo: true,
-            repeatDelay: 3,
+            repeatDelay: 1,
           }
         );
       };
@@ -1415,7 +1418,7 @@ export default function HomePage() {
         statsDotsTopRightRef,
         statsDotsBottomLeftRef,
       ].forEach((gridRef) => {
-        setTimeout(() => animateDotsGrid(gridRef), Math.random() * 2000);
+        setTimeout(() => animateDotsGrid(gridRef), Math.random() * 300);
       });
 
       // Pulse animation for icons on hover
@@ -1432,8 +1435,8 @@ export default function HomePage() {
         if (icon) {
           const hoverTl = gsap.timeline({ paused: true });
           hoverTl.to(icon, {
-            scale: 1.15,
-            duration: 0.3,
+            scale: 1.1,
+            duration: 0.15,
             ease: "power2.out",
           });
 
@@ -1452,7 +1455,7 @@ export default function HomePage() {
 
           cardHoverTl.to(card, {
             boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-            duration: 0.3,
+            duration: 0.2,
             ease: "power2.out",
           });
 
@@ -1465,7 +1468,7 @@ export default function HomePage() {
     return () => ctx.revert();
   }, [isLoading]);
 
-  // GSAP Features Section Animations
+  // GSAP Features Section Animations - Optimized for Speed and Smoothness
   useEffect(() => {
     if (isLoading || !featuresSectionRef.current) return;
 
@@ -1473,45 +1476,45 @@ export default function HomePage() {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      // Set initial states for title and description
+      // Set initial states for title and description - Reduced movement distances
       gsap.set([featuresTitleRef.current, featuresHighlightRef.current], {
-        y: 40,
+        y: 20, // Reduced from 40px to 20px
         opacity: 0,
       });
 
       gsap.set(featuresDescriptionRef.current, {
-        y: 30,
+        y: 15, // Reduced from 30px to 15px
         opacity: 0,
       });
 
-      // Set initial state for feature cards
+      // Set initial state for feature cards - Reduced movement and scale
       if (featuresGridRef.current) {
         const featureCards = featuresGridRef.current.querySelectorAll(".group");
         gsap.set(featureCards, {
-          y: 60,
+          y: 30, // Reduced from 60px to 30px
           opacity: 0,
-          scale: 0.9,
+          scale: 0.95, // Reduced from 0.9 to 0.95 for subtler effect
         });
       }
 
-      // Main timeline for features section entrance
+      // Main timeline for features section entrance - Earlier activation
       const mainTl = gsap.timeline({
         scrollTrigger: {
           trigger: featuresSectionRef.current,
-          start: "top 80%",
+          start: "top 95%", // Changed from "top 80%" to "top 95%" for earlier activation
           end: "bottom 20%",
           toggleActions: "play none none reverse",
         },
       });
 
-      // Animate title first with faster, smoother animations
+      // Animate title first with faster, smoother animations - Reduced durations
       mainTl
         .to(
           featuresTitleRef.current,
           {
             y: 0,
             opacity: 1,
-            duration: 0.6,
+            duration: 0.25, // Reduced from 0.6s to 0.25s (58% faster)
             ease: "back.out(1.7)",
           },
           0
@@ -1521,23 +1524,23 @@ export default function HomePage() {
           {
             y: 0,
             opacity: 1,
-            duration: 0.6,
+            duration: 0.25, // Reduced from 0.6s to 0.25s (58% faster)
             ease: "back.out(1.7)",
           },
-          0.05
+          0.02 // Reduced from 0.05s to 0.02s
         )
         .to(
           featuresDescriptionRef.current,
           {
             y: 0,
             opacity: 1,
-            duration: 0.5,
+            duration: 0.2, // Reduced from 0.5s to 0.2s (60% faster)
             ease: "power4.out",
           },
-          0.2
+          0.1 // Reduced from 0.2s to 0.1s
         );
 
-      // Animate feature cards with staggered entrance
+      // Animate feature cards with staggered entrance - Faster timing
       if (featuresGridRef.current) {
         const featureCards = featuresGridRef.current.querySelectorAll(".group");
 
@@ -1547,17 +1550,17 @@ export default function HomePage() {
             y: 0,
             opacity: 1,
             scale: 1,
-            duration: 0.6,
+            duration: 0.3, // Reduced from 0.6s to 0.3s (50% faster)
             ease: "back.out(1.7)",
             stagger: {
-              amount: 0.4,
+              amount: 0.15, // Reduced from 0.4s to 0.15s (62% faster)
               from: "start",
             },
           },
-          0.4
+          0.2 // Reduced from 0.4s to 0.2s
         );
 
-        // Add hover animations for feature cards
+        // Add hover animations for feature cards - Faster hover effects
         featureCards.forEach((card) => {
           const icon = card.querySelector(".w-14.h-14");
           const overlay = card.querySelector(".absolute.inset-0");
@@ -1569,9 +1572,9 @@ export default function HomePage() {
               .to(
                 icon,
                 {
-                  scale: 1.2,
-                  rotation: 8,
-                  duration: 0.3,
+                  scale: 1.15, // Reduced from 1.2 to 1.15 for subtler effect
+                  rotation: 5, // Reduced from 8 to 5 degrees
+                  duration: 0.15, // Reduced from 0.3s to 0.15s (50% faster)
                   ease: "back.out(2.5)",
                 },
                 0
@@ -1580,7 +1583,7 @@ export default function HomePage() {
                 overlay,
                 {
                   opacity: 1,
-                  duration: 0.3,
+                  duration: 0.15, // Reduced from 0.3s to 0.15s (50% faster)
                   ease: "power3.out",
                 },
                 0
@@ -1591,27 +1594,27 @@ export default function HomePage() {
           }
         });
 
-        // Add continuous floating animation for icons
+        // Add continuous floating animation for icons - Faster and smoother
         featureCards.forEach((card, index) => {
           const icon = card.querySelector(".w-14.h-14");
           if (icon) {
             gsap.to(icon, {
-              y: -8,
-              duration: 1.5 + index * 0.2,
+              y: -4, // Reduced from -8px to -4px for subtler movement
+              duration: 0.8 + index * 0.1, // Reduced from 1.5 + index * 0.2 (47% faster)
               ease: "sine.inOut",
               yoyo: true,
               repeat: -1,
-              delay: index * 0.15,
+              delay: index * 0.05, // Reduced from index * 0.15 (67% faster)
             });
 
-            // Add subtle rotation animation
+            // Add subtle rotation animation - Faster cycles
             gsap.to(icon, {
-              rotation: 3,
-              duration: 2.5 + index * 0.3,
+              rotation: 2, // Reduced from 3 to 2 degrees
+              duration: 1.2 + index * 0.15, // Reduced from 2.5 + index * 0.3 (52% faster)
               ease: "sine.inOut",
               yoyo: true,
               repeat: -1,
-              delay: index * 0.1,
+              delay: index * 0.03, // Reduced from index * 0.1 (70% faster)
             });
           }
         });
@@ -1627,8 +1630,6 @@ export default function HomePage() {
       <div className="min-h-screen bg-background font-sans">
         <HeaderSkeleton />
         <HeroSkeleton />
-        <SupportedPlatformsSkeleton />
-        <CategoriesSkeleton />
         <TestimonialsSkeleton />
         <StatisticsSkeleton />
         <FeaturesSkeleton />
@@ -1707,17 +1708,17 @@ export default function HomePage() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => handleSmoothScroll("platforms")}
-                className={`hover:bg-primary hover:text-white ${isRTL && "text-base"}`}
-              >
-                {t("header.navigation.platforms")}
-              </Button>
-              <Button
-                variant="ghost"
                 onClick={() => handleSmoothScroll("pricing")}
                 className={`hover:bg-primary hover:text-white ${isRTL && "text-base"}`}
               >
                 {t("header.navigation.pricing")}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => handleSmoothScroll("testimonials")}
+                className={`hover:bg-primary hover:text-white ${isRTL && "text-base"}`}
+              >
+                {t("header.navigation.testimonials")}
               </Button>
               <Button
                 variant="ghost"
@@ -1772,21 +1773,21 @@ export default function HomePage() {
               </div>
               <div ref={addToRefs}>
                 <button
-                  onClick={() => handleSmoothScroll("platforms")}
-                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
-                >
-                  <span className="text-base">
-                    {t("header.navigation.platforms")}
-                  </span>
-                </button>
-              </div>
-              <div ref={addToRefs}>
-                <button
                   onClick={() => handleSmoothScroll("pricing")}
                   className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
                 >
                   <span className="text-base">
                     {t("header.navigation.pricing")}
+                  </span>
+                </button>
+              </div>
+              <div ref={addToRefs}>
+                <button
+                  onClick={() => handleSmoothScroll("testimonials")}
+                  className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+                >
+                  <span className="text-base">
+                    {t("header.navigation.testimonials")}
                   </span>
                 </button>
               </div>
@@ -1843,7 +1844,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.05}s`,
+                    animationDelay: `${(row + col) * 0.005}s`,
                     opacity: Math.random() * 0.5 + 0.3,
                   }}
                 />
@@ -1875,7 +1876,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.04}s`,
+                    animationDelay: `${(row + col) * 0.004}s`,
                     opacity: Math.random() * 0.5 + 0.25,
                   }}
                 />
@@ -1908,7 +1909,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.075}s`,
+                    animationDelay: `${(row + col) * 0.007}s`,
                     opacity: Math.random() * 0.4 + 0.4,
                   }}
                 />
@@ -1939,7 +1940,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.1}s`,
+                    animationDelay: `${(row + col) * 0.01}s`,
                     opacity: Math.random() * 0.5 + 0.4,
                   }}
                 />
@@ -1971,7 +1972,7 @@ export default function HomePage() {
                   fill="currentColor"
                   className="animate-pulse-slow"
                   style={{
-                    animationDelay: `${(row + col) * 0.075}s`,
+                    animationDelay: `${(row + col) * 0.007}s`,
                     opacity: Math.random() * 0.5 + 0.3,
                   }}
                 />
@@ -2006,130 +2007,136 @@ export default function HomePage() {
               className="w-full max-w-5xl px-4 sm:px-0"
             >
               {/* Mobile Layout */}
-              <div className="sm:hidden space-y-4">
-                {/* Search Type Dropdown for Mobile */}
-                <div ref={mobileSearchTypeRef} className="w-full">
-                  <Select value={searchType} onValueChange={setSearchType}>
-                    <SelectTrigger className="w-full !h-14 text-base border-2 border-border focus:border-primary rounded-xl bg-background/80 backdrop-blur-sm">
-                      <SelectValue
-                        placeholder={t("hero.searchType.placeholder")}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        <div className="flex items-center gap-2">
-                          <Search className="w-4 h-4" />
-                          <span>{t("hero.searchType.all")}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="images">
-                        <div className="flex items-center gap-2">
-                          <ImageIcon className="w-4 h-4" />
-                          <span>{t("hero.searchType.images")}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="vectors">
-                        <div className="flex items-center gap-2">
-                          <Palette className="w-4 h-4" />
-                          <span>{t("hero.searchType.vectors")}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="videos">
-                        <div className="flex items-center gap-2">
-                          <Camera className="w-4 h-4" />
-                          <span>{t("hero.searchType.videos")}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="templates">
-                        <div className="flex items-center gap-2">
-                          <File className="w-4 h-4" />
-                          <span>{t("hero.searchType.templates")}</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="sm:hidden">
+                <div className="flex gap-2 w-full">
+                  {/* Search Type Dropdown for Mobile - Icon Only */}
+                  <div ref={mobileSearchTypeRef} className="flex-shrink-0">
+                    <Select value={searchType} onValueChange={setSearchType}>
+                      <SelectTrigger className="w-16 !h-12 border-2 border-border focus:border-primary rounded-xl bg-background/80 backdrop-blur-sm transition-fast p-0 flex items-center justify-center">
+                        <SelectValue>
+                          {searchType === "all" && (
+                            <Search className="w-5 h-5" />
+                          )}
+                          {searchType === "images" && (
+                            <ImageIcon className="w-5 h-5" />
+                          )}
+                          {searchType === "vectors" && (
+                            <Palette className="w-5 h-5" />
+                          )}
+                          {searchType === "videos" && (
+                            <Camera className="w-5 h-5" />
+                          )}
+                          {searchType === "templates" && (
+                            <File className="w-5 h-5" />
+                          )}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          <div className="flex items-center gap-2">
+                            <Search className="w-4 h-4" />
+                            <span>{t("hero.searchType.all")}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="images">
+                          <div className="flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4" />
+                            <span>{t("hero.searchType.images")}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="vectors">
+                          <div className="flex items-center gap-2">
+                            <Palette className="w-4 h-4" />
+                            <span>{t("hero.searchType.vectors")}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="videos">
+                          <div className="flex items-center gap-2">
+                            <Camera className="w-4 h-4" />
+                            <span>{t("hero.searchType.videos")}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="templates">
+                          <div className="flex items-center gap-2">
+                            <File className="w-4 h-4" />
+                            <span>{t("hero.searchType.templates")}</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                {/* Search Input */}
-                <div ref={mobileSearchInputRef} className="relative">
-                  <Search
-                    className={`absolute ${isRTL ? "right-4" : "left-4"} top-1/2 transform -translate-y-1/2 stroke-2 text-muted-foreground w-5 h-5`}
-                  />
-                  <Input
-                    type="text"
-                    placeholder={t("hero.searchPlaceholderMobile")}
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      if (searchError) setSearchError(null);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleSearch();
-                      }
-                    }}
-                    disabled={isSearching}
-                    className={`${isRTL ? "pr-12" : "pl-12"} ${searchQuery ? (isRTL ? "pl-12" : "pr-12") : isRTL ? "pl-4" : "pr-4"} py-8 h-12 2xl:h-16 text-lg border-2 ${
-                      searchError
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-border focus:border-primary"
-                    } rounded-xl bg-background/80 backdrop-blur-sm w-full ${isSearching ? "opacity-50" : ""} placeholder:text-muted-foreground/70`}
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={clearSearch}
-                      className={`absolute ${isRTL ? "left-4" : "right-4"} top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors`}
-                      type="button"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  )}
-                  {searchError && (
-                    <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                      <p className="text-sm text-red-600 dark:text-red-400">
-                        {searchError}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div
-                  ref={mobileSearchButtonRef}
-                  className="flex flex-col gap-3"
-                >
-                  <Button
-                    onClick={handleSearch}
-                    disabled={isSearching || !searchQuery.trim()}
-                    className="w-full py-7 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl min-h-[3.5rem] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+                  {/* Search Input - Flexible width */}
+                  <div
+                    ref={mobileSearchInputRef}
+                    className="relative flex-1 min-w-0"
                   >
-                    {isSearching ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                        {t("hero.searching")}
-                      </>
-                    ) : (
-                      <>
-                        <Search className="w-5 h-5 stroke-2" />
-                        {t("hero.searchButton")}
-                      </>
+                    <Input
+                      type="text"
+                      placeholder={t("hero.searchPlaceholderMobile")}
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        if (searchError) setSearchError(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleSearch();
+                        }
+                      }}
+                      disabled={isSearching}
+                      className={`${isRTL ? "pr-4" : "pl-4"} ${searchQuery ? (isRTL ? "pl-10" : "pr-10") : isRTL ? "pl-4" : "pr-4"} h-12 text-base border-2 ${
+                        searchError
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-border focus:border-primary"
+                      } rounded-xl bg-background/80 backdrop-blur-sm w-full ${isSearching ? "opacity-50" : ""} placeholder:text-muted-foreground/70 transition-fast`}
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={clearSearch}
+                        className={`absolute ${isRTL ? "left-2" : "right-2"} top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-super-fast`}
+                        type="button"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     )}
-                  </Button>
+                  </div>
+
+                  {/* Search Button - Icon Only */}
+                  <div ref={mobileSearchButtonRef} className="flex-shrink-0">
+                    <Button
+                      onClick={handleSearch}
+                      disabled={isSearching || !searchQuery.trim()}
+                      className="w-12 h-12 p-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
+                      {isSearching ? (
+                        <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin-fast" />
+                      ) : (
+                        <Search className="w-5 h-5 stroke-2" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
+
+                {/* Error Message */}
+                {searchError && (
+                  <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      {searchError}
+                    </p>
+                  </div>
+                )}
               </div>
               {/* Desktop Layout */}
-              <div
-                ref={desktopSearchBarRef}
-                className="hidden sm:flex items-center gap-5"
-              >
+              <div className="hidden sm:flex items-center gap-5">
                 <div className="w-full relative flex items-center">
                   {/* Search Type Dropdown */}
                   <div
                     className={`absolute ${isRTL ? "right-2" : "left-2"} top-1/2 transform -translate-y-1/2 z-10`}
                   >
                     <Select value={searchType} onValueChange={setSearchType}>
-                      <SelectTrigger className="w-44 !h-12 2xl:!h-16 border-0 bg-secondary hover:bg-secondary/70 dark:hover:bg-muted/50 focus:ring-0 focus:ring-offset-0">
+                      <SelectTrigger className="w-44 !h-12 2xl:!h-16 border-0 bg-secondary hover:bg-secondary/70 dark:hover:bg-muted/50 focus:ring-0 focus:ring-offset-0 transition-fast">
                         <SelectValue
                           placeholder={t("hero.searchType.placeholder")}
                         />
@@ -2199,7 +2206,7 @@ export default function HomePage() {
                       searchError
                         ? "border-red-500 focus:border-red-500"
                         : "border-border focus:border-primary"
-                    } rounded-xl bg-background/80 backdrop-blur-sm placeholder:text-base 2xl:placeholder:text-xl ${isRTL && "placeholder:text-base 2xl:placeholder:text-lg"} ${isSearching ? "opacity-50" : ""} placeholder:text-muted-foreground/70`}
+                    } rounded-xl bg-background/80 backdrop-blur-sm placeholder:text-base 2xl:placeholder:text-xl ${isRTL && "placeholder:text-base 2xl:placeholder:text-lg"} ${isSearching ? "opacity-50" : ""} placeholder:text-muted-foreground/70 transition-fast`}
                   />
 
                   {/* Clear Button */}
@@ -2207,10 +2214,14 @@ export default function HomePage() {
                     <button
                       onClick={clearSearch}
                       className={`cursor-pointer absolute ${
-                        isSearching 
-                          ? (isRTL ? "left-44" : "right-44")
-                          : (isRTL ? "left-32" : "right-36")
-                      } top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10`}
+                        isSearching
+                          ? isRTL
+                            ? "left-44"
+                            : "right-44"
+                          : isRTL
+                            ? "left-32"
+                            : "right-36"
+                      } top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-super-fast z-10`}
                       type="button"
                     >
                       <X className="w-5 h-5 2xl:w-6 2xl:h-6" />
@@ -2225,7 +2236,7 @@ export default function HomePage() {
                   >
                     {isSearching ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin-fast" />
                         {t("hero.searching")}
                       </>
                     ) : (
@@ -2280,7 +2291,7 @@ export default function HomePage() {
             {/* Supported Platforms Infinite Scroll - Integrated */}
             <div className="w-full mt-16 sm:mt-12">
               <div className="text-center mb-8 px-4">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2 leading-tight font-sans">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 leading-tight font-sans">
                   {t("supportedPlatforms.title")}{" "}
                   <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                     {t("supportedPlatforms.titleHighlight")}
@@ -2304,7 +2315,7 @@ export default function HomePage() {
                     return (
                       <div
                         key={`row1-${site.id}`}
-                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
                       >
                         <div
                           className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
@@ -2326,9 +2337,9 @@ export default function HomePage() {
                               }}
                             />
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="sm:flex-1 sm:min-w-0">
                             <h3
-                              className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
                             >
                               {site.name}
                             </h3>
@@ -2357,7 +2368,7 @@ export default function HomePage() {
                     return (
                       <div
                         key={`row1-dup-${site.id}`}
-                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
                       >
                         <div
                           className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
@@ -2379,9 +2390,9 @@ export default function HomePage() {
                               }}
                             />
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="sm:flex-1 sm:min-w-0">
                             <h3
-                              className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
                             >
                               {site.name}
                             </h3>
@@ -2423,7 +2434,7 @@ export default function HomePage() {
                     return (
                       <div
                         key={`row2-${site.id}`}
-                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
                       >
                         <div
                           className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
@@ -2445,9 +2456,9 @@ export default function HomePage() {
                               }}
                             />
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="sm:flex-1 sm:min-w-0">
                             <h3
-                              className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
                             >
                               {site.name}
                             </h3>
@@ -2476,7 +2487,7 @@ export default function HomePage() {
                     return (
                       <div
                         key={`row2-dup-${site.id}`}
-                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-64 h-32 platform-card"
+                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
                       >
                         <div
                           className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
@@ -2498,9 +2509,9 @@ export default function HomePage() {
                               }}
                             />
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="sm:flex-1 sm:min-w-0">
                             <h3
-                              className={`font-semibold text-sm text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
                             >
                               {site.name}
                             </h3>
@@ -2560,8 +2571,8 @@ export default function HomePage() {
                   fill="currentColor"
                   className="text-primary animate-pulse"
                   style={{
-                    animationDelay: `${(row + col) * 0.2}s`,
-                    animationDuration: "3s",
+                    animationDelay: `${(row + col) * 0.05}s`,
+                    animationDuration: "1.5s",
                   }}
                 />
               ))
@@ -2580,7 +2591,7 @@ export default function HomePage() {
           {/* Bottom Left Crown Icon */}
           <div
             className={`hidden md:block absolute bottom-32 ${isRTL ? "right-12" : "left-12"} animate-bounce-slow`}
-            style={{ animationDelay: "0.5s" }}
+            style={{ animationDelay: "0.2s" }}
           >
             <div className="w-13 h-13 bg-primary/10 border border-primary/10 rounded-xl flex items-center justify-center">
               <Crown className="w-6 h-6 text-primary" />
@@ -2603,8 +2614,8 @@ export default function HomePage() {
                   fill="currentColor"
                   className="text-primary animate-pulse"
                   style={{
-                    animationDelay: `${(row + col) * 0.3}s`,
-                    animationDuration: "4s",
+                    animationDelay: `${(row + col) * 0.08}s`,
+                    animationDuration: "2s",
                   }}
                 />
               ))
@@ -2614,7 +2625,7 @@ export default function HomePage() {
           {/* Bottom Center Zap Icon */}
           <div
             className={`hidden lg:block absolute bottom-24 left-1/2 -translate-x-1/2 animate-float`}
-            style={{ animationDelay: "1.5s" }}
+            style={{ animationDelay: "0.3s" }}
           >
             <div className="w-10 h-10 bg-primary/10 border border-primary/10 rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-primary" />
@@ -3015,26 +3026,26 @@ export default function HomePage() {
             className="pt-14 text-center"
           >
             <p
-              className={`text-sm text-muted-foreground mb-4 ${isRTL && "!text-lg"}`}
+              className={`text-base text-muted-foreground mb-4 ${isRTL && "!text-lg"}`}
             >
               {t("pricing.features.main")}
             </p>
             <div className="flex flex-wrap justify-center items-center gap-6 text-xs text-muted-foreground">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className={`${isRTL && "text-base"}`}>
+                <span className={`text-base ${isRTL && "text-base"}`}>
                   {t("pricing.features.moneyBack")}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-destructive rounded-full"></div>
-                <span className={`${isRTL && "text-base"}`}>
+                <span className={`text-base ${isRTL && "text-base"}`}>
                   {t("pricing.features.cancelAnytime")}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span className={`${isRTL && "text-base"}`}>
+                <span className={`text-base ${isRTL && "text-base"}`}>
                   {t("pricing.features.support24")}
                 </span>
               </div>
@@ -3049,6 +3060,7 @@ export default function HomePage() {
       ) : (
         <section
           ref={testimonialsAnimRef}
+          id="testimonials"
           className="py-16 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden"
         >
           {/* Floating Background Elements */}
@@ -3244,7 +3256,7 @@ export default function HomePage() {
         <div className="bg-gradient-to-br from-secondary/10 via-secondary/20 to-secondary/10">
           <section
             ref={statisticsSectionRef}
-            className="py-16 lg:py-20 relative overflow-hidden"
+            className="py-16 lg:pt-20 lg:pb-4 relative overflow-hidden"
           >
             {/* Floating Background Elements */}
             <div
@@ -3449,7 +3461,7 @@ export default function HomePage() {
                       value={parseInt(stat.value)}
                       label={stat.label}
                       suffix={stat.suffix}
-                      delay={index * 3500}
+                      delay={index * 200}
                       icon={getStatIcon(key)}
                     />
                   );
@@ -3469,12 +3481,12 @@ export default function HomePage() {
           id="features"
           className="py-16 lg:py-20 bg-gradient-to-br from-secondary via-secondary/50 to-secondary relative overflow-hidden"
         >
-          {/* Floating Circles Background Animation */}
+          {/* Floating Circles Background Animation - Optimized */}
           <FloatingDotsAnimation
             className="absolute inset-0 z-0"
-            dotCount={120}
-            dotSize={4}
-            animationDuration={15}
+            dotCount={80} // Reduced from 120 to 80 for better performance
+            dotSize={3} // Reduced from 4 to 3 for lighter rendering
+            animationDuration={8} // Reduced from 15 to 8 for faster cycles
           />
           <div className="container mx-auto max-w-7xl px-5 relative z-10">
             {/* Section Header */}
@@ -3504,12 +3516,12 @@ export default function HomePage() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
             >
               {/* Feature 1 - High Quality Resources */}
-              <div className="group bg-card border border-border rounded-2xl p-6 lg:p-8 transition-all duration-500 hover:border-primary/30 relative overflow-hidden">
-                {/* Hover effect overlay - diagonal sweep */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl transform translate-x-[-100%] translate-y-[-100%] group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-700 ease-out"></div>
+              <div className="group bg-card border border-border rounded-2xl p-6 lg:p-8 transition-all duration-200 hover:border-primary/30 relative overflow-hidden">
+                {/* Hover effect overlay - diagonal sweep - Optimized */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl transform translate-x-[-100%] translate-y-[-100%] group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
                 <div className="relative z-10">
                   {/* Icon */}
-                  <div className="w-14 h-14 bg-primary/10 border border-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-125 transition-transform duration-150">
+                  <div className="w-14 h-14 bg-primary/10 border border-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-100">
                     <Star className="w-7 h-7 text-primary" />
                   </div>
                   {/* Content */}
