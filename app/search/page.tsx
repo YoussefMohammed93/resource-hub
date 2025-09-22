@@ -846,42 +846,39 @@ function SearchContent() {
     return cleanedUrl;
   }, []);
 
-  // Get video poster - use improved video-thumbnail API with backend proxy
-  const getVideoPoster = useCallback(
-    (videoUrl: string): string => {
-      if (!videoUrl) return "/placeholder.png";
+  // Get video poster with enhanced fallback for production deployment
+  const getVideoPoster = useCallback((videoUrl: string): string => {
+    if (!videoUrl) return "/placeholder.png";
 
-      // Clean the URL first to remove HTML entities
-      const cleanedUrl = cleanUrl(videoUrl);
+    // Clean the URL first to remove HTML entities
+    const cleanedUrl = cleanUrl(videoUrl);
 
-      // For Envato videos, prioritize the video-thumbnail API for better extraction
-      if (
-        cleanedUrl.includes("elements.envato.com") ||
-        cleanedUrl.includes("elements.envatousercontent.com")
-      ) {
-        // If it's already a page URL, use it directly with our API
-        if (cleanedUrl.includes("/video/") || cleanedUrl.includes("/item/")) {
-          return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
-        }
-
-        // If it's a direct video file URL, try to construct the page URL
-        const match = cleanedUrl.match(/\/([^\/]+)\/[^\/]*\.(mp4|mov|avi)/i);
-        if (match) {
-          const itemName = match[1];
-          const pageUrl = `https://elements.envato.com/video/${itemName}`;
-          return `/api/video-thumbnail?url=${encodeURIComponent(pageUrl)}`;
-        }
-
-        // If we can't construct a page URL, use the video-thumbnail API with the direct URL
-        // The API will handle the backend proxy internally
+    // For Envato videos, prioritize the video-thumbnail API for better extraction
+    if (
+      cleanedUrl.includes("elements.envato.com") ||
+      cleanedUrl.includes("elements.envatousercontent.com")
+    ) {
+      // If it's already a page URL, use it directly with our API
+      if (cleanedUrl.includes("/video/") || cleanedUrl.includes("/item/")) {
         return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
       }
 
-      // For other providers, try the video-thumbnail API
+      // If it's a direct video file URL, try to construct the page URL
+      const match = cleanedUrl.match(/\/([^\/]+)\/[^\/]*\.(mp4|mov|avi)/i);
+      if (match) {
+        const itemName = match[1];
+        const pageUrl = `https://elements.envato.com/video/${itemName}`;
+        return `/api/video-thumbnail?url=${encodeURIComponent(pageUrl)}`;
+      }
+
+      // If we can't construct a page URL, use the video-thumbnail API with the direct URL
+      // The API will handle the backend proxy internally
       return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
-    },
-    [cleanUrl]
-  );
+    }
+
+    // For MotionElements and other providers, try the video-thumbnail API
+    return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
+  }, [cleanUrl]);
 
   // Get proxied URL to handle CORS issues using backend proxy
   const getProxiedUrl = useCallback(
@@ -959,6 +956,42 @@ function SearchContent() {
     },
     [cleanUrl]
   );
+
+  // Enhanced fallback poster that tries multiple sources for production deployment
+  const getEnhancedVideoPoster = useCallback((result: SearchResult): string => {
+    // Try the main video-thumbnail API first
+    const primaryPoster = getVideoPoster(result.url || result.thumbnail);
+    
+    // For production deployment, also prepare fallback URLs
+    const fallbackUrls: string[] = [];
+    
+    // If we have a direct thumbnail URL, add it as fallback
+    if (result.thumbnail && result.thumbnail !== result.url) {
+      fallbackUrls.push(getProxiedUrl(result.thumbnail));
+    }
+    
+    // For Envato, try to extract direct image URLs from the page URL
+    if (result.url && result.url.includes("elements.envato.com")) {
+      // Try to construct potential thumbnail URLs based on common Envato patterns
+      const itemId = result.url.match(/\/([A-Z0-9]+)$/)?.[1];
+      if (itemId) {
+        // Common Envato thumbnail patterns
+        fallbackUrls.push(
+          getProxiedUrl(`https://elements-resized.envatousercontent.com/elements-video-cover-images/files/${itemId.toLowerCase()}/inline_image_preview.jpg`),
+          getProxiedUrl(`https://elements-video-cover-images.envatousercontent.com/files/${itemId.toLowerCase()}/inline_image_preview.jpg`)
+        );
+      }
+    }
+    
+    // Store fallback URLs for use in error handlers
+    if (fallbackUrls.length > 0) {
+      // We'll use these in the onError handlers of the img elements
+      (window as any).videoThumbnailFallbacks = (window as any).videoThumbnailFallbacks || {};
+      (window as any).videoThumbnailFallbacks[result.id] = fallbackUrls;
+    }
+    
+    return primaryPoster;
+  }, [getVideoPoster, getProxiedUrl]);
 
   // Function to detect image dimensions from URL
   const detectImageDimensions = useCallback(
@@ -2652,9 +2685,7 @@ function SearchContent() {
                               {isValidVideoUrl(result.thumbnail) ? (
                                 <video
                                   src={getProxiedVideoUrl(result.thumbnail)}
-                                  poster={getVideoPoster(
-                                    result.url || result.thumbnail
-                                  )}
+                                  poster={getEnhancedVideoPoster(result)}
                                   className="w-full h-full object-cover"
                                   muted
                                   loop
