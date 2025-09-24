@@ -50,6 +50,43 @@ export const useHeroAnimations = ({ enabled }: UseHeroAnimationsProps) => {
   };
 
   useEffect(() => {
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
+    // If on mobile, immediately reset all elements to their natural state
+    if (!isDesktop()) {
+      const allElements = [
+        titleRef.current,
+        titleHighlightRef.current,
+        descriptionRef.current,
+        searchContainerRef.current,
+        mobileSearchTypeRef.current,
+        mobileSearchInputRef.current,
+        mobileSearchButtonRef.current,
+        desktopSearchBarRef.current,
+        backgroundPatternRef.current,
+        gridDotsRef.current,
+        squareGridRef.current,
+        diamondGridRef.current,
+        topCenterDotsRef.current,
+        topRightIconRef.current,
+        topRightSquaresRef.current,
+        ctaButtonsRef.current,
+        ...floatingIconsRefs.current,
+      ].filter(Boolean);
+
+      if (allElements.length > 0) {
+        gsap.set(allElements, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          rotation: 0,
+          clearProps: "all"
+        });
+      }
+      return;
+    }
+
     if (!enabled) return;
 
     const ctx = gsap.context(() => {
@@ -353,9 +390,48 @@ export const useHeroAnimations = ({ enabled }: UseHeroAnimationsProps) => {
       // Removed scroll-triggered glow and hover effects as requested
     }, heroSectionRef);
 
+    // Handle responsive changes
+    const onResize = () => {
+      if (!isDesktop()) {
+        // Reset elements to their natural state on mobile
+        const allElements = [
+          titleRef.current,
+          titleHighlightRef.current,
+          descriptionRef.current,
+          searchContainerRef.current,
+          mobileSearchTypeRef.current,
+          mobileSearchInputRef.current,
+          mobileSearchButtonRef.current,
+          desktopSearchBarRef.current,
+          backgroundPatternRef.current,
+          gridDotsRef.current,
+          squareGridRef.current,
+          diamondGridRef.current,
+          topCenterDotsRef.current,
+          topRightIconRef.current,
+          topRightSquaresRef.current,
+          ctaButtonsRef.current,
+          ...floatingIconsRefs.current,
+        ].filter(Boolean);
+
+        if (allElements.length > 0) {
+          gsap.set(allElements, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            clearProps: "all"
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('resize', onResize);
+
     return () => {
       ctx.revert();
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      window.removeEventListener('resize', onResize);
     };
   }, [enabled]);
 

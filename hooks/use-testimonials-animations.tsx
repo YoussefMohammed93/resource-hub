@@ -25,6 +25,38 @@ export function useTestimonialsAnimations(enabled: boolean = true) {
   const hasRunRef = useRef(false);
 
   useEffect(() => {
+    // Reset hasRunRef on every enabled change to allow re-running
+    if (enabled) {
+      hasRunRef.current = false;
+    }
+
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
+    // If on mobile, immediately reset all elements to their natural state
+    if (!isDesktop()) {
+      const allElements = [
+        testimonialsTitleRef.current,
+        testimonialsHighlightRef.current,
+        testimonialsDescRef.current,
+        carouselContainerRef.current,
+        dotsGridTopRef.current,
+        dotsGridBottomRef.current,
+        starIconRef.current,
+        heartIconRef.current,
+      ].filter(Boolean);
+
+      if (allElements.length > 0) {
+        gsap.set(allElements, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          clearProps: "all"
+        });
+      }
+      return;
+    }
+
     if (!enabled || hasRunRef.current) return;
     
     const section = testimonialsRef.current;
@@ -160,9 +192,38 @@ export function useTestimonialsAnimations(enabled: boolean = true) {
 
     }, section);
 
+    // Handle responsive changes
+    const onResize = () => {
+      if (!isDesktop()) {
+        // Reset elements to their natural state on mobile
+        const allElements = [
+          testimonialsTitleRef.current,
+          testimonialsHighlightRef.current,
+          testimonialsDescRef.current,
+          carouselContainerRef.current,
+          dotsGridTopRef.current,
+          dotsGridBottomRef.current,
+          starIconRef.current,
+          heartIconRef.current,
+        ].filter(Boolean);
+
+        if (allElements.length > 0) {
+          gsap.set(allElements, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            clearProps: "all"
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('resize', onResize);
+
     return () => {
       ctx.revert();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      window.removeEventListener('resize', onResize);
     };
   }, [enabled]);
 

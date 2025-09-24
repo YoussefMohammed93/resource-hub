@@ -847,38 +847,41 @@ function SearchContent() {
   }, []);
 
   // Get video poster with enhanced fallback for production deployment
-  const getVideoPoster = useCallback((videoUrl: string): string => {
-    if (!videoUrl) return "/placeholder.png";
+  const getVideoPoster = useCallback(
+    (videoUrl: string): string => {
+      if (!videoUrl) return "/placeholder.png";
 
-    // Clean the URL first to remove HTML entities
-    const cleanedUrl = cleanUrl(videoUrl);
+      // Clean the URL first to remove HTML entities
+      const cleanedUrl = cleanUrl(videoUrl);
 
-    // For Envato videos, prioritize the video-thumbnail API for better extraction
-    if (
-      cleanedUrl.includes("elements.envato.com") ||
-      cleanedUrl.includes("elements.envatousercontent.com")
-    ) {
-      // If it's already a page URL, use it directly with our API
-      if (cleanedUrl.includes("/video/") || cleanedUrl.includes("/item/")) {
+      // For Envato videos, prioritize the video-thumbnail API for better extraction
+      if (
+        cleanedUrl.includes("elements.envato.com") ||
+        cleanedUrl.includes("elements.envatousercontent.com")
+      ) {
+        // If it's already a page URL, use it directly with our API
+        if (cleanedUrl.includes("/video/") || cleanedUrl.includes("/item/")) {
+          return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
+        }
+
+        // If it's a direct video file URL, try to construct the page URL
+        const match = cleanedUrl.match(/\/([^\/]+)\/[^\/]*\.(mp4|mov|avi)/i);
+        if (match) {
+          const itemName = match[1];
+          const pageUrl = `https://elements.envato.com/video/${itemName}`;
+          return `/api/video-thumbnail?url=${encodeURIComponent(pageUrl)}`;
+        }
+
+        // If we can't construct a page URL, use the video-thumbnail API with the direct URL
+        // The API will handle the backend proxy internally
         return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
       }
 
-      // If it's a direct video file URL, try to construct the page URL
-      const match = cleanedUrl.match(/\/([^\/]+)\/[^\/]*\.(mp4|mov|avi)/i);
-      if (match) {
-        const itemName = match[1];
-        const pageUrl = `https://elements.envato.com/video/${itemName}`;
-        return `/api/video-thumbnail?url=${encodeURIComponent(pageUrl)}`;
-      }
-
-      // If we can't construct a page URL, use the video-thumbnail API with the direct URL
-      // The API will handle the backend proxy internally
+      // For MotionElements and other providers, try the video-thumbnail API
       return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
-    }
-
-    // For MotionElements and other providers, try the video-thumbnail API
-    return `/api/video-thumbnail?url=${encodeURIComponent(cleanedUrl)}`;
-  }, [cleanUrl]);
+    },
+    [cleanUrl]
+  );
 
   // Get proxied URL to handle CORS issues using backend proxy
   const getProxiedUrl = useCallback(
@@ -958,40 +961,48 @@ function SearchContent() {
   );
 
   // Enhanced fallback poster that tries multiple sources for production deployment
-  const getEnhancedVideoPoster = useCallback((result: SearchResult): string => {
-    // Try the main video-thumbnail API first
-    const primaryPoster = getVideoPoster(result.url || result.thumbnail);
-    
-    // For production deployment, also prepare fallback URLs
-    const fallbackUrls: string[] = [];
-    
-    // If we have a direct thumbnail URL, add it as fallback
-    if (result.thumbnail && result.thumbnail !== result.url) {
-      fallbackUrls.push(getProxiedUrl(result.thumbnail));
-    }
-    
-    // For Envato, try to extract direct image URLs from the page URL
-    if (result.url && result.url.includes("elements.envato.com")) {
-      // Try to construct potential thumbnail URLs based on common Envato patterns
-      const itemId = result.url.match(/\/([A-Z0-9]+)$/)?.[1];
-      if (itemId) {
-        // Common Envato thumbnail patterns
-        fallbackUrls.push(
-          getProxiedUrl(`https://elements-resized.envatousercontent.com/elements-video-cover-images/files/${itemId.toLowerCase()}/inline_image_preview.jpg`),
-          getProxiedUrl(`https://elements-video-cover-images.envatousercontent.com/files/${itemId.toLowerCase()}/inline_image_preview.jpg`)
-        );
+  const getEnhancedVideoPoster = useCallback(
+    (result: SearchResult): string => {
+      // Try the main video-thumbnail API first
+      const primaryPoster = getVideoPoster(result.url || result.thumbnail);
+
+      // For production deployment, also prepare fallback URLs
+      const fallbackUrls: string[] = [];
+
+      // If we have a direct thumbnail URL, add it as fallback
+      if (result.thumbnail && result.thumbnail !== result.url) {
+        fallbackUrls.push(getProxiedUrl(result.thumbnail));
       }
-    }
-    
-    // Store fallback URLs for use in error handlers
-    if (fallbackUrls.length > 0) {
-      // We'll use these in the onError handlers of the img elements
-      (window as any).videoThumbnailFallbacks = (window as any).videoThumbnailFallbacks || {};
-      (window as any).videoThumbnailFallbacks[result.id] = fallbackUrls;
-    }
-    
-    return primaryPoster;
-  }, [getVideoPoster, getProxiedUrl]);
+
+      // For Envato, try to extract direct image URLs from the page URL
+      if (result.url && result.url.includes("elements.envato.com")) {
+        // Try to construct potential thumbnail URLs based on common Envato patterns
+        const itemId = result.url.match(/\/([A-Z0-9]+)$/)?.[1];
+        if (itemId) {
+          // Common Envato thumbnail patterns
+          fallbackUrls.push(
+            getProxiedUrl(
+              `https://elements-resized.envatousercontent.com/elements-video-cover-images/files/${itemId.toLowerCase()}/inline_image_preview.jpg`
+            ),
+            getProxiedUrl(
+              `https://elements-video-cover-images.envatousercontent.com/files/${itemId.toLowerCase()}/inline_image_preview.jpg`
+            )
+          );
+        }
+      }
+
+      // Store fallback URLs for use in error handlers
+      if (fallbackUrls.length > 0) {
+        // We'll use these in the onError handlers of the img elements
+        (window as any).videoThumbnailFallbacks =
+          (window as any).videoThumbnailFallbacks || {};
+        (window as any).videoThumbnailFallbacks[result.id] = fallbackUrls;
+      }
+
+      return primaryPoster;
+    },
+    [getVideoPoster, getProxiedUrl]
+  );
 
   // Function to detect image dimensions from URL
   const detectImageDimensions = useCallback(
@@ -1997,14 +2008,14 @@ function SearchContent() {
                 className="cursor-pointer lg:hidden p-2 hover:bg-muted rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
                 aria-label={t("search.toggleFilters")}
               >
-                <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
+                <SlidersHorizontal className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
               </button>
               <Link
                 href="/"
                 aria-label={t("header.logo")}
                 className="flex items-center"
               >
-                <div className="relative w-44 sm:w-48 h-12">
+                <div className="relative w-36 sm:w-48 h-10 sm:h-12">
                   {/* Light mode logos */}
                   <Image
                     src={
@@ -2388,81 +2399,184 @@ function SearchContent() {
 
           <div className="min-h-screen relative z-10 p-4 sm:p-6 space-y-6">
             <div className="w-full flex flex-col gap-5 sm:flex-row sm:items-center max-w-3xl mx-auto search-container-3xl search-section-3xl">
-              {/* Search Bar - Centered */}
-              <div className="flex justify-center w-full sm:w-3/4">
-                <div className="w-full max-w-2xl search-bar-3xl">
-                  <div className="relative">
-                    <Search
-                      className={`absolute ${isRTL ? "right-4" : "left-4"} top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5`}
-                    />
+              {/* Mobile Layout */}
+              <div className="sm:hidden">
+                <div className="flex gap-2 w-full">
+                  {/* Search Type Dropdown for Mobile - Icon Only */}
+                  <div className="flex-shrink-0">
+                    <Select
+                      value={selectedFilter}
+                      onValueChange={setSelectedFilter}
+                    >
+                      <SelectTrigger className="w-16 !h-12 border-2 border-border focus:border-primary rounded-xl bg-background/80 backdrop-blur-sm transition-fast p-0 flex items-center justify-center">
+                        <SelectValue>
+                          {selectedFilter === "all" && (
+                            <Search className="w-5 h-5" />
+                          )}
+                          {selectedFilter === "images" && (
+                            <ImageIcon className="w-5 h-5" />
+                          )}
+                          {selectedFilter === "vectors" && (
+                            <Palette className="w-5 h-5" />
+                          )}
+                          {selectedFilter === "videos" && (
+                            <Camera className="w-5 h-5" />
+                          )}
+                          {selectedFilter === "templates" && (
+                            <File className="w-5 h-5" />
+                          )}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          <div className="flex items-center gap-2">
+                            <Search className="w-4 h-4" />
+                            <span>All Content</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="images">
+                          <div className="flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4" />
+                            <span>Images</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="vectors">
+                          <div className="flex items-center gap-2">
+                            <Palette className="w-4 h-4" />
+                            <span>Vectors</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="videos">
+                          <div className="flex items-center gap-2">
+                            <Camera className="w-4 h-4" />
+                            <span>Videos</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="templates">
+                          <div className="flex items-center gap-2">
+                            <File className="w-4 h-4" />
+                            <span>Templates</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Search Input - Flexible width */}
+                  <div className="relative flex-1 min-w-0">
                     <Input
                       type="text"
                       placeholder={t("search.searchPlaceholder")}
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        if (searchError) setSearchError(null);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
                           handleSearch();
                         }
                       }}
-                      className={`${isRTL ? "pr-12 pl-4" : "pl-12 pr-4"} placeholder:text-base py-3 !h-14 text-base border-2 border-border focus:border-primary rounded-xl bg-background`}
+                      disabled={isSearchLoading}
+                      className={`${
+                        isRTL ? "pr-4 pl-4 text-right" : "pl-4 pr-4"
+                      } placeholder:text-sm py-3 !h-12 text-sm border-2 border-border focus:border-primary rounded-xl bg-background/80 backdrop-blur-sm transition-fast disabled:opacity-50 disabled:cursor-not-allowed`}
                       dir={isRTL ? "rtl" : "ltr"}
                     />
+                  </div>
+
+                  {/* Search Button for Mobile */}
+                  <div className="flex-shrink-0">
                     <Button
                       onClick={handleSearch}
-                      className={`absolute ${isRTL ? "left-0.5" : "right-0.5"} top-1/2 transform -translate-y-1/2 !px-6 h-[52px] bg-primary hover:bg-primary/90 rounded-xl`}
+                      disabled={isSearchLoading || !searchQuery.trim()}
+                      className="!px-4 h-12 bg-primary hover:bg-primary/90 disabled:bg-primary/50 rounded-xl transition-fast flex items-center justify-center"
                     >
-                      <span>{t("search.searchButton")}</span>
-                      <Search className="w-4 h-4" />
+                      <Search className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
               </div>
 
-              {/* Filter Section Behind Search Bar */}
-              <div className="flex justify-center w-full sm:w-1/4">
-                <div className="w-full max-w-md">
-                  <Select
-                    value={selectedFilter}
-                    onValueChange={setSelectedFilter}
-                  >
-                    <SelectTrigger className="w-full !h-14 bg-background/80 rounded-xl border-2 border-border hover:border-primary/50 transition-all duration-200">
-                      <SelectValue placeholder="Select content type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        <div className="flex items-center gap-2">
-                          <Search className="w-4 h-4" />
-                          <span>All Content</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="images">
-                        <div className="flex items-center gap-2">
-                          <ImageIcon className="w-4 h-4" />
-                          <span>Images</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="vectors">
-                        <div className="flex items-center gap-2">
-                          <Palette className="w-4 h-4" />
-                          <span>Vectors</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="videos">
-                        <div className="flex items-center gap-2">
-                          <Camera className="w-4 h-4" />
-                          <span>Videos</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="templates">
-                        <div className="flex items-center gap-2">
-                          <File className="w-4 h-4" />
-                          <span>Templates</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Desktop Layout */}
+              <div className="hidden sm:flex sm:flex-row sm:items-center w-full gap-5">
+                {/* Search Bar - Centered */}
+                <div className="flex justify-center w-full sm:w-3/4">
+                  <div className="w-full max-w-2xl search-bar-3xl">
+                    <div className="relative">
+                      <Search
+                        className={`absolute ${isRTL ? "right-4" : "left-4"} top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5`}
+                      />
+                      <Input
+                        type="text"
+                        placeholder={t("search.searchPlaceholder")}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleSearch();
+                          }
+                        }}
+                        className={`${isRTL ? "pr-12 pl-4" : "pl-12 pr-4"} placeholder:text-base py-3 !h-14 text-base border-2 border-border focus:border-primary rounded-xl bg-background`}
+                        dir={isRTL ? "rtl" : "ltr"}
+                      />
+                      <Button
+                        onClick={handleSearch}
+                        className={`absolute ${isRTL ? "left-0.5" : "right-0.5"} top-1/2 transform -translate-y-1/2 !px-6 h-[52px] bg-primary hover:bg-primary/90 rounded-xl`}
+                      >
+                        <span>{t("search.searchButton")}</span>
+                        <Search className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Filter Section Behind Search Bar */}
+                <div className="flex justify-center w-full sm:w-1/4">
+                  <div className="w-full max-w-md">
+                    <Select
+                      value={selectedFilter}
+                      onValueChange={setSelectedFilter}
+                    >
+                      <SelectTrigger className="w-full !h-14 bg-background/80 rounded-xl border-2 border-border hover:border-primary/50 transition-all duration-200">
+                        <SelectValue placeholder="Select content type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          <div className="flex items-center gap-2">
+                            <Search className="w-4 h-4" />
+                            <span>All Content</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="images">
+                          <div className="flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4" />
+                            <span>Images</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="vectors">
+                          <div className="flex items-center gap-2">
+                            <Palette className="w-4 h-4" />
+                            <span>Vectors</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="videos">
+                          <div className="flex items-center gap-2">
+                            <Camera className="w-4 h-4" />
+                            <span>Videos</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="templates">
+                          <div className="flex items-center gap-2">
+                            <File className="w-4 h-4" />
+                            <span>Templates</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </div>

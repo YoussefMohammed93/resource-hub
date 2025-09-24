@@ -19,7 +19,21 @@ export function useMobileMenuAnimations(isOpen: boolean) {
     const menu = menuRef.current;
     const menuItems = menuItemsRef.current;
 
-    if (!menu) return;
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
+    if (!menu || !isDesktop()) {
+      // Reset menu items to their natural state on mobile
+      if (menuItems.length > 0) {
+        gsap.set(menuItems, {
+          x: 0,
+          opacity: 1,
+          scale: 1,
+          clearProps: "all"
+        });
+      }
+      return;
+    }
 
     if (isOpen) {
       // Opening animation - only animate menu items since CSS handles the slide

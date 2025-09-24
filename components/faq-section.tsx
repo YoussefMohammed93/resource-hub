@@ -72,6 +72,78 @@ export default function FAQSection() {
   useEffect(() => {
     if (isLoading || !sectionRef.current) return;
 
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
+    // If on mobile, immediately reset all elements to their natural state
+    if (!isDesktop()) {
+      const allElements = [
+        titleRef.current,
+        descriptionRef.current,
+      ].filter(Boolean);
+
+      if (allElements.length > 0) {
+        gsap.set(allElements, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+
+      // Reset FAQ items
+      const faqItems = document.querySelectorAll(".faq-item");
+      if (faqItems.length > 0) {
+        gsap.set(faqItems, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+
+      // Reset floating icons
+      const floatingIcons = document.querySelectorAll(".floating-icon");
+      if (floatingIcons.length > 0) {
+        gsap.set(floatingIcons, {
+          opacity: 1,
+          scale: 1,
+          rotation: 0,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+
+      // Reset decorative patterns
+      const decorativePatterns = document.querySelectorAll(".decorative-pattern");
+      if (decorativePatterns.length > 0) {
+        gsap.set(decorativePatterns, {
+          opacity: 1,
+          scale: 1,
+          clearProps: "all"
+        });
+      }
+
+      // Reset pulse dots
+      const pulseDots = document.querySelectorAll(".pulse-dot");
+      if (pulseDots.length > 0) {
+        gsap.set(pulseDots, {
+          opacity: 1,
+          scale: 1,
+          clearProps: "all"
+        });
+      }
+
+      // Reset rotate continuous elements
+      const rotateContinuous = document.querySelectorAll(".rotate-continuous");
+      if (rotateContinuous.length > 0) {
+        gsap.set(rotateContinuous, {
+          rotation: 0,
+          clearProps: "all"
+        });
+      }
+
+      return;
+    }
+
     const ctx = gsap.context(() => {
       // Set initial states - Reduced movement distances
       gsap.set(titleRef.current, { y: 25, opacity: 0 }); // Reduced from 50px to 25px
@@ -186,7 +258,82 @@ export default function FAQSection() {
       });
     }, sectionRef);
 
-    return () => ctx.revert();
+    // Handle responsive changes
+    const onResize = () => {
+      if (!isDesktop()) {
+        // Reset elements to their natural state on mobile
+        const allElements = [
+          titleRef.current,
+          descriptionRef.current,
+        ].filter(Boolean);
+
+        if (allElements.length > 0) {
+          gsap.set(allElements, {
+            opacity: 1,
+            y: 0,
+            clearProps: "all"
+          });
+        }
+
+        // Reset FAQ items
+        const faqItems = document.querySelectorAll(".faq-item");
+        if (faqItems.length > 0) {
+          gsap.set(faqItems, {
+            opacity: 1,
+            y: 0,
+            clearProps: "all"
+          });
+        }
+
+        // Reset floating icons
+        const floatingIcons = document.querySelectorAll(".floating-icon");
+        if (floatingIcons.length > 0) {
+          gsap.set(floatingIcons, {
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            y: 0,
+            clearProps: "all"
+          });
+        }
+
+        // Reset decorative patterns
+        const decorativePatterns = document.querySelectorAll(".decorative-pattern");
+        if (decorativePatterns.length > 0) {
+          gsap.set(decorativePatterns, {
+            opacity: 1,
+            scale: 1,
+            clearProps: "all"
+          });
+        }
+
+        // Reset pulse dots
+        const pulseDots = document.querySelectorAll(".pulse-dot");
+        if (pulseDots.length > 0) {
+          gsap.set(pulseDots, {
+            opacity: 1,
+            scale: 1,
+            clearProps: "all"
+          });
+        }
+
+        // Reset rotate continuous elements
+        const rotateContinuous = document.querySelectorAll(".rotate-continuous");
+        if (rotateContinuous.length > 0) {
+          gsap.set(rotateContinuous, {
+            rotation: 0,
+            clearProps: "all"
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      ctx.revert();
+      window.removeEventListener('resize', onResize);
+    };
   }, [isLoading]);
 
   // Show loading skeleton while language data is loading

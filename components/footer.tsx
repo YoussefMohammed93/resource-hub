@@ -39,6 +39,59 @@ export default function Footer() {
   useEffect(() => {
     if (!footerRef.current) return;
 
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
+    // If on mobile, immediately reset all elements to their natural state
+    if (!isDesktop()) {
+      const allElements = [
+        logoRef.current,
+        descriptionRef.current,
+        contactInfoRef.current,
+        copyrightRef.current,
+      ].filter(Boolean);
+
+      if (allElements.length > 0) {
+        gsap.set(allElements, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+
+      // Reset footer sections
+      const footerSections = document.querySelectorAll(".footer-section");
+      if (footerSections.length > 0) {
+        gsap.set(footerSections, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+
+      // Reset footer links
+      const footerLinks = document.querySelectorAll(".footer-link");
+      if (footerLinks.length > 0) {
+        gsap.set(footerLinks, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+
+      // Reset social icons
+      const socialIcons = document.querySelectorAll(".social-icon");
+      if (socialIcons.length > 0) {
+        gsap.set(socialIcons, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+
+      return;
+    }
+
     const ctx = gsap.context(() => {
       // Set initial states - Reduced movement distances for smoother feel
       gsap.set(logoRef.current, { opacity: 0, y: 15 }); // Reduced from 30px to 15px
@@ -148,7 +201,63 @@ export default function Footer() {
       });
     }, footerRef);
 
-    return () => ctx.revert();
+    // Handle responsive changes
+    const onResize = () => {
+      if (!isDesktop()) {
+        // Reset elements to their natural state on mobile
+        const allElements = [
+          logoRef.current,
+          descriptionRef.current,
+          contactInfoRef.current,
+          copyrightRef.current,
+        ].filter(Boolean);
+
+        if (allElements.length > 0) {
+          gsap.set(allElements, {
+            opacity: 1,
+            y: 0,
+            clearProps: "all"
+          });
+        }
+
+        // Reset footer sections
+        const footerSections = document.querySelectorAll(".footer-section");
+        if (footerSections.length > 0) {
+          gsap.set(footerSections, {
+            opacity: 1,
+            y: 0,
+            clearProps: "all"
+          });
+        }
+
+        // Reset footer links
+        const footerLinks = document.querySelectorAll(".footer-link");
+        if (footerLinks.length > 0) {
+          gsap.set(footerLinks, {
+            opacity: 1,
+            y: 0,
+            clearProps: "all"
+          });
+        }
+
+        // Reset social icons
+        const socialIcons = document.querySelectorAll(".social-icon");
+        if (socialIcons.length > 0) {
+          gsap.set(socialIcons, {
+            opacity: 1,
+            y: 0,
+            clearProps: "all"
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      ctx.revert();
+      window.removeEventListener('resize', onResize);
+    };
   }, []);
 
   return (

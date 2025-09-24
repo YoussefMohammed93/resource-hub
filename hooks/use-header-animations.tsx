@@ -17,6 +17,54 @@ export function useHeaderAnimations(enabled: boolean = true) {
       hasRunRef.current = false;
     }
 
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
+    // If on mobile, immediately reset all elements to their natural state
+    if (!isDesktop()) {
+      const header = headerRef.current;
+      const logo = logoRef.current;
+      const nav = navRef.current;
+      const controls = controlsRef.current;
+      const mobileButton = mobileButtonRef.current;
+      
+      // Reset header
+      if (header) {
+        gsap.set(header, {
+          y: 0,
+          opacity: 1,
+          clearProps: "all"
+        });
+      }
+      
+      // Reset all header elements to natural state
+      const headerElements = [logo, nav, controls, mobileButton].filter(Boolean);
+      if (headerElements.length > 0) {
+        gsap.set(headerElements, {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          skewY: 0,
+          clearProps: "all"
+        });
+      }
+      
+      // Reset individual nav buttons if they exist
+      if (nav) {
+        const navButtons = nav.querySelectorAll("button");
+        if (navButtons.length > 0) {
+          gsap.set(navButtons, {
+            y: 0,
+            opacity: 1,
+            skewY: 0,
+            clearProps: "all"
+          });
+        }
+      }
+      
+      return;
+    }
+    
     if (!enabled || hasRunRef.current) return;
     const header = headerRef.current;
     const logo = logoRef.current;
@@ -161,9 +209,48 @@ export function useHeaderAnimations(enabled: boolean = true) {
 
     // Animation complete - no hover effects needed
 
+    // Handle responsive changes
+    const onResize = () => {
+      if (!isDesktop()) {
+        // Reset elements to their natural state on mobile
+        const headerElements = [logo, nav, controls, mobileButton].filter(Boolean);
+        if (headerElements.length > 0) {
+          gsap.set(headerElements, {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            skewY: 0,
+            clearProps: "all"
+          });
+        }
+        if (header) {
+          gsap.set(header, {
+            y: 0,
+            opacity: 1,
+            clearProps: "all"
+          });
+        }
+        // Reset individual nav buttons if they exist
+        if (nav) {
+          const navButtons = nav.querySelectorAll("button");
+          if (navButtons.length > 0) {
+            gsap.set(navButtons, {
+              y: 0,
+              opacity: 1,
+              skewY: 0,
+              clearProps: "all"
+            });
+          }
+        }
+      }
+    };
+    
+    window.addEventListener('resize', onResize);
+
     // Cleanup function
     return () => {
       tl.kill();
+      window.removeEventListener('resize', onResize);
     };
   }, [enabled]);
 

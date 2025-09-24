@@ -41,6 +41,28 @@ export const usePricingAnimations = ({
 
   // Initialize entrance animations with optimized performance
   const initEntranceAnimations = useCallback(() => {
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
+    // If on mobile, immediately reset all elements to their natural state
+    if (!isDesktop()) {
+      const allElements = [
+        titleRef.current,
+        descriptionRef.current,
+        additionalInfoRef.current,
+        ...cardRefs.current.filter(Boolean)
+      ].filter(Boolean);
+
+      if (allElements.length > 0) {
+        gsap.set(allElements, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+      return;
+    }
+
     if (!sectionRef.current || isLoading || hasError) return;
 
     // Kill existing timeline
@@ -145,10 +167,24 @@ export const usePricingAnimations = ({
 
   // Animate loading state with optimized performance
   const animateLoadingState = useCallback(() => {
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
     if (!cardsContainerRef.current) return;
 
-    const skeletons =
-      cardsContainerRef.current.querySelectorAll("[data-skeleton]");
+    const skeletons = cardsContainerRef.current.querySelectorAll("[data-skeleton]");
+
+    // If on mobile, immediately reset skeletons to their natural state
+    if (!isDesktop()) {
+      if (skeletons.length > 0) {
+        gsap.set(skeletons, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+      return;
+    }
 
     if (skeletons.length > 0) {
       gsap.fromTo(
@@ -172,10 +208,24 @@ export const usePricingAnimations = ({
 
   // Animate error state with optimized performance
   const animateErrorState = useCallback(() => {
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
     if (!cardsContainerRef.current) return;
 
-    const errorContainer =
-      cardsContainerRef.current.querySelector("[data-error]");
+    const errorContainer = cardsContainerRef.current.querySelector("[data-error]");
+
+    // If on mobile, immediately reset error container to its natural state
+    if (!isDesktop()) {
+      if (errorContainer) {
+        gsap.set(errorContainer, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all"
+        });
+      }
+      return;
+    }
 
     if (errorContainer) {
       gsap.fromTo(
@@ -218,6 +268,59 @@ export const usePricingAnimations = ({
     animateLoadingState,
     animateErrorState,
   ]);
+
+  // Handle responsive changes
+  useEffect(() => {
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+    
+    const onResize = () => {
+      if (!isDesktop()) {
+        // Reset elements to their natural state on mobile
+        const allElements = [
+          titleRef.current,
+          descriptionRef.current,
+          additionalInfoRef.current,
+          ...cardRefs.current.filter(Boolean)
+        ].filter(Boolean);
+
+        if (allElements.length > 0) {
+          gsap.set(allElements, {
+            opacity: 1,
+            y: 0,
+            clearProps: "all"
+          });
+        }
+
+        // Also reset any skeleton or error elements
+        if (cardsContainerRef.current) {
+          const skeletons = cardsContainerRef.current.querySelectorAll("[data-skeleton]");
+          const errorContainer = cardsContainerRef.current.querySelector("[data-error]");
+          
+          if (skeletons.length > 0) {
+            gsap.set(skeletons, {
+              opacity: 1,
+              y: 0,
+              clearProps: "all"
+            });
+          }
+          
+          if (errorContainer) {
+            gsap.set(errorContainer, {
+              opacity: 1,
+              y: 0,
+              clearProps: "all"
+            });
+          }
+        }
+      }
+    };
+    
+    window.addEventListener('resize', onResize);
+    
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {

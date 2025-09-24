@@ -1176,6 +1176,52 @@ export default function HomePage() {
   useEffect(() => {
     if (isLoading || !statisticsSectionRef.current) return;
 
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
+
+    // If on mobile, immediately reset all elements to their natural state
+    if (!isDesktop()) {
+      const allElements = [
+        statsChartIconRef.current,
+        statsDownloadIconRef.current,
+        statsHeartIconRef.current,
+        statsGlobeIconRef.current,
+        statsTargetIconRef.current,
+        statsPackageIconRef.current,
+        statsDotsTopLeftRef.current,
+        statsDotsBottomRightRef.current,
+        statsDotsTopRightRef.current,
+        statsDotsBottomLeftRef.current,
+        statsTitleRef.current,
+        statsDescriptionRef.current,
+        statsCardsContainerRef.current,
+      ].filter(Boolean);
+
+      if (allElements.length > 0) {
+        gsap.set(allElements, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          rotation: 0,
+          clearProps: "all",
+        });
+      }
+
+      // Also reset individual cards if they exist
+      if (statsCardsContainerRef.current) {
+        const cards =
+          statsCardsContainerRef.current.querySelectorAll(".statistic-card");
+        if (cards.length > 0) {
+          gsap.set(cards, {
+            opacity: 1,
+            scale: 1,
+            clearProps: "all",
+          });
+        }
+      }
+      return;
+    }
+
     // Register GSAP plugins
     gsap.registerPlugin(ScrollTrigger);
 
@@ -1465,12 +1511,109 @@ export default function HomePage() {
       }
     }, statisticsSectionRef);
 
-    return () => ctx.revert();
+    // Handle responsive changes
+    const onResize = () => {
+      if (!isDesktop()) {
+        // Reset elements to their natural state on mobile
+        const allElements = [
+          statsChartIconRef.current,
+          statsDownloadIconRef.current,
+          statsHeartIconRef.current,
+          statsGlobeIconRef.current,
+          statsTargetIconRef.current,
+          statsPackageIconRef.current,
+          statsDotsTopLeftRef.current,
+          statsDotsBottomRightRef.current,
+          statsDotsTopRightRef.current,
+          statsDotsBottomLeftRef.current,
+          statsTitleRef.current,
+          statsDescriptionRef.current,
+          statsCardsContainerRef.current,
+        ].filter(Boolean);
+
+        if (allElements.length > 0) {
+          gsap.set(allElements, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            clearProps: "all",
+          });
+        }
+
+        // Also reset individual cards if they exist
+        if (statsCardsContainerRef.current) {
+          const cards =
+            statsCardsContainerRef.current.querySelectorAll(".statistic-card");
+          if (cards.length > 0) {
+            gsap.set(cards, {
+              opacity: 1,
+              scale: 1,
+              clearProps: "all",
+            });
+          }
+        }
+      }
+    };
+
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      ctx.revert();
+      window.removeEventListener("resize", onResize);
+    };
   }, [isLoading]);
 
   // GSAP Features Section Animations - Optimized for Speed and Smoothness
   useEffect(() => {
     if (isLoading || !featuresSectionRef.current) return;
+
+    // Only run animations on desktop devices (768px and above)
+    const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
+
+    // If on mobile, immediately reset all elements to their natural state
+    if (!isDesktop()) {
+      const allElements = [
+        featuresTitleRef.current,
+        featuresHighlightRef.current,
+        featuresDescriptionRef.current,
+      ].filter(Boolean);
+
+      if (allElements.length > 0) {
+        gsap.set(allElements, {
+          opacity: 1,
+          y: 0,
+          clearProps: "all",
+        });
+      }
+
+      // Also reset feature cards if they exist
+      if (featuresGridRef.current) {
+        const featureCards = featuresGridRef.current.querySelectorAll(".group");
+        if (featureCards.length > 0) {
+          gsap.set(featureCards, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            clearProps: "all",
+          });
+
+          // Reset icons within cards
+          featureCards.forEach((card) => {
+            const icon = card.querySelector(".w-14.h-14");
+            if (icon) {
+              gsap.set(icon, {
+                y: 0,
+                rotation: 0,
+                scale: 1,
+                clearProps: "all",
+              });
+            }
+          });
+        }
+      }
+      return;
+    }
 
     // Register GSAP plugins
     gsap.registerPlugin(ScrollTrigger);
@@ -1621,7 +1764,59 @@ export default function HomePage() {
       }
     }, featuresSectionRef);
 
-    return () => ctx.revert();
+    // Handle responsive changes
+    const onResize = () => {
+      if (!isDesktop()) {
+        // Reset elements to their natural state on mobile
+        const allElements = [
+          featuresTitleRef.current,
+          featuresHighlightRef.current,
+          featuresDescriptionRef.current,
+        ].filter(Boolean);
+
+        if (allElements.length > 0) {
+          gsap.set(allElements, {
+            opacity: 1,
+            y: 0,
+            clearProps: "all",
+          });
+        }
+
+        // Also reset feature cards if they exist
+        if (featuresGridRef.current) {
+          const featureCards =
+            featuresGridRef.current.querySelectorAll(".group");
+          if (featureCards.length > 0) {
+            gsap.set(featureCards, {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              clearProps: "all",
+            });
+
+            // Reset icons within cards
+            featureCards.forEach((card) => {
+              const icon = card.querySelector(".w-14.h-14");
+              if (icon) {
+                gsap.set(icon, {
+                  y: 0,
+                  rotation: 0,
+                  scale: 1,
+                  clearProps: "all",
+                });
+              }
+            });
+          }
+        }
+      }
+    };
+
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      ctx.revert();
+      window.removeEventListener("resize", onResize);
+    };
   }, [isLoading]);
 
   // Show loading skeletons while language data is loading
@@ -1660,7 +1855,7 @@ export default function HomePage() {
                 className="cursor-pointer md:hidden p-2 hover:bg-muted rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
                 aria-label="Toggle navigation menu"
               >
-                <Menu className="w-5 h-5 text-muted-foreground" />
+                <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
               </button>
               <div ref={logoRef}>
                 <Link
@@ -1668,7 +1863,7 @@ export default function HomePage() {
                   aria-label={t("header.logo")}
                   className="flex items-center"
                 >
-                  <div className="relative w-44 sm:w-48 h-12">
+                  <div className="relative w-36 sm:w-48 h-10 sm:h-12">
                     {/* Light mode logos */}
                     <Image
                       src={
@@ -2288,7 +2483,7 @@ export default function HomePage() {
               </Button>
             </div>
 
-            {/* Supported Platforms Infinite Scroll - Integrated */}
+            {/* Supported Platforms - Responsive Design */}
             <div className="w-full mt-16 sm:mt-12">
               <div className="text-center mb-8 px-4">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 leading-tight font-sans">
@@ -2299,114 +2494,49 @@ export default function HomePage() {
                 </h2>
               </div>
 
-              {/* First Row - All Cards Scrolling Left */}
-              <div className="relative overflow-hidden mb-6 w-screen left-1/2 -translate-x-1/2">
-                <div
-                  className={`flex animate-scroll-left-mobile sm:animate-scroll-left ${isRTL ? "flex-row-reverse" : ""}`}
-                  style={
-                    {
-                      "--card-count": creditSites.length,
-                    } as React.CSSProperties
-                  }
-                >
-                  {/* All platforms - complete set */}
+              {/* Mobile: 2-Column Static Grid (0px - 767px) */}
+              <div className="md:hidden px-4">
+                <div className="grid grid-cols-2 gap-3">
                   {creditSites.map((site) => {
                     const iconUrl = getSiteIconUrl(site.id, site.url);
                     return (
                       <div
-                        key={`row1-${site.id}`}
-                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
+                        key={`mobile-${site.id}`}
+                        className="bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-lg p-3 hover:border-primary/50 transition-all duration-300 hover:shadow-lg"
                       >
-                        <div
-                          className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
-                        >
-                          <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <img
-                              src={iconUrl}
-                              alt={`${site.name} icon`}
-                              width={40}
-                              height={40}
-                              loading="lazy"
-                              className="w-10 h-10 object-contain"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                                if (target.src !== fallback) {
-                                  target.src = fallback;
-                                }
-                              }}
-                            />
-                          </div>
-                          <div className="sm:flex-1 sm:min-w-0">
-                            <h3
-                              className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
-                            >
-                              {site.name}
-                            </h3>
-                            <div
-                              className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
-                            >
-                              {site.variants.map((variant, index) => (
-                                <span
-                                  key={index}
-                                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                                >
-                                  {isRTL
-                                    ? `${variant.points} نقطة - ${variant.label}`
-                                    : `${variant.label}: ${variant.points} Credit`}
-                                </span>
-                              ))}
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <div className="flex items-center text-center space-y-2 space-x-2">
+                            <div className="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={iconUrl}
+                                alt={`${site.name} icon`}
+                                width={24}
+                                height={24}
+                                loading="lazy"
+                                className="w-6 h-6 object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                  if (target.src !== fallback) {
+                                    target.src = fallback;
+                                  }
+                                }}
+                              />
                             </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {/* Duplicate for seamless loop */}
-                  {creditSites.map((site) => {
-                    const iconUrl = getSiteIconUrl(site.id, site.url);
-                    return (
-                      <div
-                        key={`row1-dup-${site.id}`}
-                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
-                      >
-                        <div
-                          className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
-                        >
-                          <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <img
-                              src={iconUrl}
-                              alt={`${site.name} icon`}
-                              width={40}
-                              height={40}
-                              loading="lazy"
-                              className="w-10 h-10 object-contain"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                                if (target.src !== fallback) {
-                                  target.src = fallback;
-                                }
-                              }}
-                            />
-                          </div>
-                          <div className="sm:flex-1 sm:min-w-0">
-                            <h3
-                              className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
-                            >
+                            <h3 className="font-semibold text-sm text-foreground truncate mb-1 max-w-[110px]">
                               {site.name}
                             </h3>
-                            <div
-                              className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
-                            >
+                          </div>
+                          <div className="w-full">
+                            <div className="flex flex-wrap gap-1 justify-center">
                               {site.variants.map((variant, index) => (
                                 <span
                                   key={index}
-                                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                  className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/20"
                                 >
                                   {isRTL
                                     ? `${variant.points} نقطة - ${variant.label}`
-                                    : `${variant.label}: ${variant.points} Credit`}
+                                    : `${variant.label} - ${variant.points} Credit`}
                                 </span>
                               ))}
                             </div>
@@ -2418,122 +2548,244 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Second Row - All Cards Scrolling Right */}
-              <div className="relative overflow-hidden w-screen left-1/2 -translate-x-1/2">
-                <div
-                  className={`flex animate-scroll-right-mobile sm:animate-scroll-right ${isRTL ? "flex-row-reverse" : ""}`}
-                  style={
-                    {
-                      "--card-count": creditSites.length,
-                    } as React.CSSProperties
-                  }
-                >
-                  {/* All platforms - complete set in reverse order for visual variety */}
-                  {[...creditSites].reverse().map((site) => {
-                    const iconUrl = getSiteIconUrl(site.id, site.url);
-                    return (
-                      <div
-                        key={`row2-${site.id}`}
-                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
-                      >
+              {/* Desktop: Infinite Scroll Animation (768px+) */}
+              <div className="hidden md:block">
+                {/* First Row - All Cards Scrolling Left */}
+                <div className="relative overflow-hidden mb-6 w-screen left-1/2 -translate-x-1/2">
+                  <div
+                    className={`flex animate-scroll-left ${isRTL ? "flex-row-reverse" : ""}`}
+                    style={
+                      {
+                        "--card-count": creditSites.length,
+                      } as React.CSSProperties
+                    }
+                  >
+                    {/* All platforms - complete set */}
+                    {creditSites.map((site) => {
+                      const iconUrl = getSiteIconUrl(site.id, site.url);
+                      return (
                         <div
-                          className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          key={`row1-${site.id}`}
+                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
                         >
-                          <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <img
-                              src={iconUrl}
-                              alt={`${site.name} icon`}
-                              width={40}
-                              height={40}
-                              loading="lazy"
-                              className="w-10 h-10 object-contain"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                                if (target.src !== fallback) {
-                                  target.src = fallback;
-                                }
-                              }}
-                            />
-                          </div>
-                          <div className="sm:flex-1 sm:min-w-0">
-                            <h3
-                              className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
-                            >
-                              {site.name}
-                            </h3>
-                            <div
-                              className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
-                            >
-                              {site.variants.map((variant, index) => (
-                                <span
-                                  key={index}
-                                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                                >
-                                  {isRTL
-                                    ? `${variant.points} نقطة - ${variant.label}`
-                                    : `${variant.label}: ${variant.points} Credit`}
-                                </span>
-                              ))}
+                          <div
+                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          >
+                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={iconUrl}
+                                alt={`${site.name} icon`}
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                  if (target.src !== fallback) {
+                                    target.src = fallback;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="sm:flex-1 sm:min-w-0">
+                              <h3
+                                className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {site.name}
+                              </h3>
+                              <div
+                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                              >
+                                {site.variants.map((variant, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                  >
+                                    {isRTL
+                                      ? `${variant.points} نقطة - ${variant.label}`
+                                      : `${variant.label}: ${variant.points} Credit`}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                  {/* Duplicate for seamless loop */}
-                  {[...creditSites].reverse().map((site) => {
-                    const iconUrl = getSiteIconUrl(site.id, site.url);
-                    return (
-                      <div
-                        key={`row2-dup-${site.id}`}
-                        className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
-                      >
+                      );
+                    })}
+                    {/* Duplicate for seamless loop */}
+                    {creditSites.map((site) => {
+                      const iconUrl = getSiteIconUrl(site.id, site.url);
+                      return (
                         <div
-                          className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          key={`row1-dup-${site.id}`}
+                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
                         >
-                          <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <img
-                              src={iconUrl}
-                              alt={`${site.name} icon`}
-                              width={40}
-                              height={40}
-                              loading="lazy"
-                              className="w-10 h-10 object-contain"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
-                                if (target.src !== fallback) {
-                                  target.src = fallback;
-                                }
-                              }}
-                            />
-                          </div>
-                          <div className="sm:flex-1 sm:min-w-0">
-                            <h3
-                              className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
-                            >
-                              {site.name}
-                            </h3>
-                            <div
-                              className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
-                            >
-                              {site.variants.map((variant, index) => (
-                                <span
-                                  key={index}
-                                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                                >
-                                  {isRTL
-                                    ? `${variant.points} نقطة - ${variant.label}`
-                                    : `${variant.label}: ${variant.points} Credit`}
-                                </span>
-                              ))}
+                          <div
+                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          >
+                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={iconUrl}
+                                alt={`${site.name} icon`}
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                  if (target.src !== fallback) {
+                                    target.src = fallback;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="sm:flex-1 sm:min-w-0">
+                              <h3
+                                className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {site.name}
+                              </h3>
+                              <div
+                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                              >
+                                {site.variants.map((variant, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                  >
+                                    {isRTL
+                                      ? `${variant.points} نقطة - ${variant.label}`
+                                      : `${variant.label}: ${variant.points} Credit`}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Second Row - All Cards Scrolling Right */}
+                <div className="relative overflow-hidden w-screen left-1/2 -translate-x-1/2">
+                  <div
+                    className={`flex animate-scroll-right-mobile sm:animate-scroll-right ${isRTL ? "flex-row-reverse" : ""}`}
+                    style={
+                      {
+                        "--card-count": creditSites.length,
+                      } as React.CSSProperties
+                    }
+                  >
+                    {/* All platforms - complete set in reverse order for visual variety */}
+                    {[...creditSites].reverse().map((site) => {
+                      const iconUrl = getSiteIconUrl(site.id, site.url);
+                      return (
+                        <div
+                          key={`row2-${site.id}`}
+                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
+                        >
+                          <div
+                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          >
+                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={iconUrl}
+                                alt={`${site.name} icon`}
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                  if (target.src !== fallback) {
+                                    target.src = fallback;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="sm:flex-1 sm:min-w-0">
+                              <h3
+                                className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {site.name}
+                              </h3>
+                              <div
+                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                              >
+                                {site.variants.map((variant, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                  >
+                                    {isRTL
+                                      ? `${variant.points} نقطة - ${variant.label}`
+                                      : `${variant.label}: ${variant.points} Credit`}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {/* Duplicate for seamless loop */}
+                    {[...creditSites].reverse().map((site) => {
+                      const iconUrl = getSiteIconUrl(site.id, site.url);
+                      return (
+                        <div
+                          key={`row2-dup-${site.id}`}
+                          className="flex-shrink-0 mx-3 bg-background/80 dark:bg-muted/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:border-primary/50 transition-all duration-300 hover:shadow-lg w-auto sm:w-64 h-32 platform-card"
+                        >
+                          <div
+                            className={`flex items-center gap-3 h-full ${isRTL ? "flex-row-reverse" : ""}`}
+                          >
+                            <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={iconUrl}
+                                alt={`${site.name} icon`}
+                                width={40}
+                                height={40}
+                                loading="lazy"
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  const fallback = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=128`;
+                                  if (target.src !== fallback) {
+                                    target.src = fallback;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="sm:flex-1 sm:min-w-0">
+                              <h3
+                                className={`font-semibold text-base text-foreground truncate mb-1 ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {site.name}
+                              </h3>
+                              <div
+                                className={`flex flex-wrap gap-1 ${isRTL ? "justify-start" : "justify-start"}`}
+                              >
+                                {site.variants.map((variant, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                  >
+                                    {isRTL
+                                      ? `${variant.points} نقطة - ${variant.label}`
+                                      : `${variant.label}: ${variant.points} Credit`}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -3053,7 +3305,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
       {/* Testimonials Section */}
       {isLoading ? (
         <TestimonialsSkeleton />
@@ -3248,7 +3499,6 @@ export default function HomePage() {
           </div>
         </section>
       )}
-
       {/* Statistics Section */}
       {isLoading ? (
         <StatisticsSkeleton />
@@ -3431,7 +3681,7 @@ export default function HomePage() {
               {/* Statistics Grid */}
               <div
                 ref={statsCardsContainerRef}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 pb-32"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 md:pb-32"
               >
                 {Object.entries(
                   t("testimonials.stats", { returnObjects: true }) as Record<
@@ -3471,7 +3721,6 @@ export default function HomePage() {
           </section>
         </div>
       )}
-
       {/* Features Section */}
       {isLoading ? (
         <FeaturesSkeleton />
@@ -3628,7 +3877,6 @@ export default function HomePage() {
           </div>
         </section>
       )}
-
       {/* FAQ Section */}
       <FAQSection />
       {/* Footer */}
